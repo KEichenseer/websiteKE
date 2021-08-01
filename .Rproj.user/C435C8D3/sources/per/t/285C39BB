@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1621671362101.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3602437672",
+    "id" : "285C39BB",
+    "lastKnownWriteTime" : 1626033004,
+    "last_content_update" : 1626033004,
+    "path" : "D:/data/websiteKE/config/_default/params.yaml",
+    "project_path" : "config/_default/params.yaml",
+    "properties" : {
+        "cursorPosition" : "16,12",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "yaml"
+}

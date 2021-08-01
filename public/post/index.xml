@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts | Kilian Eichenseer</title>
+    <link>/post/</link>
+      <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <description>Posts</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Wed, 28 Jul 2021 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png</url>
+      <title>Posts</title>
+      <link>/post/</link>
+    </image>
+    
+    <item>
+      <title>Change Point Regression</title>
+      <link>/post/change-point-regression/</link>
+      <pubDate>Wed, 28 Jul 2021 00:00:00 +0000</pubDate>
+      <guid>/post/change-point-regression/</guid>
+      <description>
+&lt;script src=&#34;/post/change-point-regression/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;style&gt;
+&lt;p&gt;.column-left{
+float: left;
+width: 56%;
+text-align: left;&lt;/p&gt;
+&lt;p&gt;}&lt;/p&gt;
+&lt;style&gt;
+.column-center{
+  float: center;
+  width: 100%;
+  text-align: left;
+
+}
+
+.column-right{
+  float: right;
+  width: 43%;
+  text-align: left;
+  margin-top: 6px;
+  line-height: 1.83;
+  font-size: 12px;
+
+}
+&lt;/style&gt;
+&lt;style type=&#34;text/css&#34;&gt;
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 12px;
+}
+pre {
+  font-size: 13.2px
+}
+&lt;/style&gt;
+&lt;p&gt;&lt;em&gt;This implementation of change point regression was developed by &lt;a href=&#34;https://www.plymouth.ac.uk/staff/julian-stander&#34;&gt;Julian Stander (University of Plymouth)&lt;/a&gt; and first published in &lt;a href=&#34;https://www.nature.com/articles/s41561-019-0392-9&#34;&gt;Eichenseer et al. (2019)&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Assume we want to investigate the relationship between two variables, &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt;, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don’t know when.&lt;/p&gt;
+&lt;p&gt;Let’s generate &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; and plot them. &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; is linearly dependent on &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; across the whole time series, but we induce an increase in the intercept, slope and residual variance at the &lt;span class=&#34;math inline&#34;&gt;\(35^{th}\)&lt;/span&gt; observation:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;set.seed(10) # change the seed for a different sequence of random numbers
+n &amp;lt;- 60 # number of total data points
+n_shift &amp;lt;- 35 # the data point at which we introduce a change
+x &amp;lt;- rnorm(n,0,1) # generate x
+y &amp;lt;- rnorm(n,0,0.5) + 0.5 * x # generate y without a change
+y[n_shift:n] &amp;lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # introduce change&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/change-point-regression/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;the-regression-model&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;The regression model&lt;/h2&gt;
+&lt;p&gt;Now we build a model that can recover the change point and the linear relationship between &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; before and after the change point.&lt;/p&gt;
+&lt;p&gt;The first part of this model looks like an ordinary least squares regression of &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; against &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma_1^2), ~~\\ \mu_i = \alpha_1~+~\beta_1~x_i, ~~~~~ i = 1,...,n_{change}-1 \end{array} \end{equation} \end{aligned}\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Here we have a single intercept (&lt;span class=&#34;math inline&#34;&gt;\(\alpha_1\)&lt;/span&gt;), slope (&lt;span class=&#34;math inline&#34;&gt;\(\beta_1\)&lt;/span&gt;), and residual variance (&lt;span class=&#34;math inline&#34;&gt;\(\sigma^2_1\)&lt;/span&gt;). &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt; - 1 denotes the number of obervations before the change point.&lt;/p&gt;
+&lt;p&gt;From the change point &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt; onwards, we add an additional intercept, &lt;span class=&#34;math inline&#34;&gt;\(\alpha_2\)&lt;/span&gt;, to the intercept from the first part (&lt;span class=&#34;math inline&#34;&gt;\(\alpha_1\)&lt;/span&gt;). We do the same for the slope and the residual variance:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma_1^2+\sigma_2^2), ~~\\ \mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i, ~~~~~ i = n_{change},...,n \end{array} \end{equation} \end{aligned}\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(n\)&lt;/span&gt; denotes the total number of observations, 60 in this case. But how do we actually find the change point &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;implementation-in-jags&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Implementation in JAGS&lt;/h2&gt;
+&lt;p&gt;Here, we turn to the &lt;a href=&#34;https://mcmc-jags.sourceforge.io/&#34;&gt;JAGS programming environment&lt;/a&gt;. Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath’s book &lt;a href=&#34;https://xcelab.net/rm/statistical-rethinking/&#34;&gt;Statistical Rethinking&lt;/a&gt;. We will access JAGS with the &lt;a href=&#34;https://CRAN.R-project.org/package=R2jags&#34;&gt;R2jags package&lt;/a&gt;, so we can keep using R even if we are writing a model for JAGS.&lt;/p&gt;
+&lt;p&gt;Below, we look at the model. The R code that will be passed to JAGS later is on the left. On the right is an explanation for each line of the model.&lt;/p&gt;
+&lt;div class=&#34;column-right&#34;&gt;
+&lt;p&gt;We save the model as a function named &lt;em&gt;model_CPR&lt;/em&gt;&lt;br /&gt;
+&lt;br/&gt;&lt;/p&gt;
+&lt;p&gt;Loop over all the data points &lt;span class=&#34;math inline&#34;&gt;\(1,...,n\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(y_i \sim N(\mu_i, \tau_i)\)&lt;/span&gt;&lt;br /&gt;
+note that JAGS uses the precision &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; instead of &lt;span class=&#34;math inline&#34;&gt;\(\sigma^2\)&lt;/span&gt;.
+&lt;span class=&#34;math inline&#34;&gt;\(\tau = 1/\sigma^2\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;step&lt;/em&gt; takes the value &lt;span class=&#34;math inline&#34;&gt;\(1\)&lt;/span&gt; if its argument is &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt;= 0\)&lt;/span&gt;,&lt;br /&gt;
+and &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt; otherwise, resulting in&lt;br /&gt;
+&lt;span class=&#34;math inline&#34;&gt;\(\mu_i = \alpha_1~+~\beta_1~x_i\)&lt;/span&gt;     before &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt; and&lt;br /&gt;
+&lt;span class=&#34;math inline&#34;&gt;\(\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i\)&lt;/span&gt;     from &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;     onwards&lt;/p&gt;
+&lt;p&gt;back-transform &lt;span class=&#34;math inline&#34;&gt;\(log(\tau)\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;again, the &lt;em&gt;step&lt;/em&gt; function is used to define &lt;span class=&#34;math inline&#34;&gt;\(log(\tau)\)&lt;/span&gt; before and after &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;. Log-transformation is used to ensure that the &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; resulting from &lt;span class=&#34;math inline&#34;&gt;\(\tau_1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\tau_2\)&lt;/span&gt; is positive.&lt;/p&gt;
+&lt;p&gt;We have to define priors for all parameters that are not specified by data.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\alpha_1 \sim N(\mu = 0, \tau = 10^{-4})\)&lt;/span&gt; That is a normal distribution with mean &lt;span class=&#34;math inline&#34;&gt;\(\mu = 0\)&lt;/span&gt; and standard deviation &lt;span class=&#34;math inline&#34;&gt;\(\sigma = 100\)&lt;/span&gt;,&lt;br /&gt;
+because &lt;span class=&#34;math inline&#34;&gt;\(\sigma = 1/\sqrt{\tau}\)&lt;/span&gt;&lt;br /&gt;
+&lt;span class=&#34;math inline&#34;&gt;\(\alpha_2 \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\beta_1 \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;br /&gt;
+&lt;span class=&#34;math inline&#34;&gt;\(\beta_2 \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(log(\tau_1) \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;br /&gt;
+&lt;span class=&#34;math inline&#34;&gt;\(log(\tau_2) \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Discrete prior on the change point. &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt; indicates one of the possible change points,
+based on the probability vector &lt;span class=&#34;math inline&#34;&gt;\(p\)&lt;/span&gt;, which we need to specify beforehand.&lt;/p&gt;
+&lt;/div&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_CPR &amp;lt;- function(){
+  
+  ### Likelihood or data model part
+  for(i in 1:n){
+    
+  y[i] ~ dnorm(mu[i], tau[i]) 
+
+    
+    
+  mu[i] &amp;lt;- alpha_1 + 
+  alpha_2 * step(i - n_change) +
+  (beta_1 + beta_2 * step(i - n_change))*x[i]
+  
+  
+  
+  tau[i] &amp;lt;- exp(log_tau[i])
+  
+  log_tau[i] &amp;lt;- log_tau_1 + log_tau_2 * 
+  step(i - n_change)
+  } 
+  
+  ### Priors
+  
+  
+  alpha_1 ~ dnorm(0, 1.0E-4)
+  
+  
+  alpha_2 ~ dnorm(0, 1.0E-4)
+  
+  beta_1 ~ dnorm(0, 1.0E-4)
+  beta_2 ~ dnorm(0, 1.0E-4)
+  
+  log_tau_1 ~ dnorm(0, 1.0E-4)
+  log_tau_2 ~ dnorm(0, 1.0E-4)
+  
+  K ~ dcat(p)
+  n_change &amp;lt;- possible_change_points[K]
+
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that we put priors on &lt;span class=&#34;math inline&#34;&gt;\(log(\tau_1)\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(log(\tau_2)\)&lt;/span&gt;, rather than on &lt;span class=&#34;math inline&#34;&gt;\(\tau_1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\tau_2\)&lt;/span&gt; directly, to ensure that the precision &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; in the second part of the regression always remains positive. &lt;span class=&#34;math inline&#34;&gt;\(e^{log(\tau_1) + log(\tau_2)}\)&lt;/span&gt; is always &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt; 0\)&lt;/span&gt;, even if the term &lt;span class=&#34;math inline&#34;&gt;\(log(\tau_1)\)&lt;/span&gt; + &lt;span class=&#34;math inline&#34;&gt;\(log(\tau_2)\)&lt;/span&gt; becomes negative.&lt;/p&gt;
+&lt;p&gt;Prepare the data which we pass to JAGS along with the model:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# minimum number of the data points before and after the change
+  min_segment_length &amp;lt;- 5 
+
+# assign indices to the potential change points we allow
+  possible_change_points &amp;lt;- (1:n)[(min_segment_length+1):(n+1-min_segment_length)] 
+ 
+# number of possible change points
+  M &amp;lt;- length(possible_change_points)  
+
+# probabilities for the discrete uniform prior on the possible change points, 
+# i.e. all possible change points have the same prior probability
+  p &amp;lt;- rep(1 / M, length = M) 
+ 
+# save the data to a list for jags
+  data_CPR &amp;lt;- list(&amp;quot;x&amp;quot;, &amp;quot;y&amp;quot;, &amp;quot;n&amp;quot;, &amp;quot;possible_change_points&amp;quot;, &amp;quot;p&amp;quot;) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Load the &lt;em&gt;R2jags&lt;/em&gt; package to access &lt;em&gt;JAGS&lt;/em&gt; in &lt;em&gt;R&lt;/em&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;  require(R2jags) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we execute the change point regression. We instruct JAGS to run three seperate chains so we can verify that the results are consistent. We allow 2000 iterations of the Markov chain Monte Carlo algorithm for each chain, the first 1000 of which will automatically be discarded as burn-in.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt; CPR  &amp;lt;- jags(data = data_CPR, 
+                         parameters.to.save = c(&amp;quot;alpha_1&amp;quot;, &amp;quot;alpha_2&amp;quot;, 
+                                                &amp;quot;beta_1&amp;quot;,&amp;quot;beta_2&amp;quot;,
+                                                &amp;quot;log_tau_1&amp;quot;,&amp;quot;log_tau_2&amp;quot;,
+                                                &amp;quot;n_change&amp;quot;), 
+                         n.iter = 2000, 
+                         n.chains = 3,
+                         model.file = model_CPR)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-results&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;The results&lt;/h2&gt;
+&lt;p&gt;To visualise the results and inspect the posterior, we are using the &lt;em&gt;ggmcmc&lt;/em&gt; package, which relies on the &lt;em&gt;ggplot2&lt;/em&gt; package. For brevity, we just look at the &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt; parameter here.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ggmcmc)
+CPR.ggs &amp;lt;- ggs(as.mcmc(CPR)) # convert to ggs object
+ggs_traceplot(CPR.ggs, family = &amp;quot;n_change&amp;quot;) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/change-point-regression/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;1000 %&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Looks like the chains converge and mix nicely. We can already see that our model locates the change point somewhere between &lt;span class=&#34;math inline&#34;&gt;\(30\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(40\)&lt;/span&gt;, although the chains occasionally explore regions further away.&lt;/p&gt;
+&lt;p&gt;Let’s look at the posterior probabilities for the possible change points:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(data = CPR.ggs %&amp;gt;% filter(Parameter == &amp;quot;n_change&amp;quot;),
+  aes(x=value, y = 3*(..count..)/sum(..count..), fill = as.factor(Chain))) + 
+  geom_vline(xintercept = 35,lty = 2) + geom_bar(position = &amp;quot;identity&amp;quot;, alpha = 0.5) +
+  ylab(&amp;quot;posterior probability&amp;quot;) + xlab(&amp;quot;n_change&amp;quot;) + labs(fill=&amp;#39;Chain&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/change-point-regression/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;700 %&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The &lt;span class=&#34;math inline&#34;&gt;\(37^{th}\)&lt;/span&gt; point has the highest probability of being the change point. That is not far off from where we introduced the change, at the &lt;span class=&#34;math inline&#34;&gt;\(35^{th}\)&lt;/span&gt; point (dashed line). The random generation of &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; has led to &lt;span class=&#34;math inline&#34;&gt;\(37\)&lt;/span&gt; being favoured. We also note that there are only minor differences between the three chains, and those differences would likely further dwindle if we were to let the chains run for longer.&lt;/p&gt;
+&lt;p&gt;Using the posterior distribution, we can answer questions like: “In which interval does the change point fall with 90 % probability?”&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;quantile(CPR$BUGSoutput$sims.list$n_change, probs = c(0.05, 0.95))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  5% 95% 
+##  33  39&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can also inquire about the probability that the change point falls in the interval &lt;span class=&#34;math inline&#34;&gt;\(34\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(38\)&lt;/span&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;round(length(which(CPR$BUGSoutput$sims.list$n_change %in% 34:38))/
+              (CPR$BUGSoutput$n.sims),2)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0.87&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, let’s have a look at the regression parameters and plot the resulting regressions before and after the most likely change point.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/change-point-regression/index_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;475 %&#34; /&gt;
+The intercept, slope, and residual variance all increase after the change point.&lt;/p&gt;
+&lt;p&gt;This can be immediately seen when plotting the change point regression:
+&lt;img src=&#34;/post/change-point-regression/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;375 %&#34; /&gt;
+The shaded areas denote &lt;span class=&#34;math inline&#34;&gt;\(95\)&lt;/span&gt; % credible intervals around the regression lines.&lt;/p&gt;
+&lt;p&gt;You can find the full R code for this analysis at &lt;a href=&#34;https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R&#34; class=&#34;uri&#34;&gt;https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Get in touch if you have any comments or questions!&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

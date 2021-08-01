@@ -1,0 +1,4 @@
+"0","points(1:6,c(CPRm$alpha_1,CPRm$alpha_1+CPRm$alpha_2, "
+"0","             CPRm$beta_1,CPRm$beta_1+CPRm$beta_2,"
+"0","             1/(exp(CPRm$log_tau_1)),1/(exp(CPRm$log_tau_1+CPRm$log_tau_2))), "
+"0","       pch = 19, cex = 1.4)"

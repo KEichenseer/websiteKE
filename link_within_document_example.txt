@@ -1,0 +1,10 @@
+([Su and Yajima 2020](#SuandYajima))
+<a id="SuandYajima"> </a> Su, Y. S., & Yaima, M. (2020). R2jags: Using R to run" JAGS" version 0.6-1. https://CRAN.R-project.org/package=R2jags.
+
+
+### References
+<a id="Eichenseer2019"> </a> Eichenseer, K., Balthasar, U., Smart, C. W., Stander, J., Haaga, K. A., & Kiessling, W. (2019). Jurassic shift from abiotic to biotic control on marine ecological success. Nature Geoscience, 12(8), 638-642.  
+  
+<a id="Plummer2012"> </a> Plummer, M. (2012). JAGS Version 3.3. 0 user manual. International Agency for Research on Cancer, Lyon, France.  
+  
+<a id="SuandYajima"> </a> Su, Y. S., & Yaima, M. (2020). R2jags: Using R to run" JAGS" version 0.6-1. https://CRAN.R-project.org/package=R2jags.

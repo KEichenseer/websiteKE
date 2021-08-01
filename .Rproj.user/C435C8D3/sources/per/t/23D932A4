@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1626424239488.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "134085365",
+    "id" : "23D932A4",
+    "lastKnownWriteTime" : 1626424252,
+    "last_content_update" : 1626424252499,
+    "path" : "C:/Users/Kilian/Desktop/test.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "4,20",
+        "scrollLine" : "0",
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 14,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

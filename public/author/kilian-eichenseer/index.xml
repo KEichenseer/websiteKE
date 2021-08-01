@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kilian Eichenseer</title>
+    <link>/author/kilian-eichenseer/</link>
+      <atom:link href="/author/kilian-eichenseer/index.xml" rel="self" type="application/rss+xml" />
+    <description>Kilian Eichenseer</description>
+    <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language>
+    <image>
+      <url>/author/kilian-eichenseer/avatar_hucb2b171b2d9632a768b398bf7da88278_391899_270x270_fill_q75_lanczos_center.jpg</url>
+      <title>Kilian Eichenseer</title>
+      <link>/author/kilian-eichenseer/</link>
+    </image>
+    
+  </channel>
+</rss>

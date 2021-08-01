@@ -1,0 +1,27 @@
+"0","library(ggmcmc)"
+"2","Loading required package: dplyr
+"
+"2","
+Attaching package: ‘dplyr’
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+"
+"2","Loading required package: tidyr
+"
+"2","Loading required package: ggplot2
+"
+"2","Registered S3 method overwritten by 'GGally':
+  method from   
+  +.gg   ggplot2
+"
+"0","CPR.ggs <- ggs(as.mcmc(CPR)) # convert to ggs object"
+"0","ggs_traceplot(CPR.ggs, family = ""n_change"") "

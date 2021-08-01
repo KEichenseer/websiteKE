@@ -1,0 +1,285 @@
+---
+title: Change point regression with JAGS
+author: ''
+date: '2021-05-16'
+slug: change-point-regression-with-jags
+categories: []
+tags: []
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2021-05-16T11:58:43+02:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+output:blogdown::html_page:
+header-includes: \usepackage{align}
+---
+
+
+<style type="text/css">
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 13.2px;
+}
+pre {
+  font-size: 13.2px
+}
+
+pre.r{
+  font-size: 13.2px;
+  float: left;
+    width: 50%;
+    text-align: left;
+}
+</style>
+
+```{r setup, include=TRUE, echo=FALSE, results='hide',message=FALSE}
+knitr::opts_chunk$set(echo = FALSE, include = FALSE)
+```
+
+*This implementation of change point regression was developed by [Julian Stander (University of Plymouth)](https://www.plymouth.ac.uk/staff/julian-stander) and first published in [Eichenseer et al. (2019)](https://www.nature.com/articles/s41561-019-0392-9).*
+
+
+
+Assume we want to investigate the relationship between two variables, let's say $x$ and $y$, that we have collected over a certain period of time $t$. We have reason to believe that the relationship changed at some point, but we don't know when.  
+
+Let's generate $x$ and $y$ and plot them. $y$ is linearly dependent on $x$ across the whole time series, but we induce an increase in the intercept, slope and residual variance at $t$ = 35:
+
+```{r, fig.width = 6.6, fig.height = 3.3, warning = FALSE, echo = FALSE}
+set.seed(10)
+n <- 60
+x <- rnorm(n,0,1)
+y <- rnorm(n,0,0.5) + 0.5 * x
+phase_1 <- 1:34.
+phase_2 <- 35:n
+y[phase_2] <- rnorm(length(phase_2),0,1) + 1 * x[phase_2] + 0.75
+
+phase_col <- rep(rgb(0,0.3,1,0.75), n)
+phase_col[phase_2] <- rgb(0.9,0.4,0,0.75)
+
+par(mfrow=c(1,2), mar = c(4,4,1,1), las = 1, mgp = c(2.25,0.75,0))
+
+plot(x, type = "o", pch = 19, ylim = c(min(y),max(y)), cex = 0.6, xlab = "time")
+abline(v = 34.5, lty = 3, lwd = 1.5)
+points(y, type = "o", col = "red", pch = 19, cex = 0.6)
+legend("topleft", legend = c("x","y"), col = c("black","red"), pch = 19, lwd = 1, pt.cex = 0.6, bty = "n")
+
+plot(x,y, type = "n")
+abline(h=0, v=0, lty = 3)
+points(c(min(x[phase_1]),max(x[phase_1])), c(min(x[phase_1]), max(x[phase_1])) *  coefficients(lm(y[phase_1] ~ x[phase_1]))[2] + coefficients(lm(y[phase_1] ~ x[phase_1]))[1], type = "l", col = rgb(0,0.3,1) , lwd = 1.5)
+points(c(min(x[phase_2]),max(x[phase_2])), c(min(x[phase_2]), max(x[phase_2])) *  coefficients(lm(y[phase_2] ~ x[phase_2]))[2] + coefficients(lm(y[phase_2] ~ x[phase_2]))[1], type = "l", col = rgb(0.9,0.4,0), lwd = 1.5)
+points(x,y, bg = phase_col, pch = 21)
+legend("topleft", legend = c(expression("t"[1]~"- t"[34]), expression("t"[35]~"- t"[60])), pt.bg  = c(rgb(0,0.3,1), rgb(0.9,0.4,0)), pch = 21,  pt.cex = 1, bty = "n")
+
+
+
+
+
+```
+
+## The regression model
+Now we build a model that can recover the change point and the linear relationship between $x$ and $y$ before and after the change point.
+
+The first part of this model looks like an ordinary least squares regression of $y$ against $x$:
+
+$\begin{aligned} \begin{equation} \begin{array}{l} 
+y_i \sim N(\mu_i, \sigma_1^2), \\
+\mu_i = \alpha_1~+~\beta_1~x_i, ~~~~~ i = 1,...,n_{change}-1  \end{array} 
+\end{equation} \end{aligned}$ 
+
+Here we have a single intercept ($\alpha_1$), slope ($\beta_1$), and residual variance ($\sigma^2_1$). $n_{change}$ denotes the total  number of obervations before the change point.  
+
+After the change point, we add an additional intercept, $\alpha_2$, to the intercept from the first part ($\alpha_1$). We do the same for the slope and the residual variance:  
+
+$\begin{aligned} \begin{equation} \begin{array}{l} 
+y_i \sim N(\mu_i, \sigma_1^2+\sigma_2^2), \\
+\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i, ~~~~~ i = n_{change},...,n  \end{array} 
+\end{equation} \end{aligned}$ 
+
+But how do we actually find the change point $n_{change}$?
+
+## Implementation in JAGS
+
+Here, we turn to the [JAGS programming environment](https://mcmc-jags.sourceforge.io/). Understanding a model written in JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath's book [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/). We will access JAGS with the R2jags package ([Su and Yajima 2020](#SuandYajima)), so we can keep using R even if we are writing a model for JAGS.
+
+
+::: {#jagsmodel width="55%"}
+
+```{r, echo = TRUE}
+
+
+model_CPR <- function(){
+  
+  for(i in 1:n){
+    
+  y[i] ~ dnorm(mu[i], tau[i]) 
+
+    
+  mu[i] <- alpha_1 + alpha_2 * step(i - n_change) 
+  + (beta_1 + beta_2 * step(i - n_change))*x[i]
+  
+  
+  tau[i] <- exp(log_tau[i])
+  
+  log_tau[i] <- log_tau_1 + log_tau_2 * 
+  step(i - n_change)
+  
+  } 
+  
+ 
+}
+
+```
+
+:::
+
+```{css, echo=FALSE}
+p {
+  font-size: 32px;
+}
+```
+
+<div id="right" class="column-right" width="55%">
+\ We save the model as a function named *model_CPR*  
+<br>
+\ Loop over all the data points $1,...,n$  
+<br>
+\ $y_i \sim N(\mu_i, \sigma_i^2)$  
+\ note that JAGS uses the precision $\tau$ instead of $\sigma^2$.\ \ \ $\tau = 1/\sigma^2$  
+<br>
+\ *step* takes the value $1$ if its argument is $>= 0$, and $0$ otherwise, resulting in  
+\ $\mu_i = \alpha_1~+~\beta_1~x_i$ \ \ \ \ \ before \ $n_{change}$ \  and  
+\ $\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i$ \ \ \ \ \ from \ $n_{change}$ onwards  
+<br>
+\ back-transform $log(\tau)$ to $\tau$.  
+<br>
+\ again, the *step* function is used to define $log(\tau)$ before and after $n_{change}$.  
+\ log-transformation is used to ensure that the $\tau$ resulting from $\tau_1$ and $\tau_2$ is positive.
+
+</div>  
+
+  
+
+
+  
+require(ggmcmc) 
+require(ggplot2)
+```{r, echo =FALSE, include = FALSE}
+
+##################################################################
+#
+# Detect one change point
+#
+#
+# Allow a difference variance before and after the change point
+#
+model_CPR <- function(){
+  for(i in 1:n){ # Points i in 1:n_change - 1 have a certain linear behaviour, 
+    # points i in (n_change):n have a potentially different behaviour
+    # The precision can also change before and after the change point
+    #
+    # Data model or likelihood part
+    #
+    y[i] ~ dnorm(mu[i], tau[i]) # Parametrized by the precision tau = 1 / sigma^2
+    mu[i] <- beta_0 + additional_beta_0 * step(i - n_change) + (beta_1 + (additional_beta_1 * step(i - n_change)))*x[i]
+    # step takes the value 1 if its argument is greater than or equal to 0, i.e. it test for argument >= 0
+    tau[i] <- exp(log_tau[i])
+    # An additional contribution to tau, the precision, is allowed after the change point
+    # This could be negative, corresponding to a reduction
+    #
+    log_tau[i] <- log_tau_before + log_tau_additional * step(i - n_change)
+  }
+  #
+  #
+  # Priors
+  #
+  beta_0 ~ dnorm(0.0, 1.0E-4) # Prior on beta_0 is normal with low precision
+  beta_1 ~ dnorm(0.0, 1.0E-4) # Prior on beta_1 is normal with low precision
+  #
+  additional_beta_0 ~ dnorm(0.0, 1.0E-4) # Prior on additional_beta_0 is normal with low precision
+  additional_beta_1 ~ dnorm(0.0, 1.0E-4) # Prior on additional_beta_1 is normal with low precision
+  #
+  # Vauge prior on log_taus
+  #
+  log_tau_before ~ dnorm(0.0, 1.0E-4)
+  log_tau_additional ~ dnorm(0.0, 1.0E-4)
+  #
+  tau_before <- exp(log_tau_before)
+  tau_after <- exp(log_tau_before + log_tau_additional)
+  #
+  K ~ dcat(p[])
+  
+  n_change <- possible_change_points[K]
+  #
+  # Definition of sigma
+  #
+  sigma_before <- 1.0 / sqrt(tau_before)
+  sigma_after <- 1.0 / sqrt(tau_after)
+  #
+  sigma_change <- sigma_after - sigma_before
+  #
+  # Slope and intercept after the change point
+  #
+  beta_0_after <- beta_0 + additional_beta_0
+  beta_1_after <- beta_1 + additional_beta_1
+}
+
+```
+
+```{r, echo = FALSE}
+ require(R2jags) 
+
+ # Perform Bayesian inference 
+ #
+ # Data
+ #
+ #
+ minimum_segment_length <- 5
+ possible_change_points <- (1:n)[(minimum_segment_length+1):(n+1-minimum_segment_length)]
+ #
+ M <- length(possible_change_points)
+ M
+ #
+ # For discrete uniform prior on the possible change points
+ #
+ p <- rep(1 / M, length = M) 
+ p
+ #
+ # Prepare the data for jags
+ #
+ data_CPR <- list("x", "y", "n", "possible_change_points", "p")
+ #
+ #
+ regression_CPR  <- jags(data = data_CPR, 
+                                              parameters.to.save = c("beta_0", "beta_1", 
+                                                                     "beta_0_after","beta_1_after",
+                                                                     "additional_beta_0",
+                                                                     "additional_beta_1",
+                                                                     "n_change",
+                                                                     "tau_before","tau_after",
+                                                                     "sigma_before", "sigma_after",
+                                                                     "sigma_change"), 
+                                              n.iter = 500, # Rather slow!
+                                              n.chains = 2,
+                                              model.file = model_CPR)
+ #
+ # ---------------------------------------------
+ #
+ regression_CPR
+ hist(regression_CPR$BUGSoutput$sims.list$n_change, col = rgb(0,0,0,0.3), breaks = seq(min(possible_change_points)-0.25,max(possible_change_points)+0.25,0.5))
+ abline(v = 35, col = "red", lty = 3)
+```
+
+
+### References
+<a id="Eichenseer2019"> </a> Eichenseer, K., Balthasar, U., Smart, C. W., Stander, J., Haaga, K. A., & Kiessling, W. (2019). Jurassic shift from abiotic to biotic control on marine ecological success. Nature Geoscience, 12(8), 638-642.  
+  
+<a id="Plummer2012"> </a> Plummer, M. (2012). JAGS Version 3.3. 0 user manual. International Agency for Research on Cancer, Lyon, France.  
+  
+<a id="SuandYajima"> </a> Su, Y. S., & Yaima, M. (2020). R2jags: Using R to run" JAGS" version 0.6-1. https://CRAN.R-project.org/package=R2jags.

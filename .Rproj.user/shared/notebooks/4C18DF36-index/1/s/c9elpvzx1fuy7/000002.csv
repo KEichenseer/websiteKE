@@ -1,0 +1,6 @@
+"0","set.seed(10) # change the seed for a different sequence of random numbers"
+"0","n <- 60 # number of total data points"
+"0","n_shift <- 35 # the data point at which we introduce a change"
+"0","x <- rnorm(n,0,1) # generate x"
+"0","y <- rnorm(n,0,0.5) + 0.5 * x # generate y without a change"
+"0","y[n_shift:n] <- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # introduce change"

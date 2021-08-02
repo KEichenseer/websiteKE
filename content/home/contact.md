@@ -39,8 +39,8 @@ content:
 ---
 
 <i class="fas fa-envelope"></i>
-  kilian.eichenseer@fau.de  
+$~$ kilian.eichenseer@fau.de  
 <i class="fas fa-phone"></i>
-+49 9131 85-24789
+$~$ +49 9131 85-24789
 
   

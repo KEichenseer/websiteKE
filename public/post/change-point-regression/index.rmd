@@ -8,8 +8,8 @@ tags: []
 subtitle: ''
 authors: []
 lastmod: '2021-07-28T10:58:49+02:00'
-featured: false
-image_preview:
+#featured: false
+image:
   caption: ''
   focal_point: ''
   preview_only: true
@@ -63,7 +63,7 @@ pre {
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-*This implementation of change point regression was developed by [Julian Stander (University of Plymouth)](https://www.plymouth.ac.uk/staff/julian-stander) and first published in [Eichenseer et al. (2019)](https://www.nature.com/articles/s41561-019-0392-9).*
+> *This implementation of change point regression was developed by [Julian Stander](https://www.plymouth.ac.uk/staff/julian-stander) (University of Plymouth) in [Eichenseer et al. (2019)](https://www.nature.com/articles/s41561-019-0392-9).*
 
 Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don't know when.  
 
@@ -124,11 +124,9 @@ $n$ denotes the total number of observations, 60 in this case. But how do we act
 
 ## Implementation in JAGS
 
-Here, we turn to the [JAGS programming environment](https://mcmc-jags.sourceforge.io/). Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath's book [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/). 
+Here, we turn to the [JAGS programming environment](https://mcmc-jags.sourceforge.io/). Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath's book [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/). We will access JAGS with the [R2jags package](https://CRAN.R-project.org/package=R2jags), so we can keep using R even if we are writing a model for JAGS. 
 
-*Bayesian methods for detecting change points are also available in [Stan](https://mc-stan.org/), as discussed [here](https://mc-stan.org/docs/2_27/stan-users-guide/change-point-section.html). An application using English league football data can be found [here](https://www.significancemagazine.com/sports/693-has-english-league-football-become-less-exciting).*  
-
-We will access JAGS with the [R2jags package](https://CRAN.R-project.org/package=R2jags), so we can keep using R even if we are writing a model for JAGS.  
+> *Bayesian methods for detecting change points are also available in [Stan](https://mc-stan.org/), as discussed [here](https://mc-stan.org/docs/2_27/stan-users-guide/change-point-section.html). An application using English league football data can be found [here](https://www.significancemagazine.com/sports/693-has-english-league-football-become-less-exciting).*  
 
 Below, we look at the model. The R code that will be passed to JAGS later is on the left. On the right is an explanation for each line of the model.
 

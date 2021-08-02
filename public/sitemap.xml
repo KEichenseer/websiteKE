@@ -5,6 +5,9 @@
     <loc>/courses/example/python/</loc>
     <lastmod>2021-01-01T00:00:00+00:00</lastmod>
   </url><url>
+    <loc>/post/</loc>
+    <lastmod>2021-07-28T10:58:49+02:00</lastmod>
+  </url><url>
     <loc>/courses/example/visualization/</loc>
     <lastmod>2021-01-01T00:00:00+00:00</lastmod>
   </url><url>
@@ -21,9 +24,6 @@
     <lastmod>2030-06-01T13:00:00+00:00</lastmod>
   </url><url>
     <loc>/post/change-point-regression/</loc>
-    <lastmod>2021-07-28T10:58:49+02:00</lastmod>
-  </url><url>
-    <loc>/post/</loc>
     <lastmod>2021-07-28T10:58:49+02:00</lastmod>
   </url><url>
     <loc>/courses/</loc>

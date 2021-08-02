@@ -287,16 +287,15 @@
   
   
     
-    
   
   
-  <meta property="twitter:card" content="summary" />
+  <meta property="twitter:card" content="summary_large_image" />
   
   <meta property="og:site_name" content="Kilian Eichenseer" />
   <meta property="og:url" content="/post/change-point-regression/" />
   <meta property="og:title" content="Change Point Regression | Kilian Eichenseer" />
-  <meta property="og:description" content="Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don&#39;t know when." /><meta property="og:image" content="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png" />
-    <meta property="twitter:image" content="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png" /><meta property="og:locale" content="en-us" />
+  <meta property="og:description" content="Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don&#39;t know when." /><meta property="og:image" content="/post/change-point-regression/featured.jpg" />
+    <meta property="twitter:image" content="/post/change-point-regression/featured.jpg" /><meta property="og:locale" content="en-us" />
   
     
       <meta
@@ -331,6 +330,10 @@
     "@id": "/post/change-point-regression/"
   },
   "headline": "Change Point Regression",
+  
+  "image": [
+    "/post/change-point-regression/featured.jpg"
+  ],
   
   "datePublished": "2021-07-28T00:00:00Z",
   "dateModified": "2021-07-28T10:58:49+02:00",
@@ -688,19 +691,26 @@
 
 
 
-  
+
+
+
+
+
+
+
 
   
   
-  
+
+
 <div class="article-container pt-3">
   <h1>Change Point Regression</h1>
 
   
 
-  
  
-    
+
+  
 
 
 <div class="article-metadata">
@@ -725,7 +735,7 @@
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    6 min read
+    7 min read
   </span>
   
 
@@ -741,13 +751,20 @@
 
 </div>
 
-    
-
-
-
-
-
   
+
+
+
+
+
+</div>
+
+
+<div class="article-header article-container featured-image-wrapper mt-4 mb-4" style="max-width: 656px; max-height: 667px;">
+  <div style="position: relative">
+    <img src="/post/change-point-regression/featured.jpg" alt="" class="featured-image">
+    
+  </div>
 </div>
 
 
@@ -816,7 +833,9 @@ y[n_shift:n] &lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # intr
 </div>
 <div id="implementation-in-jags" class="section level2">
 <h2>Implementation in JAGS</h2>
-<p>Here, we turn to the <a href="https://mcmc-jags.sourceforge.io/">JAGS programming environment</a>. Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath’s book <a href="https://xcelab.net/rm/statistical-rethinking/">Statistical Rethinking</a>. We will access JAGS with the <a href="https://CRAN.R-project.org/package=R2jags">R2jags package</a>, so we can keep using R even if we are writing a model for JAGS.</p>
+<p>Here, we turn to the <a href="https://mcmc-jags.sourceforge.io/">JAGS programming environment</a>. Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath’s book <a href="https://xcelab.net/rm/statistical-rethinking/">Statistical Rethinking</a>.</p>
+<p><em>Bayesian methods for detecting change points are also available in <a href="https://mc-stan.org/">Stan</a>, as discussed <a href="https://mc-stan.org/docs/2_27/stan-users-guide/change-point-section.html">here</a>. An application using English league football data can be found <a href="https://www.significancemagazine.com/sports/693-has-english-league-football-become-less-exciting">here</a>.</em></p>
+<p>We will access JAGS with the <a href="https://CRAN.R-project.org/package=R2jags">R2jags package</a>, so we can keep using R even if we are writing a model for JAGS.</p>
 <p>Below, we look at the model. The R code that will be passed to JAGS later is on the left. On the right is an explanation for each line of the model.</p>
 <div class="column-right">
 <p>We save the model as a function named <em>model_CPR</em><br />
@@ -825,20 +844,20 @@ y[n_shift:n] &lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # intr
 <p><span class="math inline">\(y_i \sim N(\mu_i, \tau_i)\)</span><br />
 note that JAGS uses the precision <span class="math inline">\(\tau\)</span> instead of <span class="math inline">\(\sigma^2\)</span>.
 <span class="math inline">\(\tau = 1/\sigma^2\)</span></p>
-<p><em>step</em> takes the value <span class="math inline">\(1\)</span> if its argument is <span class="math inline">\(&gt;= 0\)</span>,<br />
+<p><em>step</em> takes the value <span class="math inline">\(1\)</span> if its argument is <span class="math inline">\(\ge 0\)</span>,<br />
 and <span class="math inline">\(0\)</span> otherwise, resulting in<br />
 <span class="math inline">\(\mu_i = \alpha_1~+~\beta_1~x_i\)</span>     before <span class="math inline">\(n_{change}\)</span> and<br />
 <span class="math inline">\(\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i\)</span>     from <span class="math inline">\(n_{change}\)</span>     onwards</p>
-<p>back-transform <span class="math inline">\(log(\tau)\)</span> to <span class="math inline">\(\tau\)</span>.</p>
-<p>again, the <em>step</em> function is used to define <span class="math inline">\(log(\tau)\)</span> before and after <span class="math inline">\(n_{change}\)</span>. Log-transformation is used to ensure that the <span class="math inline">\(\tau\)</span> resulting from <span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> is positive.</p>
+<p>back-transform <span class="math inline">\(\log(\tau)\)</span> to <span class="math inline">\(\tau\)</span>.</p>
+<p>again, the <em>step</em> function is used to define <span class="math inline">\(\log(\tau)\)</span> before and after <span class="math inline">\(n_{change}\)</span>. Log-transformation is used to ensure that the <span class="math inline">\(\tau\)</span> resulting from <span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> is positive.</p>
 <p>We have to define priors for all parameters that are not specified by data.</p>
 <p><span class="math inline">\(\alpha_1 \sim N(\mu = 0, \tau = 10^{-4})\)</span> That is a normal distribution with mean <span class="math inline">\(\mu = 0\)</span> and standard deviation <span class="math inline">\(\sigma = 100\)</span>,<br />
 because <span class="math inline">\(\sigma = 1/\sqrt{\tau}\)</span><br />
 <span class="math inline">\(\alpha_2 \sim N(0, 10^{-4})\)</span></p>
 <p><span class="math inline">\(\beta_1 \sim N(0, 10^{-4})\)</span><br />
 <span class="math inline">\(\beta_2 \sim N(0, 10^{-4})\)</span></p>
-<p><span class="math inline">\(log(\tau_1) \sim N(0, 10^{-4})\)</span><br />
-<span class="math inline">\(log(\tau_2) \sim N(0, 10^{-4})\)</span></p>
+<p><span class="math inline">\(\log(\tau_1) \sim N(0, 10^{-4})\)</span><br />
+<span class="math inline">\(\log(\tau_2) \sim N(0, 10^{-4})\)</span></p>
 <p>Discrete prior on the change point. <span class="math inline">\(K\)</span> indicates one of the possible change points,
 based on the probability vector <span class="math inline">\(p\)</span>, which we need to specify beforehand.</p>
 </div>
@@ -881,7 +900,7 @@ based on the probability vector <span class="math inline">\(p\)</span>, which we
   n_change &lt;- possible_change_points[K]
 
 }</code></pre>
-<p>Note that we put priors on <span class="math inline">\(log(\tau_1)\)</span> and <span class="math inline">\(log(\tau_2)\)</span>, rather than on <span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> directly, to ensure that the precision <span class="math inline">\(\tau\)</span> in the second part of the regression always remains positive. <span class="math inline">\(e^{log(\tau_1) + log(\tau_2)}\)</span> is always <span class="math inline">\(&gt; 0\)</span>, even if the term <span class="math inline">\(log(\tau_1)\)</span> + <span class="math inline">\(log(\tau_2)\)</span> becomes negative.</p>
+<p>Note that we put priors on <span class="math inline">\(\log(\tau_1)\)</span> and <span class="math inline">\(\log(\tau_2)\)</span>, rather than on <span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> directly, to ensure that the precision <span class="math inline">\(\tau\)</span> in the second part of the regression always remains positive. <span class="math inline">\(e^{\log(\tau_1) + \log(\tau_2)}\)</span> is always <span class="math inline">\(&gt; 0\)</span>, even if the term <span class="math inline">\(\log(\tau_1)\)</span> + <span class="math inline">\(\log(\tau_2)\)</span> becomes negative.</p>
 <p>Prepare the data which we pass to JAGS along with the model:</p>
 <pre class="r"><code># minimum number of the data points before and after the change
   min_segment_length &lt;- 5 
@@ -899,7 +918,7 @@ based on the probability vector <span class="math inline">\(p\)</span>, which we
 # save the data to a list for jags
   data_CPR &lt;- list(&quot;x&quot;, &quot;y&quot;, &quot;n&quot;, &quot;possible_change_points&quot;, &quot;p&quot;) </code></pre>
 <p>Load the <em>R2jags</em> package to access <em>JAGS</em> in <em>R</em>:</p>
-<pre class="r"><code>  require(R2jags) </code></pre>
+<pre class="r"><code>  library(R2jags) </code></pre>
 <p>Now we execute the change point regression. We instruct JAGS to run three seperate chains so we can verify that the results are consistent. We allow 2000 iterations of the Markov chain Monte Carlo algorithm for each chain, the first 1000 of which will automatically be discarded as burn-in.</p>
 <pre class="r"><code> CPR  &lt;- jags(data = data_CPR, 
                          parameters.to.save = c(&quot;alpha_1&quot;, &quot;alpha_2&quot;, 
@@ -953,90 +972,6 @@ The shaded areas denote <span class="math inline">\(95\)</span> % credible inter
 
 
 
-
-<div class="share-box" aria-hidden="true">
-  <ul class="share">
-    
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="https://twitter.com/intent/tweet?url=/post/change-point-regression/&amp;text=Change%20Point%20Regression" target="_blank" rel="noopener" class="share-btn-twitter">
-          <i class="fab fa-twitter"></i>
-        </a>
-      </li>
-    
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="https://www.facebook.com/sharer.php?u=/post/change-point-regression/&amp;t=Change%20Point%20Regression" target="_blank" rel="noopener" class="share-btn-facebook">
-          <i class="fab fa-facebook"></i>
-        </a>
-      </li>
-    
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="mailto:?subject=Change%20Point%20Regression&amp;body=/post/change-point-regression/" target="_blank" rel="noopener" class="share-btn-email">
-          <i class="fas fa-envelope"></i>
-        </a>
-      </li>
-    
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="https://www.linkedin.com/shareArticle?url=/post/change-point-regression/&amp;title=Change%20Point%20Regression" target="_blank" rel="noopener" class="share-btn-linkedin">
-          <i class="fab fa-linkedin-in"></i>
-        </a>
-      </li>
-    
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="whatsapp://send?text=Change%20Point%20Regression%20/post/change-point-regression/" target="_blank" rel="noopener" class="share-btn-whatsapp">
-          <i class="fab fa-whatsapp"></i>
-        </a>
-      </li>
-    
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="https://service.weibo.com/share/share.php?url=/post/change-point-regression/&amp;title=Change%20Point%20Regression" target="_blank" rel="noopener" class="share-btn-weibo">
-          <i class="fab fa-weibo"></i>
-        </a>
-      </li>
-    
-  </ul>
-</div>
 
 
 

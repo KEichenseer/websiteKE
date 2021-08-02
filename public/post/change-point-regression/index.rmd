@@ -8,11 +8,11 @@ tags: []
 subtitle: ''
 authors: []
 lastmod: '2021-07-28T10:58:49+02:00'
-featured: no
-image:
+featured: false
+image_preview:
   caption: ''
   focal_point: ''
-  preview_only: no
+  preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
 summary: Assume we want to investigate the relationship between two variables, $x$
@@ -126,7 +126,7 @@ $n$ denotes the total number of observations, 60 in this case. But how do we act
 
 Here, we turn to the [JAGS programming environment](https://mcmc-jags.sourceforge.io/). Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath's book [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/). 
 
-Bayesian methods for detecting change points are also available in [Stan](https://mc-stan.org/), as discussed [here](https://mc-stan.org/docs/2_27/stan-users-guide/change-point-section.html). An application using English League football data can be found [here](https://www.significancemagazine.com/sports/693-has-english-league-football-become-less-exciting).  
+*Bayesian methods for detecting change points are also available in [Stan](https://mc-stan.org/), as discussed [here](https://mc-stan.org/docs/2_27/stan-users-guide/change-point-section.html). An application using English league football data can be found [here](https://www.significancemagazine.com/sports/693-has-english-league-football-become-less-exciting).*  
 
 We will access JAGS with the [R2jags package](https://CRAN.R-project.org/package=R2jags), so we can keep using R even if we are writing a model for JAGS.  
 
@@ -239,7 +239,7 @@ Prepare the data which we pass to JAGS along with the model:
 
 Load the *R2jags* package to access *JAGS* in *R*:
 ```{r, echo = TRUE, eval = TRUE, warning=FALSE, message = FALSE}
-  require(R2jags) 
+  library(R2jags) 
 ```
 
 Now we execute the change point regression. We instruct JAGS to run three seperate chains so we can verify that the results are consistent. We allow 2000 iterations of the Markov chain Monte Carlo algorithm for each chain, the first 1000 of which will automatically be discarded as burn-in.

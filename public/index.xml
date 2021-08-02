@@ -193,7 +193,9 @@ y[n_shift:n] &amp;lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # 
 &lt;/div&gt;
 &lt;div id=&#34;implementation-in-jags&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Implementation in JAGS&lt;/h2&gt;
-&lt;p&gt;Here, we turn to the &lt;a href=&#34;https://mcmc-jags.sourceforge.io/&#34;&gt;JAGS programming environment&lt;/a&gt;. Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath’s book &lt;a href=&#34;https://xcelab.net/rm/statistical-rethinking/&#34;&gt;Statistical Rethinking&lt;/a&gt;. We will access JAGS with the &lt;a href=&#34;https://CRAN.R-project.org/package=R2jags&#34;&gt;R2jags package&lt;/a&gt;, so we can keep using R even if we are writing a model for JAGS.&lt;/p&gt;
+&lt;p&gt;Here, we turn to the &lt;a href=&#34;https://mcmc-jags.sourceforge.io/&#34;&gt;JAGS programming environment&lt;/a&gt;. Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath’s book &lt;a href=&#34;https://xcelab.net/rm/statistical-rethinking/&#34;&gt;Statistical Rethinking&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Bayesian methods for detecting change points are also available in &lt;a href=&#34;https://mc-stan.org/&#34;&gt;Stan&lt;/a&gt;, as discussed &lt;a href=&#34;https://mc-stan.org/docs/2_27/stan-users-guide/change-point-section.html&#34;&gt;here&lt;/a&gt;. An application using English league football data can be found &lt;a href=&#34;https://www.significancemagazine.com/sports/693-has-english-league-football-become-less-exciting&#34;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;We will access JAGS with the &lt;a href=&#34;https://CRAN.R-project.org/package=R2jags&#34;&gt;R2jags package&lt;/a&gt;, so we can keep using R even if we are writing a model for JAGS.&lt;/p&gt;
 &lt;p&gt;Below, we look at the model. The R code that will be passed to JAGS later is on the left. On the right is an explanation for each line of the model.&lt;/p&gt;
 &lt;div class=&#34;column-right&#34;&gt;
 &lt;p&gt;We save the model as a function named &lt;em&gt;model_CPR&lt;/em&gt;&lt;br /&gt;
@@ -202,20 +204,20 @@ y[n_shift:n] &amp;lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # 
 &lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(y_i \sim N(\mu_i, \tau_i)\)&lt;/span&gt;&lt;br /&gt;
 note that JAGS uses the precision &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; instead of &lt;span class=&#34;math inline&#34;&gt;\(\sigma^2\)&lt;/span&gt;.
 &lt;span class=&#34;math inline&#34;&gt;\(\tau = 1/\sigma^2\)&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;step&lt;/em&gt; takes the value &lt;span class=&#34;math inline&#34;&gt;\(1\)&lt;/span&gt; if its argument is &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt;= 0\)&lt;/span&gt;,&lt;br /&gt;
+&lt;p&gt;&lt;em&gt;step&lt;/em&gt; takes the value &lt;span class=&#34;math inline&#34;&gt;\(1\)&lt;/span&gt; if its argument is &lt;span class=&#34;math inline&#34;&gt;\(\ge 0\)&lt;/span&gt;,&lt;br /&gt;
 and &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt; otherwise, resulting in&lt;br /&gt;
 &lt;span class=&#34;math inline&#34;&gt;\(\mu_i = \alpha_1~+~\beta_1~x_i\)&lt;/span&gt;     before &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt; and&lt;br /&gt;
 &lt;span class=&#34;math inline&#34;&gt;\(\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i\)&lt;/span&gt;     from &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;     onwards&lt;/p&gt;
-&lt;p&gt;back-transform &lt;span class=&#34;math inline&#34;&gt;\(log(\tau)\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;again, the &lt;em&gt;step&lt;/em&gt; function is used to define &lt;span class=&#34;math inline&#34;&gt;\(log(\tau)\)&lt;/span&gt; before and after &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;. Log-transformation is used to ensure that the &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; resulting from &lt;span class=&#34;math inline&#34;&gt;\(\tau_1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\tau_2\)&lt;/span&gt; is positive.&lt;/p&gt;
+&lt;p&gt;back-transform &lt;span class=&#34;math inline&#34;&gt;\(\log(\tau)\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;again, the &lt;em&gt;step&lt;/em&gt; function is used to define &lt;span class=&#34;math inline&#34;&gt;\(\log(\tau)\)&lt;/span&gt; before and after &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;. Log-transformation is used to ensure that the &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; resulting from &lt;span class=&#34;math inline&#34;&gt;\(\tau_1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\tau_2\)&lt;/span&gt; is positive.&lt;/p&gt;
 &lt;p&gt;We have to define priors for all parameters that are not specified by data.&lt;/p&gt;
 &lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\alpha_1 \sim N(\mu = 0, \tau = 10^{-4})\)&lt;/span&gt; That is a normal distribution with mean &lt;span class=&#34;math inline&#34;&gt;\(\mu = 0\)&lt;/span&gt; and standard deviation &lt;span class=&#34;math inline&#34;&gt;\(\sigma = 100\)&lt;/span&gt;,&lt;br /&gt;
 because &lt;span class=&#34;math inline&#34;&gt;\(\sigma = 1/\sqrt{\tau}\)&lt;/span&gt;&lt;br /&gt;
 &lt;span class=&#34;math inline&#34;&gt;\(\alpha_2 \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\beta_1 \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;br /&gt;
 &lt;span class=&#34;math inline&#34;&gt;\(\beta_2 \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(log(\tau_1) \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;br /&gt;
-&lt;span class=&#34;math inline&#34;&gt;\(log(\tau_2) \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\log(\tau_1) \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;br /&gt;
+&lt;span class=&#34;math inline&#34;&gt;\(\log(\tau_2) \sim N(0, 10^{-4})\)&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;Discrete prior on the change point. &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt; indicates one of the possible change points,
 based on the probability vector &lt;span class=&#34;math inline&#34;&gt;\(p\)&lt;/span&gt;, which we need to specify beforehand.&lt;/p&gt;
 &lt;/div&gt;
@@ -258,7 +260,7 @@ based on the probability vector &lt;span class=&#34;math inline&#34;&gt;\(p\)&lt
   n_change &amp;lt;- possible_change_points[K]
 
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Note that we put priors on &lt;span class=&#34;math inline&#34;&gt;\(log(\tau_1)\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(log(\tau_2)\)&lt;/span&gt;, rather than on &lt;span class=&#34;math inline&#34;&gt;\(\tau_1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\tau_2\)&lt;/span&gt; directly, to ensure that the precision &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; in the second part of the regression always remains positive. &lt;span class=&#34;math inline&#34;&gt;\(e^{log(\tau_1) + log(\tau_2)}\)&lt;/span&gt; is always &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt; 0\)&lt;/span&gt;, even if the term &lt;span class=&#34;math inline&#34;&gt;\(log(\tau_1)\)&lt;/span&gt; + &lt;span class=&#34;math inline&#34;&gt;\(log(\tau_2)\)&lt;/span&gt; becomes negative.&lt;/p&gt;
+&lt;p&gt;Note that we put priors on &lt;span class=&#34;math inline&#34;&gt;\(\log(\tau_1)\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\log(\tau_2)\)&lt;/span&gt;, rather than on &lt;span class=&#34;math inline&#34;&gt;\(\tau_1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\tau_2\)&lt;/span&gt; directly, to ensure that the precision &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; in the second part of the regression always remains positive. &lt;span class=&#34;math inline&#34;&gt;\(e^{\log(\tau_1) + \log(\tau_2)}\)&lt;/span&gt; is always &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt; 0\)&lt;/span&gt;, even if the term &lt;span class=&#34;math inline&#34;&gt;\(\log(\tau_1)\)&lt;/span&gt; + &lt;span class=&#34;math inline&#34;&gt;\(\log(\tau_2)\)&lt;/span&gt; becomes negative.&lt;/p&gt;
 &lt;p&gt;Prepare the data which we pass to JAGS along with the model:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# minimum number of the data points before and after the change
   min_segment_length &amp;lt;- 5 
@@ -276,7 +278,7 @@ based on the probability vector &lt;span class=&#34;math inline&#34;&gt;\(p\)&lt
 # save the data to a list for jags
   data_CPR &amp;lt;- list(&amp;quot;x&amp;quot;, &amp;quot;y&amp;quot;, &amp;quot;n&amp;quot;, &amp;quot;possible_change_points&amp;quot;, &amp;quot;p&amp;quot;) &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Load the &lt;em&gt;R2jags&lt;/em&gt; package to access &lt;em&gt;JAGS&lt;/em&gt; in &lt;em&gt;R&lt;/em&gt;:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;  require(R2jags) &lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;  library(R2jags) &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Now we execute the change point regression. We instruct JAGS to run three seperate chains so we can verify that the results are consistent. We allow 2000 iterations of the Markov chain Monte Carlo algorithm for each chain, the first 1000 of which will automatically be discarded as burn-in.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt; CPR  &amp;lt;- jags(data = data_CPR, 
                          parameters.to.save = c(&amp;quot;alpha_1&amp;quot;, &amp;quot;alpha_2&amp;quot;, 

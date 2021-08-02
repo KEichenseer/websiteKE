@@ -2,10 +2,10 @@
 bio: 
 education:
   courses:
-  - course: PhD in Palaeontology
+  - course: PhD in Earth Sciences
     institution: University of Plymouth
     year: 2021
-  - course: MSc in Geosciences
+  - course: MSc in Palaeobiology & Sedimentology
     institution: Universität Erlangen-Nürnberg
     year: 2016
   - course: BSc in Geosciences
@@ -39,7 +39,7 @@ social:
   icon_pack: fab
   link: https://github.com/KEichenseer
 superuser: true
-title: Kilian Eichenseer
+title: Kilian Eichenseer PhD
 ---
 
 Centuries of palaeontological and geological research have produced vast quantities of information on past organisms and environments. Using statistical tools, I am probing these data riches to reconstruct novel aspects of the history of Life. Focal points of my research have been coral reefs, palaeoclimate and the skeletal mineralogy of marine invertebrates. I am currently building a [data base on biotic and abiotic drivers of marine macroevolution](https://cnidaria.nat.uni-erlangen.de/evodrive/) at the University of Erlangen-Nürnberg.

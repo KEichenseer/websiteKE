@@ -8,11 +8,11 @@ tags: []
 subtitle: ''
 authors: []
 lastmod: '2021-07-28T10:58:49+02:00'
-featured: no
+#featured: false
 image:
   caption: ''
   focal_point: ''
-  preview_only: no
+  preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
 summary: Assume we want to investigate the relationship between two variables, $x$
@@ -58,7 +58,9 @@ pre {
   font-size: 13.2px
 }
 </style>
-<p><em>This implementation of change point regression was developed by <a href="https://www.plymouth.ac.uk/staff/julian-stander">Julian Stander (University of Plymouth)</a> and first published in <a href="https://www.nature.com/articles/s41561-019-0392-9">Eichenseer et al. (2019)</a>.</em></p>
+<blockquote>
+<p><em>This implementation of change point regression was developed by <a href="https://www.plymouth.ac.uk/staff/julian-stander">Julian Stander</a> (University of Plymouth) in <a href="https://www.nature.com/articles/s41561-019-0392-9">Eichenseer et al. (2019)</a>.</em></p>
+</blockquote>
 <p>Assume we want to investigate the relationship between two variables, <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don’t know when.</p>
 <p>Let’s generate <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> and plot them. <span class="math inline">\(y\)</span> is linearly dependent on <span class="math inline">\(x\)</span> across the whole time series, but we induce an increase in the intercept, slope and residual variance at the <span class="math inline">\(35^{th}\)</span> observation:</p>
 <pre class="r"><code>set.seed(10) # change the seed for a different sequence of random numbers
@@ -80,9 +82,10 @@ y[n_shift:n] &lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # intr
 </div>
 <div id="implementation-in-jags" class="section level2">
 <h2>Implementation in JAGS</h2>
-<p>Here, we turn to the <a href="https://mcmc-jags.sourceforge.io/">JAGS programming environment</a>. Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath’s book <a href="https://xcelab.net/rm/statistical-rethinking/">Statistical Rethinking</a>.</p>
+<p>Here, we turn to the <a href="https://mcmc-jags.sourceforge.io/">JAGS programming environment</a>. Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath’s book <a href="https://xcelab.net/rm/statistical-rethinking/">Statistical Rethinking</a>. We will access JAGS with the <a href="https://CRAN.R-project.org/package=R2jags">R2jags package</a>, so we can keep using R even if we are writing a model for JAGS.</p>
+<blockquote>
 <p><em>Bayesian methods for detecting change points are also available in <a href="https://mc-stan.org/">Stan</a>, as discussed <a href="https://mc-stan.org/docs/2_27/stan-users-guide/change-point-section.html">here</a>. An application using English league football data can be found <a href="https://www.significancemagazine.com/sports/693-has-english-league-football-become-less-exciting">here</a>.</em></p>
-<p>We will access JAGS with the <a href="https://CRAN.R-project.org/package=R2jags">R2jags package</a>, so we can keep using R even if we are writing a model for JAGS.</p>
+</blockquote>
 <p>Below, we look at the model. The R code that will be passed to JAGS later is on the left. On the right is an explanation for each line of the model.</p>
 <div class="column-right">
 <p>We save the model as a function named <em>model_CPR</em><br />

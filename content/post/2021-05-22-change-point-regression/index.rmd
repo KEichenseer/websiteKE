@@ -132,14 +132,16 @@ Below, we look at the model. The R code that will be passed to JAGS later is on 
 
 <div class="column-right">
 
-We save the model as a function named *model_CPR*  
-<br/>  
+We save the model as a function named  
+*model_CPR*
+<br/>
 
 Loop over all the data points $1,...,n$  
   
 $y_i \sim N(\mu_i, \tau_i)$  
-note that JAGS uses the precision $\tau$ instead of $\sigma^2$.  
-$\tau = 1/\sigma^2$  
+note that JAGS uses the precision $\tau$ instead  
+of $\sigma^2$. &nbsp; &nbsp; $\tau = 1/\sigma^2$  
+
   
 *step* takes the value $1$ if its argument is $\ge 0$,  
 and $0$ otherwise, resulting in  

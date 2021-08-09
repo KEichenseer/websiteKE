@@ -88,12 +88,13 @@ y[n_shift:n] &lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # intr
 </blockquote>
 <p>Below, we look at the model. The R code that will be passed to JAGS later is on the left. On the right is an explanation for each line of the model.</p>
 <div class="column-right">
-<p>We save the model as a function named <em>model_CPR</em><br />
+<p>We save the model as a function named<br />
+<em>model_CPR</em>
 <br/></p>
 <p>Loop over all the data points <span class="math inline">\(1,...,n\)</span></p>
 <p><span class="math inline">\(y_i \sim N(\mu_i, \tau_i)\)</span><br />
-note that JAGS uses the precision <span class="math inline">\(\tau\)</span> instead of <span class="math inline">\(\sigma^2\)</span>.<br />
-<span class="math inline">\(\tau = 1/\sigma^2\)</span></p>
+note that JAGS uses the precision <span class="math inline">\(\tau\)</span> instead<br />
+of <span class="math inline">\(\sigma^2\)</span>.     <span class="math inline">\(\tau = 1/\sigma^2\)</span></p>
 <p><em>step</em> takes the value <span class="math inline">\(1\)</span> if its argument is <span class="math inline">\(\ge 0\)</span>,<br />
 and <span class="math inline">\(0\)</span> otherwise, resulting in<br />
 <span class="math inline">\(\mu_i = \alpha_1~+~\beta_1~x_i\)</span>     before <span class="math inline">\(n_{change}\)</span> and<br />

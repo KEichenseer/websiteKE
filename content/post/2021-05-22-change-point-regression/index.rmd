@@ -147,7 +147,7 @@ of $\sigma^2$. &nbsp; &nbsp; $\tau = 1/\sigma^2$
 and $0$ otherwise, resulting in  
 $\mu_i = \alpha_1~+~\beta_1~x_i$ &nbsp; &nbsp; before $n_{change}$ and  
 $\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i$  
-from $n_{change}$ &nbsp; &nbsp; onwards  
+from $n_{change}$ onwards.  
   
 back-transform $\log(\tau)$ to $\tau$.  
    

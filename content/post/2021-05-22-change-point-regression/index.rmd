@@ -24,7 +24,7 @@ summary: Assume we want to investigate the relationship between two variables, $
 <style>
 .column-left{
   float: left;
-  width: 56%;
+  width: 52%;
   text-align: left;
 
 }
@@ -39,7 +39,7 @@ summary: Assume we want to investigate the relationship between two variables, $
 
 .column-right{
   float: right;
-  width: 43%;
+  width: 48%;
   text-align: left;
   margin-top: 6px;
   line-height: 1.83;
@@ -138,13 +138,14 @@ We save the model as a function named *model_CPR*
 Loop over all the data points $1,...,n$  
   
 $y_i \sim N(\mu_i, \tau_i)$  
-note that JAGS uses the precision $\tau$ instead of $\sigma^2$. 
+note that JAGS uses the precision $\tau$ instead of $\sigma^2$.  
 $\tau = 1/\sigma^2$  
   
 *step* takes the value $1$ if its argument is $\ge 0$,  
 and $0$ otherwise, resulting in  
 $\mu_i = \alpha_1~+~\beta_1~x_i$ &nbsp; &nbsp; before $n_{change}$ and  
-$\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i$ &nbsp; &nbsp; from $n_{change}$ &nbsp; &nbsp; onwards  
+$\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i$  
+from $n_{change}$ &nbsp; &nbsp; onwards  
   
 back-transform $\log(\tau)$ to $\tau$.  
    

@@ -24,7 +24,7 @@ summary: Assume we want to investigate the relationship between two variables, $
 <style>
 .column-left{
   float: left;
-  width: 56%;
+  width: 52%;
   text-align: left;
 
 }
@@ -39,7 +39,7 @@ summary: Assume we want to investigate the relationship between two variables, $
 
 .column-right{
   float: right;
-  width: 43%;
+  width: 48%;
   text-align: left;
   margin-top: 6px;
   line-height: 1.83;

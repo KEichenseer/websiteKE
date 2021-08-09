@@ -26,7 +26,7 @@ summary: Assume we want to investigate the relationship between two variables, $
 <style>
 <p>.column-left{
 float: left;
-width: 56%;
+width: 52%;
 text-align: left;</p>
 <p>}</p>
 <style>
@@ -39,7 +39,7 @@ text-align: left;</p>
 
 .column-right{
   float: right;
-  width: 43%;
+  width: 48%;
   text-align: left;
   margin-top: 6px;
   line-height: 1.83;
@@ -92,12 +92,13 @@ y[n_shift:n] &lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # intr
 <br/></p>
 <p>Loop over all the data points <span class="math inline">\(1,...,n\)</span></p>
 <p><span class="math inline">\(y_i \sim N(\mu_i, \tau_i)\)</span><br />
-note that JAGS uses the precision <span class="math inline">\(\tau\)</span> instead of <span class="math inline">\(\sigma^2\)</span>.
+note that JAGS uses the precision <span class="math inline">\(\tau\)</span> instead of <span class="math inline">\(\sigma^2\)</span>.<br />
 <span class="math inline">\(\tau = 1/\sigma^2\)</span></p>
 <p><em>step</em> takes the value <span class="math inline">\(1\)</span> if its argument is <span class="math inline">\(\ge 0\)</span>,<br />
 and <span class="math inline">\(0\)</span> otherwise, resulting in<br />
 <span class="math inline">\(\mu_i = \alpha_1~+~\beta_1~x_i\)</span>     before <span class="math inline">\(n_{change}\)</span> and<br />
-<span class="math inline">\(\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i\)</span>     from <span class="math inline">\(n_{change}\)</span>     onwards</p>
+<span class="math inline">\(\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i\)</span><br />
+from <span class="math inline">\(n_{change}\)</span>     onwards</p>
 <p>back-transform <span class="math inline">\(\log(\tau)\)</span> to <span class="math inline">\(\tau\)</span>.</p>
 <p>again, the <em>step</em> function is used to define <span class="math inline">\(\log(\tau)\)</span> before and after <span class="math inline">\(n_{change}\)</span>. Log-transformation is used to ensure that the <span class="math inline">\(\tau\)</span> resulting from <span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> is positive.</p>
 <p>We have to define priors for all parameters that are not specified by data.</p>

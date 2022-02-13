@@ -128,18 +128,18 @@ The variance of the distribution is $\sigma^{2}$.
     </item>
     
     <item>
-      <title>Change Point Regression</title>
-      <link>/post/change-point-regression/</link>
-      <pubDate>Wed, 28 Jul 2021 00:00:00 +0000</pubDate>
-      <guid>/post/change-point-regression/</guid>
+      <title>Latitudinal temperature gradients estimated with Metropolis-Hastings within-Gibbs</title>
+      <link>/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/</link>
+      <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>
+      <guid>/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/</guid>
       <description>
-&lt;script src=&#34;/post/change-point-regression/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/index.en_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
 
 
 &lt;style&gt;
 &lt;p&gt;.column-left{
 float: left;
-width: 56%;
+width: 52%;
 text-align: left;&lt;/p&gt;
 &lt;p&gt;}&lt;/p&gt;
 &lt;style&gt;
@@ -152,7 +152,134 @@ text-align: left;&lt;/p&gt;
 
 .column-right{
   float: right;
-  width: 43%;
+  width: 48%;
+  text-align: left;
+  margin-top: 6px;
+  line-height: 1.83;
+  font-size: 12px;
+
+}
+&lt;/style&gt;
+&lt;style type=&#34;text/css&#34;&gt;
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 12px;
+}
+pre {
+  font-size: 13.2px
+}
+&lt;/style&gt;
+&lt;p&gt;&lt;em&gt;The Metropolis-Hastings component of this model uses modified code from &lt;a href=&#34;https://khayatrayen.github.io/MCMC.html&#34; class=&#34;uri&#34;&gt;https://khayatrayen.github.io/MCMC.html&lt;/a&gt;. A more complex Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of &lt;span class=&#34;math inline&#34;&gt;\(\delta\)&lt;/span&gt;&lt;sup&gt;13&lt;/sup&gt;C records is currently being developed by the &lt;a href=&#34;https://smithlabdurham.github.io/#!team&#34;&gt;Smith Lab at Durham University&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the &lt;a href=&#34;https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/&#34;&gt;sparse and geographically variable sampling of proxy data in most geological intervals&lt;/a&gt;. To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified &lt;a href=&#34;https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents&#34;&gt;Richard’s curve&lt;/a&gt;) that can readily incorporate information in addition to the proxy data. For example, we can easily instruct the model to force temperature to continuously increase from the tropics toward the poles.&lt;/p&gt;
+&lt;p&gt;Here, temperature (&lt;span class=&#34;math inline&#34;&gt;\(T\)&lt;/span&gt;) is modelled as a function of latitude (&lt;span class=&#34;math inline&#34;&gt;\(L\)&lt;/span&gt;) as:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\begin{aligned} \begin{equation} \begin{array}{l} T_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(\nu\ e^{Q(L_i-M)^{\frac{1}{\nu}}}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(A\)&lt;/span&gt; is the lower asymptote, &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt; is the upper asymptote, &lt;span class=&#34;math inline&#34;&gt;\(M\)&lt;/span&gt; is the inflection point, i.e. the steepest point of the curve, &lt;span class=&#34;math inline&#34;&gt;\(Q\)&lt;/span&gt; controls the steepness of the curve, and &lt;span class=&#34;math inline&#34;&gt;\(\nu\)&lt;/span&gt; (the greek letter “nu”) influences whether the slope of the curve is changing faster towards the lower or the upper asymptote. The difference &lt;span class=&#34;math inline&#34;&gt;\(K-A\)&lt;/span&gt; is constrained to be &lt;span class=&#34;math inline&#34;&gt;\(\ge 0\)&lt;/span&gt; to preclude inverse temperature gradients.&lt;/p&gt;
+&lt;p&gt;In R code, we turn this into a function named &lt;span class=&#34;math inline&#34;&gt;\(gradient\)&lt;/span&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;gradient &amp;lt;- function(lat, coeff, sd) {
+  A = coeff[1]
+  K = coeff[2]
+  M = coeff[3]
+  Q = coeff[4]
+  nu = coeff[5]
+  return(A + max(c(K-A,0))/((1+(nu*exp(Q*(lat-M))))^(1/nu)) + rnorm(length(lat),0,sd))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As an example, let’s look at the modern, average latitudinal sea surface temperature gradient. We approximate it by setting &lt;span class=&#34;math inline&#34;&gt;\(A = -2.2\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(K = 28.0\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(M = 39.1\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(Q = 0.10\)&lt;/span&gt;, and &lt;span class=&#34;math inline&#34;&gt;\(\nu = 1.2\)&lt;/span&gt;. The residual standard deviation &lt;span class=&#34;math inline&#34;&gt;\(\sigma\)&lt;/span&gt; is set to &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt;, resulting in a smooth curve without noise (lefthand plot). Note that we are using absolute latitudes, assuming a common latitudinal temperature gradient in both hemispheres.
+We also sample &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; points from this gradient, introducing some noise by setting &lt;span class=&#34;math inline&#34;&gt;\(\sigma = 2\)&lt;/span&gt;. We will later use these &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; points to estimate a latitudinal gradient (righthand plot).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;set.seed(10)
+sample_lat &amp;lt;- runif(10,0,90)
+sample_data &amp;lt;- data.frame(
+  latitude = sample_lat, 
+  temperature = gradient(lat = sample_lat, coeff = c(-2.2, 28, 39.1, 0.1, 1.2), sd = 2))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;864&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Now, we build a model that will reconstruct the gradient from the sample data. Before writing the main Markov chain Monte Carlo (MCMC) function, we pre-define a couple of supplementary functions that will make the code easier to read.
+We start with the log-likelihood function:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;loglik &amp;lt;- function(lat, coeff, temp, sd) {
+  A = coeff[1]
+  K = coeff[2]
+  M = coeff[3]
+  Q = coeff[4]
+  nu = coeff[5]
+  pred = A + max(c(K-A,0))/((1+(nu*exp(Q*(lat-M))))^(1/nu))
+  return(sum(dnorm(temp, mean = pred, sd = sd, log = TRUE)))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Next, we need a function to generate the log-priors. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from &lt;span class=&#34;math inline&#34;&gt;\(-4\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(40\)&lt;/span&gt; are put on &lt;span class=&#34;math inline&#34;&gt;\(A\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt;, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of 45 standard deviation of &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; is placed on &lt;span class=&#34;math inline&#34;&gt;\(M\)&lt;/span&gt;, implying that we expect the steepest temperature gradient in the mid-latitudes, but the data will quickly overwhelm the prior due to the large standard deviation. We constrain &lt;span class=&#34;math inline&#34;&gt;\(Q\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\nu\)&lt;/span&gt; to be &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt;0\)&lt;/span&gt; by placing Gamma priors on them:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;logprior &amp;lt;- function(coeff) {
+    return(sum(c(
+    dunif(param[1], -4, 40, log = TRUE),
+    dunif(param[2], -4, 40, log = TRUE),
+    dnorm(param[3], 45, 10, log = TRUE),
+    dgamma(param[4], 0.2, 0.2, log = TRUE),
+    dgamma(param[5], 1, 1, log = TRUE))))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The posterior is the likelihood &lt;span class=&#34;math inline&#34;&gt;\(\times\)&lt;/span&gt; prior. On the log scale, we can simply add them:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;logposterior &amp;lt;- function(lat, coeff, temp, sd){
+  return (loglik(lat, coeff, temp, sd) + logprior(coeff))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, we define a function that proposes new values for the Metropolis-Hastings step. The magnitude of the proposal standard deviations (&lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;) is quite important, as low values will lead to the chain exploring the parameter space very slowly, and high values result in a low acceptance rate and an insufficient exploration of the parameter space. As appropriate (&lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;) are difficult to know a priori, adaptive steps are often used to find better values. For simplicity, we will use fixed (&lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;). Different (&lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;) can and usually should be used for different parameters.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;MH_proposal &amp;lt;- function(param, proposal_sd){
+  return(rnorm(5,mean = param, sd= c(.5,.5,.5,0.01,0.01)))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With all the prerequisites in place, we can build the MCMC function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;run_MCMC &amp;lt;- function(param_inits, sdy_init, nIter, latitude, temperature){
+  chain = array(dim = c(nIter,5))
+  chain[1,] = param_inits
+  sdy = rep(NA_real_,nIter)
+  sdy[1] = sdy_init
+  # for sdy
+  A_sdy = 3
+  B_sdy = 0.1
+  n &amp;lt;- length(y)
+  shape_sdy &amp;lt;- A_sdy+n/2
+  for (i in 2:nIter){
+
+    sdy[i] = sqrt(rinvgamma(1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,chain[i-1,],0))^2)))
+
+    proposal = proposalfunction(chain[i-1,])
+    if(any(proposal[c(4,5)] &amp;lt;= 0)) probab = 0 else
+    probab = exp(posterior(param = proposal, x = x, y = y, sdy = sdy[i]) -
+                   posterior(param = chain[i-1,], x = x, y = y, sdy = sdy[i]))
+
+    if (runif(1) &amp;lt; probab){
+      chain[i,] = proposal
+    }else{
+      chain[i,] = chain[i-1,]
+    }
+  }
+  output = list(chain = chain,
+                sdy = sdy)
+  return(output)
+}&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Change Point Regression</title>
+      <link>/post/change-point-regression/</link>
+      <pubDate>Wed, 28 Jul 2021 00:00:00 +0000</pubDate>
+      <guid>/post/change-point-regression/</guid>
+      <description>
+&lt;script src=&#34;/post/change-point-regression/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;style&gt;
+&lt;p&gt;.column-left{
+float: left;
+width: 52%;
+text-align: left;&lt;/p&gt;
+&lt;p&gt;}&lt;/p&gt;
+&lt;style&gt;
+.column-center{
+  float: center;
+  width: 100%;
+  text-align: left;
+
+}
+
+.column-right{
+  float: right;
+  width: 48%;
   text-align: left;
   margin-top: 6px;
   line-height: 1.83;
@@ -201,16 +328,18 @@ y[n_shift:n] &amp;lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # 
 &lt;/blockquote&gt;
 &lt;p&gt;Below, we look at the model. The R code that will be passed to JAGS later is on the left. On the right is an explanation for each line of the model.&lt;/p&gt;
 &lt;div class=&#34;column-right&#34;&gt;
-&lt;p&gt;We save the model as a function named &lt;em&gt;model_CPR&lt;/em&gt;&lt;br /&gt;
+&lt;p&gt;We save the model as a function named&lt;br /&gt;
+&lt;em&gt;model_CPR&lt;/em&gt;
 &lt;br/&gt;&lt;/p&gt;
 &lt;p&gt;Loop over all the data points &lt;span class=&#34;math inline&#34;&gt;\(1,...,n\)&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(y_i \sim N(\mu_i, \tau_i)\)&lt;/span&gt;&lt;br /&gt;
-note that JAGS uses the precision &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; instead of &lt;span class=&#34;math inline&#34;&gt;\(\sigma^2\)&lt;/span&gt;.
-&lt;span class=&#34;math inline&#34;&gt;\(\tau = 1/\sigma^2\)&lt;/span&gt;&lt;/p&gt;
+note that JAGS uses the precision &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; instead&lt;br /&gt;
+of &lt;span class=&#34;math inline&#34;&gt;\(\sigma^2\)&lt;/span&gt;.     &lt;span class=&#34;math inline&#34;&gt;\(\tau = 1/\sigma^2\)&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;step&lt;/em&gt; takes the value &lt;span class=&#34;math inline&#34;&gt;\(1\)&lt;/span&gt; if its argument is &lt;span class=&#34;math inline&#34;&gt;\(\ge 0\)&lt;/span&gt;,&lt;br /&gt;
 and &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt; otherwise, resulting in&lt;br /&gt;
 &lt;span class=&#34;math inline&#34;&gt;\(\mu_i = \alpha_1~+~\beta_1~x_i\)&lt;/span&gt;     before &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt; and&lt;br /&gt;
-&lt;span class=&#34;math inline&#34;&gt;\(\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i\)&lt;/span&gt;     from &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;     onwards&lt;/p&gt;
+&lt;span class=&#34;math inline&#34;&gt;\(\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i\)&lt;/span&gt;&lt;br /&gt;
+from &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;   onwards.&lt;/p&gt;
 &lt;p&gt;back-transform &lt;span class=&#34;math inline&#34;&gt;\(\log(\tau)\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;again, the &lt;em&gt;step&lt;/em&gt; function is used to define &lt;span class=&#34;math inline&#34;&gt;\(\log(\tau)\)&lt;/span&gt; before and after &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;. Log-transformation is used to ensure that the &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; resulting from &lt;span class=&#34;math inline&#34;&gt;\(\tau_1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\tau_2\)&lt;/span&gt; is positive.&lt;/p&gt;
 &lt;p&gt;We have to define priors for all parameters that are not specified by data.&lt;/p&gt;

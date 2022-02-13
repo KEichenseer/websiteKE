@@ -39,8 +39,8 @@ content:
 ---
 
 <i class="fas fa-envelope"></i>
-$~$ kilian.eichenseer@fau.de  
+$~$ kilian.eichenseer@durham.ac.uk  
 <i class="fas fa-phone"></i>
-$~$ +49 9131 85-24789
+$~$ +44 (0) 191 334 2347
 
   

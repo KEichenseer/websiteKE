@@ -39,11 +39,13 @@ content:
 
 ## **Peer-reviewed publications**
 
+#### 2022
+
+Jones, Lewis A., & **Kilian Eichenseer** (2022). "Uneven spatial sampling distorts reconstructions of Phanerozoic seawater temperature." **Geology** 50 (2), 238-242. [View here.](https://pubs.geoscienceworld.org/gsa/geology/article/50/2/238/609542/Uneven-spatial-sampling-distorts-reconstructions)
+
 #### 2021
 
 Uwe Balthasar, Stephen Kershaw, Anne-Christine Da Silva, Barbara Seuss, Maggie Cusack, **Kilian Eichenseer** & Peter Chung  (2021). Palaeozoic stromatoporoids and chaetetids analysed using electron backscatter diffraction (EBSD); implications for original mineralogy and microstructure. *Facies* 67 (1), 1-18. [View here.](https://link.springer.com/article/10.1007/s10347-020-00618-5)
-
-Lewis A. Jones & **Kilian Eichenseer** (In review). Uneven spatial sampling distorts reconstructions of Phanerozoic temperature. *Geology*.
 
 #### 2019
 

@@ -30,10 +30,12 @@
   
     
   
-  <meta name="description" content="Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don&#39;t know when." />
+  <meta name="description" content=".column-left{float: left;width: 52%;text-align: left;
+}
+.column-center{float: center;width: 100%;text-align: left;}.column-right{float: right;width: 48%;text-align: left;margin-top: 6px;line-height: 1." />
 
   
-  <link rel="alternate" hreflang="en-us" href="/post/change-point-regression/" />
+  <link rel="alternate" hreflang="en-us" href="/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/" />
 
   
 
@@ -276,7 +278,7 @@
   <link rel="icon" type="image/png" href="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_32x32_fill_lanczos_center_2.png" />
   <link rel="apple-touch-icon" type="image/png" href="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_180x180_fill_lanczos_center_2.png" />
 
-  <link rel="canonical" href="/post/change-point-regression/" />
+  <link rel="canonical" href="/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/" />
 
   
   
@@ -287,23 +289,26 @@
   
   
     
+    
   
   
-  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:card" content="summary" />
   
   <meta property="og:site_name" content="Kilian Eichenseer" />
-  <meta property="og:url" content="/post/change-point-regression/" />
-  <meta property="og:title" content="Change Point Regression | Kilian Eichenseer" />
-  <meta property="og:description" content="Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don&#39;t know when." /><meta property="og:image" content="/post/change-point-regression/featured.jpg" />
-    <meta property="twitter:image" content="/post/change-point-regression/featured.jpg" /><meta property="og:locale" content="en-us" />
+  <meta property="og:url" content="/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/" />
+  <meta property="og:title" content="Latitudinal temperature gradients estimated with Metropolis-Hastings within-Gibbs | Kilian Eichenseer" />
+  <meta property="og:description" content=".column-left{float: left;width: 52%;text-align: left;
+}
+.column-center{float: center;width: 100%;text-align: left;}.column-right{float: right;width: 48%;text-align: left;margin-top: 6px;line-height: 1." /><meta property="og:image" content="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png" />
+    <meta property="twitter:image" content="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png" /><meta property="og:locale" content="en-us" />
   
     
       <meta
         property="article:published_time"
-        content="2021-07-28T00:00:00&#43;00:00"
+        content="2022-02-12T00:00:00&#43;00:00"
       />
     
-    <meta property="article:modified_time" content="2021-07-28T10:58:49&#43;02:00">
+    <meta property="article:modified_time" content="2022-02-12T21:20:10&#43;00:00">
   
 
   
@@ -327,16 +332,12 @@
   "@type": "BlogPosting",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "/post/change-point-regression/"
+    "@id": "/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/"
   },
-  "headline": "Change Point Regression",
+  "headline": "Latitudinal temperature gradients estimated with Metropolis-Hastings within-Gibbs",
   
-  "image": [
-    "/post/change-point-regression/featured.jpg"
-  ],
-  
-  "datePublished": "2021-07-28T00:00:00Z",
-  "dateModified": "2021-07-28T10:58:49+02:00",
+  "datePublished": "2022-02-12T00:00:00Z",
+  "dateModified": "2022-02-12T21:20:10Z",
   
   "author": {
     "@type": "Person",
@@ -351,7 +352,7 @@
       "url": "/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_192x192_fill_lanczos_center_2.png"
     }
   },
-  "description": "Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don't know when."
+  "description": ".column-left{\rfloat: left;\rwidth: 52%;\rtext-align: left;\n}\n\r.column-center{\rfloat: center;\rwidth: 100%;\rtext-align: left;\r}\r.column-right{\rfloat: right;\rwidth: 48%;\rtext-align: left;\rmargin-top: 6px;\rline-height: 1."
 }
 </script>
 
@@ -367,11 +368,11 @@
 
 
 
-  <title>Change Point Regression | Kilian Eichenseer</title>
+  <title>Latitudinal temperature gradients estimated with Metropolis-Hastings within-Gibbs | Kilian Eichenseer</title>
 </head>
 
 
-<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="page-wrapper   " data-wc-page-id="88ac832bdb2c666a211891011443bad9" >
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="page-wrapper   " data-wc-page-id="f74f260f6a35cf523ffa55ef4ae150b4" >
 
   
   
@@ -697,7 +698,7 @@
   
   
 <div class="article-container pt-3">
-  <h1>Change Point Regression</h1>
+  <h1>Latitudinal temperature gradients estimated with Metropolis-Hastings within-Gibbs</h1>
 
   
 
@@ -719,7 +720,7 @@
           Last updated on
       
     
-    Jul 28, 2021
+    Feb 12, 2022
   </span>
   
 
@@ -728,7 +729,7 @@
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    7 min read
+    5 min read
   </span>
   
 
@@ -759,7 +760,7 @@
 
     <div class="article-style">
       
-<script src="/post/change-point-regression/index_files/header-attrs/header-attrs.js"></script>
+<script src="/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/index.en_files/header-attrs/header-attrs.js"></script>
 
 
 <style>
@@ -797,161 +798,86 @@ pre {
   font-size: 13.2px
 }
 </style>
-<blockquote>
-<p><em>This implementation of change point regression was developed by <a href="https://www.plymouth.ac.uk/staff/julian-stander">Julian Stander</a> (University of Plymouth) in <a href="https://www.nature.com/articles/s41561-019-0392-9">Eichenseer et al. (2019)</a>.</em></p>
-</blockquote>
-<p>Assume we want to investigate the relationship between two variables, <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don’t know when.</p>
-<p>Let’s generate <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> and plot them. <span class="math inline">\(y\)</span> is linearly dependent on <span class="math inline">\(x\)</span> across the whole time series, but we induce an increase in the intercept, slope and residual variance at the <span class="math inline">\(35^{th}\)</span> observation:</p>
-<pre class="r"><code>set.seed(10) # change the seed for a different sequence of random numbers
-n &lt;- 60 # number of total data points
-n_shift &lt;- 35 # the data point at which we introduce a change
-x &lt;- rnorm(n,0,1) # generate x
-y &lt;- rnorm(n,0,0.5) + 0.5 * x # generate y without a change
-y[n_shift:n] &lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # introduce change</code></pre>
-<p><img src="/post/change-point-regression/index_files/figure-html/unnamed-chunk-2-1.png" width="960" /></p>
-<div id="the-regression-model" class="section level2">
-<h2>The regression model</h2>
-<p>Now we build a model that can recover the change point and the linear relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> before and after the change point.</p>
-<p>The first part of this model looks like an ordinary least squares regression of <span class="math inline">\(y\)</span> against <span class="math inline">\(x\)</span>:</p>
-<p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma_1^2), ~~\\ \mu_i = \alpha_1~+~\beta_1~x_i, ~~~~~ i = 1,...,n_{change}-1 \end{array} \end{equation} \end{aligned}\)</span></p>
-<p>Here we have a single intercept (<span class="math inline">\(\alpha_1\)</span>), slope (<span class="math inline">\(\beta_1\)</span>), and residual variance (<span class="math inline">\(\sigma^2_1\)</span>). <span class="math inline">\(n_{change}\)</span> - 1 denotes the number of obervations before the change point.</p>
-<p>From the change point <span class="math inline">\(n_{change}\)</span> onwards, we add an additional intercept, <span class="math inline">\(\alpha_2\)</span>, to the intercept from the first part (<span class="math inline">\(\alpha_1\)</span>). We do the same for the slope and the residual variance:</p>
-<p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma_1^2+\sigma_2^2), ~~\\ \mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i, ~~~~~ i = n_{change},...,n \end{array} \end{equation} \end{aligned}\)</span></p>
-<p><span class="math inline">\(n\)</span> denotes the total number of observations, 60 in this case. But how do we actually find the change point <span class="math inline">\(n_{change}\)</span>?</p>
-</div>
-<div id="implementation-in-jags" class="section level2">
-<h2>Implementation in JAGS</h2>
-<p>Here, we turn to the <a href="https://mcmc-jags.sourceforge.io/">JAGS programming environment</a>. Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath’s book <a href="https://xcelab.net/rm/statistical-rethinking/">Statistical Rethinking</a>. We will access JAGS with the <a href="https://CRAN.R-project.org/package=R2jags">R2jags package</a>, so we can keep using R even if we are writing a model for JAGS.</p>
-<blockquote>
-<p><em>Bayesian methods for detecting change points are also available in <a href="https://mc-stan.org/">Stan</a>, as discussed <a href="https://mc-stan.org/docs/2_27/stan-users-guide/change-point-section.html">here</a>. An application using English league football data can be found <a href="https://www.significancemagazine.com/sports/693-has-english-league-football-become-less-exciting">here</a>.</em></p>
-</blockquote>
-<p>Below, we look at the model. The R code that will be passed to JAGS later is on the left. On the right is an explanation for each line of the model.</p>
-<div class="column-right">
-<p>We save the model as a function named<br />
-<em>model_CPR</em>
-<br/></p>
-<p>Loop over all the data points <span class="math inline">\(1,...,n\)</span></p>
-<p><span class="math inline">\(y_i \sim N(\mu_i, \tau_i)\)</span><br />
-note that JAGS uses the precision <span class="math inline">\(\tau\)</span> instead<br />
-of <span class="math inline">\(\sigma^2\)</span>.     <span class="math inline">\(\tau = 1/\sigma^2\)</span></p>
-<p><em>step</em> takes the value <span class="math inline">\(1\)</span> if its argument is <span class="math inline">\(\ge 0\)</span>,<br />
-and <span class="math inline">\(0\)</span> otherwise, resulting in<br />
-<span class="math inline">\(\mu_i = \alpha_1~+~\beta_1~x_i\)</span>     before <span class="math inline">\(n_{change}\)</span> and<br />
-<span class="math inline">\(\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i\)</span><br />
-from <span class="math inline">\(n_{change}\)</span>   onwards.</p>
-<p>back-transform <span class="math inline">\(\log(\tau)\)</span> to <span class="math inline">\(\tau\)</span>.</p>
-<p>again, the <em>step</em> function is used to define <span class="math inline">\(\log(\tau)\)</span> before and after <span class="math inline">\(n_{change}\)</span>. Log-transformation is used to ensure that the <span class="math inline">\(\tau\)</span> resulting from <span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> is positive.</p>
-<p>We have to define priors for all parameters that are not specified by data.</p>
-<p><span class="math inline">\(\alpha_1 \sim N(\mu = 0, \tau = 10^{-4})\)</span> That is a normal distribution with mean <span class="math inline">\(\mu = 0\)</span> and standard deviation <span class="math inline">\(\sigma = 100\)</span>,<br />
-because <span class="math inline">\(\sigma = 1/\sqrt{\tau}\)</span><br />
-<span class="math inline">\(\alpha_2 \sim N(0, 10^{-4})\)</span></p>
-<p><span class="math inline">\(\beta_1 \sim N(0, 10^{-4})\)</span><br />
-<span class="math inline">\(\beta_2 \sim N(0, 10^{-4})\)</span></p>
-<p><span class="math inline">\(\log(\tau_1) \sim N(0, 10^{-4})\)</span><br />
-<span class="math inline">\(\log(\tau_2) \sim N(0, 10^{-4})\)</span></p>
-<p>Discrete prior on the change point. <span class="math inline">\(K\)</span> indicates one of the possible change points,
-based on the probability vector <span class="math inline">\(p\)</span>, which we need to specify beforehand.</p>
-</div>
-<pre class="r"><code>model_CPR &lt;- function(){
-  
-  ### Likelihood or data model part
-  for(i in 1:n){
-    
-  y[i] ~ dnorm(mu[i], tau[i]) 
-
-    
-    
-  mu[i] &lt;- alpha_1 + 
-  alpha_2 * step(i - n_change) +
-  (beta_1 + beta_2 * step(i - n_change))*x[i]
-  
-  
-  
-  tau[i] &lt;- exp(log_tau[i])
-  
-  log_tau[i] &lt;- log_tau_1 + log_tau_2 * 
-  step(i - n_change)
-  } 
-  
-  ### Priors
-  
-  
-  alpha_1 ~ dnorm(0, 1.0E-4)
-  
-  
-  alpha_2 ~ dnorm(0, 1.0E-4)
-  
-  beta_1 ~ dnorm(0, 1.0E-4)
-  beta_2 ~ dnorm(0, 1.0E-4)
-  
-  log_tau_1 ~ dnorm(0, 1.0E-4)
-  log_tau_2 ~ dnorm(0, 1.0E-4)
-  
-  K ~ dcat(p)
-  n_change &lt;- possible_change_points[K]
-
+<p><em>The Metropolis-Hastings component of this model uses modified code from <a href="https://khayatrayen.github.io/MCMC.html" class="uri">https://khayatrayen.github.io/MCMC.html</a>. A more complex Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records is currently being developed by the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
+<p>Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the <a href="https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/">sparse and geographically variable sampling of proxy data in most geological intervals</a>. To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified <a href="https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents">Richard’s curve</a>) that can readily incorporate information in addition to the proxy data. For example, we can easily instruct the model to force temperature to continuously increase from the tropics toward the poles.</p>
+<p>Here, temperature (<span class="math inline">\(T\)</span>) is modelled as a function of latitude (<span class="math inline">\(L\)</span>) as:</p>
+<p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} T_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(\nu\ e^{Q(L_i-M)^{\frac{1}{\nu}}}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)</span></p>
+<p><span class="math inline">\(A\)</span> is the lower asymptote, <span class="math inline">\(K\)</span> is the upper asymptote, <span class="math inline">\(M\)</span> is the inflection point, i.e. the steepest point of the curve, <span class="math inline">\(Q\)</span> controls the steepness of the curve, and <span class="math inline">\(\nu\)</span> (the greek letter “nu”) influences whether the slope of the curve is changing faster towards the lower or the upper asymptote. The difference <span class="math inline">\(K-A\)</span> is constrained to be <span class="math inline">\(\ge 0\)</span> to preclude inverse temperature gradients.</p>
+<p>In R code, we turn this into a function named <span class="math inline">\(gradient\)</span>:</p>
+<pre class="r"><code>gradient &lt;- function(lat, coeff, sd) {
+  A = coeff[1]
+  K = coeff[2]
+  M = coeff[3]
+  Q = coeff[4]
+  nu = coeff[5]
+  return(A + max(c(K-A,0))/((1+(nu*exp(Q*(lat-M))))^(1/nu)) + rnorm(length(lat),0,sd))
 }</code></pre>
-<p>Note that we put priors on <span class="math inline">\(\log(\tau_1)\)</span> and <span class="math inline">\(\log(\tau_2)\)</span>, rather than on <span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> directly, to ensure that the precision <span class="math inline">\(\tau\)</span> in the second part of the regression always remains positive. <span class="math inline">\(e^{\log(\tau_1) + \log(\tau_2)}\)</span> is always <span class="math inline">\(&gt; 0\)</span>, even if the term <span class="math inline">\(\log(\tau_1)\)</span> + <span class="math inline">\(\log(\tau_2)\)</span> becomes negative.</p>
-<p>Prepare the data which we pass to JAGS along with the model:</p>
-<pre class="r"><code># minimum number of the data points before and after the change
-  min_segment_length &lt;- 5 
+<p>As an example, let’s look at the modern, average latitudinal sea surface temperature gradient. We approximate it by setting <span class="math inline">\(A = -2.2\)</span>, <span class="math inline">\(K = 28.0\)</span>, <span class="math inline">\(M = 39.1\)</span>, <span class="math inline">\(Q = 0.10\)</span>, and <span class="math inline">\(\nu = 1.2\)</span>. The residual standard deviation <span class="math inline">\(\sigma\)</span> is set to <span class="math inline">\(0\)</span>, resulting in a smooth curve without noise (lefthand plot). Note that we are using absolute latitudes, assuming a common latitudinal temperature gradient in both hemispheres.
+We also sample <span class="math inline">\(10\)</span> points from this gradient, introducing some noise by setting <span class="math inline">\(\sigma = 2\)</span>. We will later use these <span class="math inline">\(10\)</span> points to estimate a latitudinal gradient (righthand plot).</p>
+<pre class="r"><code>set.seed(10)
+sample_lat &lt;- runif(10,0,90)
+sample_data &lt;- data.frame(
+  latitude = sample_lat, 
+  temperature = gradient(lat = sample_lat, coeff = c(-2.2, 28, 39.1, 0.1, 1.2), sd = 2))</code></pre>
+<p><img src="/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-3-1.png" width="864" /></p>
+<p>Now, we build a model that will reconstruct the gradient from the sample data. Before writing the main Markov chain Monte Carlo (MCMC) function, we pre-define a couple of supplementary functions that will make the code easier to read.
+We start with the log-likelihood function:</p>
+<pre class="r"><code>loglik &lt;- function(lat, coeff, temp, sd) {
+  A = coeff[1]
+  K = coeff[2]
+  M = coeff[3]
+  Q = coeff[4]
+  nu = coeff[5]
+  pred = A + max(c(K-A,0))/((1+(nu*exp(Q*(lat-M))))^(1/nu))
+  return(sum(dnorm(temp, mean = pred, sd = sd, log = TRUE)))
+}</code></pre>
+<p>Next, we need a function to generate the log-priors. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from <span class="math inline">\(-4\)</span> to <span class="math inline">\(40\)</span> are put on <span class="math inline">\(A\)</span> and <span class="math inline">\(K\)</span>, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of 45 standard deviation of <span class="math inline">\(10\)</span> is placed on <span class="math inline">\(M\)</span>, implying that we expect the steepest temperature gradient in the mid-latitudes, but the data will quickly overwhelm the prior due to the large standard deviation. We constrain <span class="math inline">\(Q\)</span> and <span class="math inline">\(\nu\)</span> to be <span class="math inline">\(&gt;0\)</span> by placing Gamma priors on them:</p>
+<pre class="r"><code>logprior &lt;- function(coeff) {
+    return(sum(c(
+    dunif(param[1], -4, 40, log = TRUE),
+    dunif(param[2], -4, 40, log = TRUE),
+    dnorm(param[3], 45, 10, log = TRUE),
+    dgamma(param[4], 0.2, 0.2, log = TRUE),
+    dgamma(param[5], 1, 1, log = TRUE))))
+}</code></pre>
+<p>The posterior is the likelihood <span class="math inline">\(\times\)</span> prior. On the log scale, we can simply add them:</p>
+<pre class="r"><code>logposterior &lt;- function(lat, coeff, temp, sd){
+  return (loglik(lat, coeff, temp, sd) + logprior(coeff))
+}</code></pre>
+<p>Finally, we define a function that proposes new values for the Metropolis-Hastings step. The magnitude of the proposal standard deviations (<span class="math inline">\(\sigma_{proposal}\)</span>) is quite important, as low values will lead to the chain exploring the parameter space very slowly, and high values result in a low acceptance rate and an insufficient exploration of the parameter space. As appropriate (<span class="math inline">\(\sigma_{proposal}\)</span>) are difficult to know a priori, adaptive steps are often used to find better values. For simplicity, we will use fixed (<span class="math inline">\(\sigma_{proposal}\)</span>). Different (<span class="math inline">\(\sigma_{proposal}\)</span>) can and usually should be used for different parameters.</p>
+<pre class="r"><code>MH_proposal &lt;- function(param, proposal_sd){
+  return(rnorm(5,mean = param, sd= c(.5,.5,.5,0.01,0.01)))
+}</code></pre>
+<p>With all the prerequisites in place, we can build the MCMC function.</p>
+<pre class="r"><code>run_MCMC &lt;- function(param_inits, sdy_init, nIter, latitude, temperature){
+  chain = array(dim = c(nIter,5))
+  chain[1,] = param_inits
+  sdy = rep(NA_real_,nIter)
+  sdy[1] = sdy_init
+  # for sdy
+  A_sdy = 3
+  B_sdy = 0.1
+  n &lt;- length(y)
+  shape_sdy &lt;- A_sdy+n/2
+  for (i in 2:nIter){
 
-# assign indices to the potential change points we allow
-  possible_change_points &lt;- (1:n)[(min_segment_length+1):(n+1-min_segment_length)] 
- 
-# number of possible change points
-  M &lt;- length(possible_change_points)  
+    sdy[i] = sqrt(rinvgamma(1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,chain[i-1,],0))^2)))
 
-# probabilities for the discrete uniform prior on the possible change points, 
-# i.e. all possible change points have the same prior probability
-  p &lt;- rep(1 / M, length = M) 
- 
-# save the data to a list for jags
-  data_CPR &lt;- list(&quot;x&quot;, &quot;y&quot;, &quot;n&quot;, &quot;possible_change_points&quot;, &quot;p&quot;) </code></pre>
-<p>Load the <em>R2jags</em> package to access <em>JAGS</em> in <em>R</em>:</p>
-<pre class="r"><code>  library(R2jags) </code></pre>
-<p>Now we execute the change point regression. We instruct JAGS to run three seperate chains so we can verify that the results are consistent. We allow 2000 iterations of the Markov chain Monte Carlo algorithm for each chain, the first 1000 of which will automatically be discarded as burn-in.</p>
-<pre class="r"><code> CPR  &lt;- jags(data = data_CPR, 
-                         parameters.to.save = c(&quot;alpha_1&quot;, &quot;alpha_2&quot;, 
-                                                &quot;beta_1&quot;,&quot;beta_2&quot;,
-                                                &quot;log_tau_1&quot;,&quot;log_tau_2&quot;,
-                                                &quot;n_change&quot;), 
-                         n.iter = 2000, 
-                         n.chains = 3,
-                         model.file = model_CPR)</code></pre>
-</div>
-<div id="the-results" class="section level2">
-<h2>The results</h2>
-<p>To visualise the results and inspect the posterior, we are using the <em>ggmcmc</em> package, which relies on the <em>ggplot2</em> package. For brevity, we just look at the <span class="math inline">\(n_{change}\)</span> parameter here.</p>
-<pre class="r"><code>library(ggmcmc)
-CPR.ggs &lt;- ggs(as.mcmc(CPR)) # convert to ggs object
-ggs_traceplot(CPR.ggs, family = &quot;n_change&quot;) </code></pre>
-<p><img src="/post/change-point-regression/index_files/figure-html/unnamed-chunk-7-1.png" width="1000 %" /></p>
-<p>Looks like the chains converge and mix nicely. We can already see that our model locates the change point somewhere between <span class="math inline">\(30\)</span> and <span class="math inline">\(40\)</span>, although the chains occasionally explore regions further away.</p>
-<p>Let’s look at the posterior probabilities for the possible change points:</p>
-<pre class="r"><code>ggplot(data = CPR.ggs %&gt;% filter(Parameter == &quot;n_change&quot;),
-  aes(x=value, y = 3*(..count..)/sum(..count..), fill = as.factor(Chain))) + 
-  geom_vline(xintercept = 35,lty = 2) + geom_bar(position = &quot;identity&quot;, alpha = 0.5) +
-  ylab(&quot;posterior probability&quot;) + xlab(&quot;n_change&quot;) + labs(fill=&#39;Chain&#39;)</code></pre>
-<p><img src="/post/change-point-regression/index_files/figure-html/unnamed-chunk-8-1.png" width="700 %" /></p>
-<p>The <span class="math inline">\(37^{th}\)</span> point has the highest probability of being the change point. That is not far off from where we introduced the change, at the <span class="math inline">\(35^{th}\)</span> point (dashed line). The random generation of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> has led to <span class="math inline">\(37\)</span> being favoured. We also note that there are only minor differences between the three chains, and those differences would likely further dwindle if we were to let the chains run for longer.</p>
-<p>Using the posterior distribution, we can answer questions like: “In which interval does the change point fall with 90 % probability?”</p>
-<pre class="r"><code>quantile(CPR$BUGSoutput$sims.list$n_change, probs = c(0.05, 0.95))</code></pre>
-<pre><code>##  5% 95% 
-##  33  39</code></pre>
-<p>We can also inquire about the probability that the change point falls in the interval <span class="math inline">\(34\)</span> to <span class="math inline">\(38\)</span>:</p>
-<pre class="r"><code>round(length(which(CPR$BUGSoutput$sims.list$n_change %in% 34:38))/
-              (CPR$BUGSoutput$n.sims),2)</code></pre>
-<pre><code>## [1] 0.87</code></pre>
-<p>Finally, let’s have a look at the regression parameters and plot the resulting regressions before and after the most likely change point.</p>
-<p><img src="/post/change-point-regression/index_files/figure-html/unnamed-chunk-12-1.png" width="475 %" />
-The intercept, slope, and residual variance all increase after the change point.</p>
-<p>This can be immediately seen when plotting the change point regression:
-<img src="/post/change-point-regression/index_files/figure-html/unnamed-chunk-13-1.png" width="375 %" />
-The shaded areas denote <span class="math inline">\(95\)</span> % credible intervals around the regression lines.</p>
-<p>You can find the full R code for this analysis at <a href="https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R" class="uri">https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R</a></p>
-<p>Get in touch if you have any comments or questions!</p>
-</div>
+    proposal = proposalfunction(chain[i-1,])
+    if(any(proposal[c(4,5)] &lt;= 0)) probab = 0 else
+    probab = exp(posterior(param = proposal, x = x, y = y, sdy = sdy[i]) -
+                   posterior(param = chain[i-1,], x = x, y = y, sdy = sdy[i]))
+
+    if (runif(1) &lt; probab){
+      chain[i,] = proposal
+    }else{
+      chain[i,] = chain[i-1,]
+    }
+  }
+  output = list(chain = chain,
+                sdy = sdy)
+  return(output)
+}</code></pre>
 
     </div>
 

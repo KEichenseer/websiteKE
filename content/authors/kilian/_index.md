@@ -11,7 +11,7 @@ education:
   - course: BSc in Geosciences
     institution: Universität Erlangen-Nürnberg
     year: 2015
-email: "kilian.eichenseer@gmail.com"
+email: "kilian.eichenseer@durham.ac.uk"
 highlight_name: false
 interests:
 - Palaeobiology and palaeoclimate
@@ -20,8 +20,8 @@ interests:
 - Data analysis and statistics
 
 organizations:
-- name: Universität Erlangen-Nürnberg
-  url: https://www.gzn.nat.fau.de/palaeontologie/team/wissenschaftler/kilian-eichenseer/
+- name: Durham University
+  url: https://smithlabdurham.github.io/#!team
 role: Quantitative Palaeobiology
 social:
 - icon: envelope
@@ -42,6 +42,7 @@ superuser: true
 title: Kilian Eichenseer PhD
 ---
 
-Centuries of palaeontological and geological research have produced vast quantities of information on past organisms and environments. Using statistical tools, I am probing these data riches to reconstruct novel aspects of the history of Life. Focal points of my research have been coral reefs, palaeoclimate and the skeletal mineralogy of marine invertebrates. I am currently building a [data base on biotic and abiotic drivers of marine macroevolution](https://cnidaria.nat.uni-erlangen.de/evodrive/) at the University of Erlangen-Nürnberg.
+Centuries of palaeontological and geological research have produced vast quantities of information on past organisms and environments. Using statistical tools, I am probing these data riches to reconstruct novel aspects of the history of Life. Focal points of my research have been coral reefs, palaeoclimate and the skeletal mineralogy of marine invertebrates. I am currently building a Bayesian stratigraphic model to correlate Cambrian sections using $\delta$<sup>13</sup>C records. (https://smithlabdurham.github.io/#!team).
+
 
 {{< icon name="download" pack="fas" >}} Download my {{< staticref "media/Kilian-Eichenseer-CV.pdf" "newtab" >}}CV{{< /staticref >}}.

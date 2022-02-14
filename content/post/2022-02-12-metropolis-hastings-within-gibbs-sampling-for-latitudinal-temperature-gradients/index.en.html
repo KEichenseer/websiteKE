@@ -1,26 +1,26 @@
+---
+title: "Latitudinal temperature gradients estimated with Metropolis-Hastings"
+author: "Kilian Eichenseer"
+date: '2022-02-12'
+slug: metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients
+categories: []
+tags: []
+subtitle: ''
+authors: []
+lastmod: '2022-02-12T21:20:10Z'
+#featured: false
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: true
+projects: []
+header-includes: \usepackage{graphics}
+summary: Reconstructing climate gradients from only a handful of data points is a challenge ideally suited for Bayesian modelling. Here, I build a Metropolis-Hastings within-Gibbs algorithm in R and use it to estimate a generalised logistic function.
+---
 
 <script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
 
 
-<hr />
-title: “Latitudinal temperature gradients estimated with Metropolis-Hastings”
-author: “Kilian Eichenseer”
-date: ‘2022-02-12’
-slug: metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients
-categories: []
-tags: []
-subtitle: ’’
-summary: ’’
-authors: []
-lastmod: ‘2022-02-12T21:20:10Z’
-featured: no
-image:
-caption: ’’
-focal_point: ’’
-preview_only: true
-projects: []
-header-includes:
-<p>summary: Reconstructing climate gradients from only a handful of data points is a challenge ideally suited for Bayesian modelling. Here, I build a Metropolis-Hastings within-Gibbs algorithm within R and use it to estimate a generalised logistic function.—</p>
 <style>
 <p>.column-left{
 float: left;
@@ -62,21 +62,21 @@ pre {
 <p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu}}}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)</span></p>
 <p><span class="math inline">\(A\)</span> is the lower asymptote, <span class="math inline">\(K\)</span> is the upper asymptote, <span class="math inline">\(M\)</span> is the inflection point, i.e. the steepest point of the curve, <span class="math inline">\(Q\)</span> controls the steepness of the curve, and <span class="math inline">\(\nu\)</span> (the greek letter “nu”) influences whether the slope of the curve is changing faster towards the lower or the upper asymptote. The difference <span class="math inline">\(K-A\)</span> is constrained to be <span class="math inline">\(\ge 0\)</span> to preclude inverse temperature gradients.</p>
 <p>In R code, we turn this into a function named <span class="math inline">\(gradient\)</span>:</p>
-<pre class="r"><code>gradient &lt;- function(lat, coeff, sd) {
+<pre class="r"><code>gradient &lt;- function(x, coeff, sd) {
   A = coeff[1]
   K = coeff[2]
   M = coeff[3]
   Q = coeff[4]
   nu = coeff[5]
-  return(A + max(c(K-A,0))/((1+(nu*exp(Q*(lat-M))))^(1/nu)) + rnorm(length(lat),0,sd))
+  return(A + max(c(K-A,0))/((1+(nu*exp(Q*(x-M))))^(1/nu)) + rnorm(length(x),0,sd))
 }</code></pre>
 <p>As an example, let’s look at the modern, average latitudinal sea surface temperature gradient. We approximate it by setting <span class="math inline">\(A = -2.2\)</span>, <span class="math inline">\(K = 28.0\)</span>, <span class="math inline">\(M = 39.1\)</span>, <span class="math inline">\(Q = 0.10\)</span>, and <span class="math inline">\(\nu = 1.2\)</span>. The residual standard deviation <span class="math inline">\(\sigma_y\)</span> is set to <span class="math inline">\(0\)</span>, resulting in a smooth curve without noise (lefthand plot). Note that we are using absolute latitudes, assuming a common latitudinal temperature gradient in both hemispheres.
 We also sample <span class="math inline">\(10\)</span> points from this gradient, introducing some noise by setting <span class="math inline">\(\sigma_y = 2\)</span>. We will later use these <span class="math inline">\(10\)</span> points to estimate a latitudinal gradient (righthand plot).</p>
 <pre class="r"><code>set.seed(10)
 sample_lat &lt;- runif(10,0,90)
 sample_data &lt;- data.frame(
-  latitude = sample_lat, 
-  temperature = gradient(lat = sample_lat, coeff = c(-2.2, 28, 39.1, 0.1, 1.2), sd = 2))</code></pre>
+  x = sample_lat, 
+  y = gradient(x = sample_lat, coeff = c(-2.2, 28, 39.1, 0.1, 1.2), sd = 2))</code></pre>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-3-1.png" width="864" /></p>
 <p>Now, we build a model that will reconstruct the gradient from the sample data. Before writing the main Markov chain Monte Carlo (MCMC) function, we pre-define a couple of supplementary functions that will make the code easier to read.
 We start with the log-likelihood function:</p>
@@ -106,7 +106,7 @@ We start with the log-likelihood function:</p>
 <pre class="r"><code>MH_propose &lt;- function(coeff, proposal_sd){
   return(rnorm(5,mean = coeff, sd= c(.5,.5,.5,0.01,0.01)))
 }</code></pre>
-<p>With all the prerequisites in place, we can build the MCMC function.</p>
+<p>With all the prerequisites in place, we can build the MCMC function. The model will update <span class="math inline">\(\sigma\)</span> with a Gibbs step, and update the other coefficients with a Metropolis-Hastings step:</p>
 <pre class="r"><code>run_MCMC &lt;- function(x, y, coeff_inits, sdy_init, nIter){
   ### Initialisation
   coefficients = array(dim = c(nIter,5)) # set up array to store coefficients
@@ -122,29 +122,35 @@ We start with the log-likelihood function:</p>
   for (i in 2:nIter){ 
     
     ## 1. Gibbs step to estimate sdy
-    sdy[i] = sqrt(rinvgamma(1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,chain[i-1,],0))^2)))
+    sdy[i] = sqrt(1/rgamma(1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,coefficients[i-1,],0))^2)))
     
     ## 2. Metropolis-Hastings step to estimate the regression coefficients
-    proposal = MH_propose(coeff[i-1,]) # new proposed values
+    proposal = MH_propose(coefficients[i-1,]) # new proposed values
     if(any(proposal[c(4,5)] &lt;= 0)) HR = 0 else # Q and nu need to be &gt;0
     # Hasting&#39;s ratio of the proposal
-    HR = exp(posterior(param = proposal, x = x, y = y, sdy = sdy[i]) -
-                   posterior(param = chain[i-1,], x = x, y = y, sdy = sdy[i]))
+    HR = exp(logposterior(x = x, y = y, coeff = proposal, sdy = sdy[i]) -
+                   logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
     # accept proposal with probability = min(HR,1)
     if (runif(1) &lt; HR){ 
-      coeff[i,] = proposal
+      coefficients[i,] = proposal
     # if proposal is rejected, keep the values from the previous iteration
     }else{
-      coeff[i,] = coeff[i-1,]
+      coefficients[i,] = coefficients[i-1,]
     }
   } # end of the MCMC loop
   
   ###  Function output
-  output = data.frame(A = coeff[,1],
-                      K = coeff[,2],
-                      M = coeff[,3],
-                      Q = coeff[,4],
-                      nu = coeff[,5],
+  output = data.frame(A = coefficients[,1],
+                      K = coefficients[,2],
+                      M = coefficients[,3],
+                      Q = coefficients[,4],
+                      nu = coefficients[,5],
                       sdy = sdy)
   return(output)
 }</code></pre>
+<p>To run the model, we need to provide starting values for the unknown parameters. We let it run for <span class="math inline">\(20,000\)</span> iterations:</p>
+<pre class="r"><code>m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y, coeff_inits = c(10,15,20,1,1), sdy_init = 10, nIter = 20000)</code></pre>
+<p>To assess the model output, we produce traceplots of the parameters:
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+All the parameters seem to have converged reasonably well. We discard the first <span class="math inline">\(10,000\)</span> iterations as burn-in and use the mean of the parameters to plot the reconstructed gradient:
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-11-1.png" width="576" /></p>

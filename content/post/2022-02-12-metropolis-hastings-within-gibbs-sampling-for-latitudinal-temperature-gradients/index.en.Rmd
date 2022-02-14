@@ -6,17 +6,17 @@ slug: metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-grad
 categories: []
 tags: []
 subtitle: ''
-summary: ''
 authors: []
 lastmod: '2022-02-12T21:20:10Z'
-featured: no
+#featured: false
 image:
   caption: ''
   focal_point: ''
   preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
-summary: Reconstructing climate gradients from only a handful of data points is a challenge ideally suited for Bayesian modelling. Here, I build a Metropolis-Hastings within-Gibbs algorithm within R and use it to estimate a generalised logistic function.---
+summary: Reconstructing climate gradients from only a handful of data points is a challenge ideally suited for Bayesian modelling. Here, I build a Metropolis-Hastings within-Gibbs algorithm in R and use it to estimate a generalised logistic function.
+---
 
 
 <style>
@@ -76,13 +76,13 @@ $A$ is the lower asymptote, $K$ is the upper asymptote, $M$ is the inflection po
 
 In R code, we turn this into a function named $gradient$:
 ```{r, warning = FALSE, echo = TRUE}
-gradient <- function(lat, coeff, sd) {
+gradient <- function(x, coeff, sd) {
   A = coeff[1]
   K = coeff[2]
   M = coeff[3]
   Q = coeff[4]
   nu = coeff[5]
-  return(A + max(c(K-A,0))/((1+(nu*exp(Q*(lat-M))))^(1/nu)) + rnorm(length(lat),0,sd))
+  return(A + max(c(K-A,0))/((1+(nu*exp(Q*(x-M))))^(1/nu)) + rnorm(length(x),0,sd))
 }
 ```
 
@@ -93,15 +93,15 @@ We also sample $10$ points from this gradient, introducing some noise by setting
 set.seed(10)
 sample_lat <- runif(10,0,90)
 sample_data <- data.frame(
-  latitude = sample_lat, 
-  temperature = gradient(lat = sample_lat, coeff = c(-2.2, 28, 39.1, 0.1, 1.2), sd = 2))
+  x = sample_lat, 
+  y = gradient(x = sample_lat, coeff = c(-2.2, 28, 39.1, 0.1, 1.2), sd = 2))
 ```
 ```{r, fig.width = 9, fig.height = 4, warning = FALSE, echo = FALSE}
 layout(matrix(c(1,2), nrow = 1, ncol = 2, byrow = TRUE))
 
 par(mar = c(4,4.25,1.25,0.75), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
 latitude <- seq(0,90,by=0.2)
-temperature <- gradient(lat = latitude, coeff = c(-2.2, 28, 39.1, 0.1, 1.2), sd = 0)
+temperature <- gradient(x = latitude, coeff = c(-2.2, 28, 39.1, 0.1, 1.2), sd = 0)
 plot(latitude, temperature, type = "l", lwd = 3, ylim = c(-4,30), xlab = expression ("absolute latitude ("*degree*")"), yaxt = "n", ylab = expression("temperature ("*degree~"C)"), yaxs = "i", xaxs = "i",
      xlim = c(0,90), main = "gradient")
 axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
@@ -109,7 +109,7 @@ axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
 
 plot(latitude, temperature, type = "l", lwd = 1.5, ylim = c(-4,30), xlab = expression ("absolute latitude ("*degree*")"), yaxt = "n", ylab = expression("temperature ("*degree~"C)"), yaxs = "i", xaxs = "i",
      xlim = c(0,90), main = "sample data")
-points(sample_data$latitude, sample_data$temperature,  pch = 19, cex = 1.2, col = rgb(0,0,0,0.6), xpd = T)
+points(sample_data$x, sample_data$y,  pch = 19, cex = 1.2, col = rgb(0,0,0,0.6), xpd = T)
 axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
 ```
 
@@ -149,9 +149,8 @@ MH_propose <- function(coeff, proposal_sd){
   return(rnorm(5,mean = coeff, sd= c(.5,.5,.5,0.01,0.01)))
 }
 ```
-With all the prerequisites in place, we can build the MCMC function. 
+With all the prerequisites in place, we can build the MCMC function. The model will update $\sigma$ with a Gibbs step, and update the other coefficients with a Metropolis-Hastings step: 
 ```{r, warning = FALSE, echo = TRUE}
-
 run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter){
   ### Initialisation
   coefficients = array(dim = c(nIter,5)) # set up array to store coefficients
@@ -167,30 +166,60 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter){
   for (i in 2:nIter){ 
     
     ## 1. Gibbs step to estimate sdy
-    sdy[i] = sqrt(rinvgamma(1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,chain[i-1,],0))^2)))
+    sdy[i] = sqrt(1/rgamma(1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,coefficients[i-1,],0))^2)))
     
     ## 2. Metropolis-Hastings step to estimate the regression coefficients
-    proposal = MH_propose(coeff[i-1,]) # new proposed values
+    proposal = MH_propose(coefficients[i-1,]) # new proposed values
     if(any(proposal[c(4,5)] <= 0)) HR = 0 else # Q and nu need to be >0
     # Hasting's ratio of the proposal
-    HR = exp(posterior(param = proposal, x = x, y = y, sdy = sdy[i]) -
-                   posterior(param = chain[i-1,], x = x, y = y, sdy = sdy[i]))
+    HR = exp(logposterior(x = x, y = y, coeff = proposal, sdy = sdy[i]) -
+                   logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
     # accept proposal with probability = min(HR,1)
     if (runif(1) < HR){ 
-      coeff[i,] = proposal
+      coefficients[i,] = proposal
     # if proposal is rejected, keep the values from the previous iteration
     }else{
-      coeff[i,] = coeff[i-1,]
+      coefficients[i,] = coefficients[i-1,]
     }
   } # end of the MCMC loop
   
   ###  Function output
-  output = data.frame(A = coeff[,1],
-                      K = coeff[,2],
-                      M = coeff[,3],
-                      Q = coeff[,4],
-                      nu = coeff[,5],
+  output = data.frame(A = coefficients[,1],
+                      K = coefficients[,2],
+                      M = coefficients[,3],
+                      Q = coefficients[,4],
+                      nu = coefficients[,5],
                       sdy = sdy)
   return(output)
 }
+```
+To run the model, we need to provide starting values for the unknown parameters. We let it run for $20,000$ iterations:
+```{r, warning = FALSE, echo = TRUE}
+m <- run_MCMC(x = sample_data$x, y = sample_data$y, coeff_inits = c(10,15,20,1,1), sdy_init = 10, nIter = 20000)
+```
+To assess the model output, we produce traceplots of the parameters:
+```{r, fig.width = 7, fig.height = 7, warning = FALSE, echo = FALSE}
+par(mar = c(4,4,0.75,0.75), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
+layout(matrix(1:6, nrow = 6, ncol = 1, byrow = TRUE))
+plot(m$A,type = "l")
+plot(m$K,type = "l")
+plot(m$M,type = "l")
+plot(m$Q,type = "l")
+plot(m$nu,type = "l")
+plot(m$sdy,type = "l")
+
+```
+All the parameters seem to have converged reasonably well. We discard the first $10,000$ iterations as burn-in and use the mean of the parameters to plot the reconstructed gradient:
+```{r, fig.width = 6, fig.height = 5, warning = FALSE, echo = FALSE}
+burnin <- 1:10000
+latseq <- seq(0,90,0.2)
+par(mar = c(4,4.25,1.25,0.75), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
+
+plot(latitude, temperature, type = "l", lwd = 1.5, ylim = c(-4,30), xlab = expression ("absolute latitude ("*degree*")"), yaxt = "n", ylab = expression("temperature ("*degree~"C)"), yaxs = "i", xaxs = "i",
+     xlim = c(0,90))
+points(sample_data$x, sample_data$y,  pch = 19, cex = 1.2, col = rgb(0,0,0,0.6), xpd = T)
+points(latseq, gradient(x = latseq, coeff = apply(m[-burnin,1:5],2,mean), sd = 0), type = "l", lwd = 3, col = rgb(0.9,0,0,0.75))
+axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
+
+
 ```

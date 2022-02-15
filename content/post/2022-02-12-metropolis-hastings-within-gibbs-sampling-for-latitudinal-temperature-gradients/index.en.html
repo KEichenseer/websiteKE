@@ -1,5 +1,5 @@
 ---
-title: "Latitudinal temperature gradients estimated with Metropolis-Hastings"
+title: "Bayesian estimation of latitudinal temperature gradients"
 author: "Kilian Eichenseer"
 date: '2022-02-12'
 slug: metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients
@@ -149,8 +149,8 @@ We start with the log-likelihood function:</p>
   return(output)
 }</code></pre>
 <p>To run the model, we need to provide starting values for the unknown parameters. We let it run for <span class="math inline">\(20,000\)</span> iterations:</p>
-<pre class="r"><code>m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y, coeff_inits = c(10,15,20,1,1), sdy_init = 10, nIter = 20000)</code></pre>
+<pre class="r"><code>m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y, coeff_inits = c(10,15,25,0.5,0.5), sdy_init = 5, nIter = 20000)</code></pre>
 <p>To assess the model output, we produce traceplots of the parameters:
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-10-1.png" width="672" />
-All the parameters seem to have converged reasonably well. We discard the first <span class="math inline">\(10,000\)</span> iterations as burn-in and use the mean of the parameters to plot the reconstructed gradient:
-<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-11-1.png" width="576" /></p>
+The parameters have converged reasonably well, except for <span class="math inline">\(\nu\)</span>. We discard the first <span class="math inline">\(10,000\)</span> iterations as burn-in and use the mean of the parameters to plot the reconstructed gradient:
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-11-1.png" width="480" /></p>

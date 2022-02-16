@@ -1,5 +1,5 @@
 ---
-title: "Bayesian estimation of latitudinal temperature gradients"
+title: "A Metropolis-Hastings algorithm for Latitudinal Temperature Gradients"
 author: "Kilian Eichenseer"
 date: '2022-02-12'
 slug: metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients
@@ -56,7 +56,7 @@ pre {
   font-size: 13.2px
 }
 </style>
-<p><em>The Metropolis-Hastings component of this model uses modified code from <a href="https://khayatrayen.github.io/MCMC.html" class="uri">https://khayatrayen.github.io/MCMC.html</a>. A more advanced Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records is currently being developed by the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
+<p><em>The model presented herein uses modified code from <a href="https://khayatrayen.github.io/MCMC.html" class="uri">https://khayatrayen.github.io/MCMC.html</a>. I am currently developing a Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records with Andrew Millards and Martin Smith at the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
 <p>Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the <a href="https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/">sparse and geographically variable sampling of proxy data in most geological intervals</a>. To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified <a href="https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents">Richard’s curve</a>) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously increase from the tropics toward the poles.</p>
 <p>To keep with the familiar notation in regression models, we set denote latitude as <span class="math inline">\(x\)</span> and temperature as <span class="math inline">\(y\)</span>. Temperature is modelled as a function of latitude as:</p>
 <p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu_y}}}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)</span></p>
@@ -148,34 +148,13 @@ We start with the log-likelihood function:</p>
                       sdy = sdy)
   return(output)
 }</code></pre>
-<p>To run the model, we need to provide starting values for the unknown parameters. We let it run for <span class="math inline">\(20,000\)</span> iterations:</p>
+<p>To run the model, we need to provide starting values for the unknown parameters. We let it run for <span class="math inline">\(100,000\)</span> iterations:</p>
 <pre class="r"><code>nIter &lt;- 100000
 m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y, coeff_inits = c(10,20,30,0.4,0.4), sdy_init = 5, nIter = nIter)</code></pre>
-<p>To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every 10th iteration is shown to improve readability. We discard the first <span class="math inline">\(10,000\)</span> iterations as burn-in, to ensure we sample the posterior without the influence of the starting values.
+<p>To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every 10th iteration is shown to improve readability. The black lines in the density plot denote the parameters of the original sea surface temperature gradient.
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-10-1.png" width="691.2" />
-The parameters have converged reasonably well, although there is considerable uncertainty, especially around <span class="math inline">\(\nu\)</span>. The black lines denote the parameters of the original sea surface temperature gradient.</p>
-<p>We discard the first <span class="math inline">\(10,000\)</span> iterations as burn-in and plot <span class="math inline">\(8\)</span> gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the <span class="math inline">\(10\)</span> sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and 95% credible intervals (blue shading), are shown. Between <span class="math inline">\(10^\circ\)</span> and <span class="math inline">\(50^\circ\)</span>, where we have sufficient samples, the estimated gradient very closely resembles the original gradient (black, dashed line). The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range (<span class="math inline">\(&gt;-4^\circ C\)</span>), even at latitudes <span class="math inline">\(&gt; 65^\circ\)</span> where we have no data.</p>
-<pre><code>## [[1]]
-## NULL
-## 
-## [[2]]
-## NULL
-## 
-## [[3]]
-## NULL
-## 
-## [[4]]
-## NULL
-## 
-## [[5]]
-## NULL
-## 
-## [[6]]
-## NULL
-## 
-## [[7]]
-## NULL
-## 
-## [[8]]
-## NULL</code></pre>
-<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-11-1.png" width="864" /></p>
+The parameters have converged reasonably well, although there is considerable uncertainty, especially around <span class="math inline">\(\nu\)</span>.</p>
+<p>Below, we discard the first <span class="math inline">\(10,000\)</span> iterations as burn-in and plot <span class="math inline">\(8\)</span> gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the <span class="math inline">\(10\)</span> sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and 95% credible intervals (blue shading), are shown. Between <span class="math inline">\(10^\circ\)</span> and <span class="math inline">\(50^\circ\)</span>, where we have sufficient samples, the estimated gradient very closely resembles the original gradient. The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range (<span class="math inline">\(&gt;-4^\circ C\)</span>), even at latitudes <span class="math inline">\(&gt; 65^\circ\)</span> where we have no data.</p>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-11-1.png" width="864" />
+In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. A valuable improvement would be the implementation of adaption of <span class="math inline">\(\sigma_{proposal}\)</span>, as good values for <span class="math inline">\(\sigma_{proposal}\)</span> are difficult to guess <em>a priori</em>.</p>
+<p>You can find the full R code to reproduce all analyses and figures on <a href="https://github.com/KEichenseer/Methods/blob/e4a68c48fd039bc03e56558ca981f0109b914891/A_Metropolis-Hastings_algorithm_for_estimating_Latitudinal_Temperature_Gradients.R">Github</a></p>

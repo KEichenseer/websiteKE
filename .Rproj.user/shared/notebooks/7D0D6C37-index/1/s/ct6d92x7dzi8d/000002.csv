@@ -1,6 +1,0 @@
-"0","round(length(which(CPR$BUGSoutput$sims.list$n_change %in% 34:38))/"
-"0","              (CPR$BUGSoutput$n.sims),2)"
-"1","[1]"
-"1"," 0.87"
-"1","
-"

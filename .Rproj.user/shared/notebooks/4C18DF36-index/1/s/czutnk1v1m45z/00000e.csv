@@ -1,3 +1,0 @@
-"0","#points(c(min(x[phase_1]),max(x[phase_1])), c(min(x[phase_1]), max(x[phase_1])) *  coefficients(lm(y[phase_1] ~ x[phase_1]))[2] + coefficients(lm(y[phase_1] ~ x[phase_1]))[1], type = ""l"", col = rgb(0,0.3,1) , lwd = 2)"
-"0","#points(c(min(x[phase_2]),max(x[phase_2])), c(min(x[phase_2]), max(x[phase_2])) *  coefficients(lm(y[phase_2] ~ x[phase_2]))[2] + coefficients(lm(y[phase_2] ~ x[phase_2]))[1], type = ""l"", col = rgb(0.9,0.4,0), lwd = 2)"
-"0","points(x,y, bg = phase_col, pch = 21, cex = 0.9)"

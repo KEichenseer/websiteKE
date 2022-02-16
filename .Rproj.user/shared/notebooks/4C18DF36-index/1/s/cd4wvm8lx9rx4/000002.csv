@@ -1,4 +1,0 @@
-"0","ggplot(data = CPR.ggs %>% filter(Parameter == ""n_change""),"
-"0","  aes(x=value, y = 3*(..count..)/sum(..count..), fill = as.factor(Chain))) + "
-"0","  geom_vline(xintercept = 35,lty = 2) + geom_bar(position = ""identity"", alpha = 0.5) +"
-"0","  ylab(""posterior probability"") + xlab(""n_change"") + labs(fill='Chain')"

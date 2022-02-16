@@ -1,8 +1,0 @@
-"0",""
-"0","error_polygon <- function(x,en,ep,color) {"
-"0","  polygon( c(x[1], x, x[length(x)], x[length(x)], rev(x), x[1]),"
-"0","           c((ep)[1],ep, (ep)[length(ep)], (en)[length(en)], rev(en), (en)[1]),"
-"0","           border = NA, col = color)"
-"0","}"
-"0",""
-"0","error_polygon(reg2_seq,reg2_025,reg2_975,rgb(0.9,0.4,0,0.22))"

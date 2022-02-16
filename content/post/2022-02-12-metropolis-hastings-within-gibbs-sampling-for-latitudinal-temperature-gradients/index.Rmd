@@ -1,0 +1,299 @@
+---
+title: "Bayesian estimation of latitudinal temperature gradients"
+author: "Kilian Eichenseer"
+date: '2022-02-12'
+slug: metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients
+categories: []
+tags: []
+subtitle: ''
+authors: []
+lastmod: '2022-02-12T21:20:10Z'
+#featured: false
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: true
+projects: []
+header-includes: \usepackage{graphics}
+summary: Reconstructing climate gradients from only a handful of data points is a challenge ideally suited for Bayesian modelling. Here, I build a Metropolis-Hastings within-Gibbs algorithm in R and use it to estimate a generalised logistic function.
+---
+
+
+<style>
+.column-left{
+  float: left;
+  width: 52%;
+  text-align: left;
+
+}
+
+<style>
+.column-center{
+  float: center;
+  width: 100%;
+  text-align: left;
+
+}
+
+.column-right{
+  float: right;
+  width: 48%;
+  text-align: left;
+  margin-top: 6px;
+  line-height: 1.83;
+  font-size: 12px;
+
+}
+</style>
+
+<style type="text/css">
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 12px;
+}
+pre {
+  font-size: 13.2px
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+*The Metropolis-Hastings component of this model uses modified code from https://khayatrayen.github.io/MCMC.html. A more advanced Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of $\delta$<sup>13</sup>C records is currently being developed by the [Smith Lab at Durham University](https://smithlabdurham.github.io/#!team).*
+
+Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the [sparse and geographically variable sampling of proxy data in most geological intervals](https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/). To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified [Richard's curve](https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents)) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously increase from the tropics toward the poles.
+
+To keep with the familiar notation in regression models, we set denote latitude as $x$ and  temperature as $y$. Temperature is modelled as a function of latitude as: 
+
+$\begin{aligned} \begin{equation} \begin{array}{l} 
+y_i \sim N(\mu_i, \sigma), ~~\\
+\mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu_y}}}), ~~~~~ i = 1,...,n.  \end{array} 
+\end{equation} \end{aligned}$
+
+$A$ is the lower asymptote, $K$ is the upper asymptote, $M$ is the inflection point, i.e. the steepest point of the curve, $Q$ controls the steepness of the curve, and $\nu$ (the greek letter "nu") influences whether the slope of the curve is changing faster towards the lower or the upper asymptote. The difference $K-A$ is constrained to be $\ge 0$ to preclude inverse temperature gradients.
+
+In R code, we turn this into a function named $gradient$:
+```{r, warning = FALSE, echo = TRUE}
+gradient <- function(x, coeff, sdy) { # sigma is labelled "sdy"
+  A = coeff[1]
+  K = coeff[2]
+  M = coeff[3]
+  Q = coeff[4]
+  nu = coeff[5]
+  return(A + max(c(K-A,0))/((1+(nu*exp(Q*(x-M))))^(1/nu)) + rnorm(length(x),0,sdy))
+}
+```
+
+As an example, let's look at the modern, average latitudinal sea surface temperature gradient. We approximate it by setting $A = -2.2$, $K = 28$, $M = 39$, $Q = 0.10$, and $\nu = 1.2$. The residual standard deviation $\sigma$ is set to $0$, resulting in a smooth curve without noise (lefthand plot). Note that we are using absolute latitudes, assuming a common latitudinal temperature gradient in both hemispheres. 
+We also sample $10$ points from this gradient, introducing some noise by setting $\sigma = 2$. We will later use these $10$ points to estimate a latitudinal gradient (righthand plot).
+
+```{r, warning = FALSE, echo = TRUE}
+set.seed(10)
+sample_lat <- runif(10,0,90)
+sample_data <- data.frame(
+  x = sample_lat, 
+  y = gradient(x = sample_lat, coeff = c(-2.2, 28, 39, 0.1, 1.2), sd = 2))
+```
+```{r, fig.width = 9, fig.height = 4, warning = FALSE, echo = FALSE}
+layout(matrix(c(1,2), nrow = 1, ncol = 2, byrow = TRUE))
+
+par(mar = c(4,4.25,1.25,0.75), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
+latitude <- seq(0,90,by=0.2)
+temperature <- gradient(x = latitude, coeff = c(-2.2, 28, 39, 0.1, 1.2), sd = 0)
+plot(latitude, temperature, type = "l", lwd = 3, ylim = c(-4.5,32), xlab = expression ("absolute latitude ("*degree*")"), yaxt = "n", ylab = expression("temperature ("*degree~"C)"), yaxs = "i", xaxs = "i",
+     xlim = c(0,90), main = "gradient", cex.main = 1)
+axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
+
+
+plot(latitude, temperature, type = "l", lwd = 2, ylim = c(-4.5,32), xlab = expression ("absolute latitude ("*degree*")"), yaxt = "n", ylab = expression("temperature ("*degree~"C)"), yaxs = "i", xaxs = "i",
+     xlim = c(0,90), main = "sample data", lty= 2, cex.main = 1)
+points(sample_data$x, sample_data$y,  pch = 19, cex = 1.2, col = rgb(0,0,0,0.6), xpd = T)
+axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
+```
+
+Now, we build a model that will reconstruct the gradient from the sample data. Before writing the main Markov chain Monte Carlo (MCMC) function, we pre-define a couple of supplementary functions that will make the code easier to read.
+We start with the log-likelihood function:
+```{r, warning = FALSE, echo = TRUE}
+loglik <- function(x, y,  coeff, sdy) { 
+  A = coeff[1]
+  K = coeff[2]
+  M = coeff[3]
+  Q = coeff[4]
+  nu = coeff[5]
+  pred = A + max(c(K-A,0))/((1+(nu*exp(Q*(x-M))))^(1/nu))
+  return(sum(dnorm(y, mean = pred, sd = sdy, log = TRUE)))
+}
+```
+Next, we need a function to generate the log-priors. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from $-4$ to $40$ are put on $A$ and $K$, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of 45 standard deviation of $10$ is placed on $M$, implying that we expect the steepest temperature gradient in the mid-latitudes, but the data will quickly overwhelm the prior due to the large standard deviation. We constrain $Q$ and $\nu$ to be $>0$ by placing Gamma priors on them:
+```{r, warning = FALSE, echo = TRUE}
+logprior <- function(coeff) {
+    return(sum(c(
+    dunif(coeff[1], -4, 40, log = TRUE),
+    dunif(coeff[2], -4, 40, log = TRUE),
+    dnorm(coeff[3], 45, 10, log = TRUE),
+    dgamma(coeff[4], 0.2, 0.2, log = TRUE),
+    dgamma(coeff[5], 1, 1, log = TRUE))))
+}
+```
+The posterior is proportional to the likelihood $\times$ prior. On the log scale, we can simply add them:
+```{r, warning = FALSE, echo = TRUE}
+logposterior <- function(x, y, coeff, sdy){
+  return (loglik(x, y, coeff, sdy) + logprior(coeff))
+}
+```
+Finally, we define a function that proposes new values for the Metropolis-Hastings step. The magnitude of the proposal standard deviations ($\sigma_{proposal}$) is quite important, as low values will lead to the chain exploring the parameter space very slowly, and high values result in a low acceptance rate and an insufficient exploration of the parameter space. As appropriate $\sigma_{proposal}$ are difficult to know a priori, adaptive steps are often used to find better values. For simplicity, we will use fixed $\sigma_{proposal}$. Different $\sigma_{proposal}$ can and usually should be used for different parameters.
+```{r, warning = FALSE, echo = TRUE}
+MH_propose <- function(coeff, proposal_sd){
+  return(rnorm(5,mean = coeff, sd= c(.5,.5,.5,0.01,0.07)))
+}
+```
+With all the prerequisites in place, we can build the MCMC function. The model will update $\sigma$ with a Gibbs step, and update the other coefficients with a Metropolis-Hastings step: 
+```{r, warning = FALSE, echo = TRUE}
+run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter){
+  ### Initialisation
+  coefficients = array(dim = c(nIter,5)) # set up array to store coefficients
+  coefficients[1,] = coeff_inits # initialise coefficients
+  sdy = rep(NA_real_,nIter) # set up vector to store sdy
+  sdy[1] = sdy_init # intialise sdy
+  A_sdy = 3 # parameter for the prior on the inverse gamma distribution of sdy
+  B_sdy = 0.1 # parameter for the prior on the inverse gamma distribution of sdy
+  n <- length(y)
+  shape_sdy <- A_sdy+n/2 # shape parameter for the inverse gamma
+  
+  ### The MCMC loop
+  for (i in 2:nIter){ 
+    
+    ## 1. Gibbs step to estimate sdy
+    sdy[i] = sqrt(1/rgamma(1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,coefficients[i-1,],0))^2)))
+    
+    ## 2. Metropolis-Hastings step to estimate the regression coefficients
+    proposal = MH_propose(coefficients[i-1,]) # new proposed values
+    if(any(proposal[c(4,5)] <= 0)) HR = 0 else # Q and nu need to be >0
+    # Hasting's ratio of the proposal
+    HR = exp(logposterior(x = x, y = y, coeff = proposal, sdy = sdy[i]) -
+                   logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
+    # accept proposal with probability = min(HR,1)
+    if (runif(1) < HR){ 
+      coefficients[i,] = proposal
+    # if proposal is rejected, keep the values from the previous iteration
+    }else{
+      coefficients[i,] = coefficients[i-1,]
+    }
+  } # end of the MCMC loop
+  
+  ###  Function output
+  output = data.frame(A = coefficients[,1],
+                      K = coefficients[,2],
+                      M = coefficients[,3],
+                      Q = coefficients[,4],
+                      nu = coefficients[,5],
+                      sdy = sdy)
+  return(output)
+}
+```
+To run the model, we need to provide starting values for the unknown parameters. We let it run for $20,000$ iterations:
+```{r, warning = FALSE, echo = TRUE}
+nIter <- 100000
+m <- run_MCMC(x = sample_data$x, y = sample_data$y, coeff_inits = c(10,20,30,0.4,0.4), sdy_init = 5, nIter = nIter)
+```
+To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every 10th iteration is shown to improve readability. We discard the first $10,000$ iterations as burn-in, to ensure we sample the posterior without the influence of the starting values.
+```{r, fig.width = 7.2, fig.height = 7.2, warning = FALSE, echo = FALSE, message = FALSE}
+library(ggplot2)
+library(dplyr)
+library(reshape)
+library(cowplot)
+m <- m %>% mutate(iteration = 1:nrow(.))
+mm <- melt(m,id.vars = "iteration")
+mm <- mm %>% mutate(trueval = rep(c(-2.2, 28, 39, 0.1, 1.2, 2), each = nrow(m)))
+
+facet.labs = c("F", "K", "M", "Q", expression(nu), expression(sigma["y"]))
+names(facet.labs) <- c("A", "K", "M", "Q", "nu", "sdy")
+
+p1 <- ggplot(mm %>% filter(iteration %% 10 == 0)) + geom_line(aes(x = iteration, y = value),
+                             colour = rgb(0,0.35,0.7,1))+
+      facet_grid(variable ~ ., switch = "y",scales = "free_y",
+        labeller = labeller(variable = facet.labs)) + 
+       theme(legend.position = "none")+
+      theme_bw(base_size = 14)+
+      theme(strip.text.y.left = element_text(angle = 0))+
+      scale_y_continuous(position = "right")+
+      ylab(NULL)+
+      ggtitle(expression("traceplot (showing every 10th"~"iteration)"))+ 
+      theme(plot.title = element_text(size = 13, face = "bold",hjust = 0.5),
+            axis.title=element_text(size=13), axis.text.y=element_blank(),)
+
+
+p2 <- ggplot(mm %>% filter(iteration %% 10 == 0)) +
+  geom_vline(aes(xintercept = trueval), colour = "black", size = 1,linetype = "solid")+
+
+ stat_density(aes(x = value, y =..scaled..), 
+   fill = rgb(0,0.35,0.7,0.55), size = 1.5)+
+      facet_grid(variable ~ ., scales = "free_y")+ 
+     theme(legend.position = "none")+
+     theme_bw(base_size = 14)+
+     theme(strip.background = element_blank(),
+   strip.text.y = element_blank())+ 
+ scale_y_continuous(position = "left",breaks = c(0,0.5,1))+
+  scale_x_continuous(position = "top")+
+coord_flip()+
+  ylab("scaled density")+
+      xlab(NULL)+
+      ggtitle(expression("density"))+ 
+      theme(plot.title = element_text(size = 13, face = "bold",hjust = 0.5),
+            axis.title=element_text(size=13))
+
+#title <- ggdraw() + draw_label("Conditions for site 05430175", fontface='bold')
+#bottom_row <- plot_grid(nutrient_boxplot, tss_flow_plot, ncol = 2, labels = "AUTO")
+plot_grid(p1, p2, ncol = 2, labels = c("", ""),
+         rel_widths = c(7,2))
+
+
+# + geom_histogram(aes(x=value))+
+
+```
+The parameters have converged reasonably well, although there is considerable uncertainty, especially around $\nu$. The black lines denote the parameters of the original sea surface temperature gradient.
+
+We discard the first $10,000$ iterations as burn-in and plot $8$ gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the $10$ sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and 95% credible intervals (blue shading), are shown. Between $10^\circ$ and $50^\circ$, where we have sufficient samples, the estimated gradient very closely resembles the original gradient (black, dashed line). The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range ($>-4^\circ C$), even at latitudes $> 65^\circ$ where we have no data.
+
+```{r, fig.width = 9, fig.height = 4, warning = FALSE, echo = FALSE, message = FALSE}
+burnin <- 10000
+latseq <- seq(0,90,0.2)
+
+layout(matrix(c(1,2), nrow = 1, ncol = 2, byrow = TRUE))
+par(mar = c(4,4.25,1.25,0.75), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
+latitude <- seq(0,90,by=0.5)
+temperature <- gradient(x = latitude, coeff = c(-2.2, 28, 39, 0.1, 1.2), sdy = 0)
+plot(latitude, temperature, type = "l", lwd = 2, ylim = c(-4.5,32), xlab = expression ("absolute latitude ("*degree*")"), yaxt = "n", ylab = expression("temperature ("*degree~"C)"), yaxs = "i", xaxs = "i", lty = 2,
+     xlim = c(0,90), main = "8 draws from the posterior", cex.main = 1)
+points(sample_data$x, sample_data$y,  pch = 19, cex = 1.2, col = rgb(0,0,0,0.6), xpd = T)
+replicate(8, points(latitude, gradient(x = latitude, coeff = unlist(m[sample((burnin+1):nIter,1),1:5]), sdy = 0), type = "l", col = rgb(0,0.35,0.7,0.33), lwd = 2))
+axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
+
+
+### Calculate confidence intervals
+sample_it <- sample((burnin+1):nIter,1000)
+grad_025 <- sapply(1:length(latitude), function(f) quantile(apply(m[sample_it,1:5],1,function(a) gradient(x=latitude[f], coeff =  a, sdy = 0)), probs = 0.025))
+grad_975 <- sapply(1:length(latitude), function(f) quantile(apply(m[sample_it,1:5],1,function(a) gradient(x=latitude[f], coeff =  a, sdy = 0)), probs = 0.975))
+
+
+### Calculate confidence intervals
+sample_it <- sample((burnin+1):nIter,1000)
+grad_025 <- sapply(1:length(latitude), function(f) quantile(apply(m[sample_it,1:5],1,function(a) gradient(x=latitude[f], coeff =  a, sdy = 0)), probs = 0.025))
+grad_975 <- sapply(1:length(latitude), function(f) quantile(apply(m[sample_it,1:5],1,function(a) gradient(x=latitude[f], coeff =  a, sdy = 0)), probs = 0.975))
+
+
+plot(latitude, temperature, type = "n", lwd = 2, ylim = c(-4.5,32), xlab = expression ("absolute latitude ("*degree*")"), yaxt = "n", ylab = expression("temperature ("*degree~"C)"), yaxs = "i", xaxs = "i", lty = 2,
+     xlim = c(0,90), main = "posterior median and 95% CI", cex.main = 1)
+
+error_polygon <- function(x,en,ep,color) {
+  polygon( c(x[1], x, x[length(x)], x[length(x)], rev(x), x[1]),
+           c((ep)[1],ep, (ep)[length(ep)], (en)[length(en)], rev(en), (en)[1]),
+           border = NA, col = color)
+}
+error_polygon(latitude,grad_025,grad_975,rgb(0,0.35,0.7,0.33))
+points(latitude, gradient(x=latitude, coeff =  apply(m[sample_it,1:5],2,median), sdy = 0), type = "l", lwd = 3, col = rgb(0,0.35,0.7,0.75))
+points(latitude, temperature, type = "l", lwd = 2, lty = 2)
+axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
+```

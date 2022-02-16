@@ -174,7 +174,7 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter){
     if(any(proposal[c(4,5)] <= 0)) HR = 0 else # Q and nu need to be >0
     # Hasting's ratio of the proposal
     HR = exp(logposterior(x = x, y = y, coeff = proposal, sdy = sdy[i]) -
-                   logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
+             logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
     # accept proposal with probability = min(HR,1)
     if (runif(1) < HR){ 
       coefficients[i,] = proposal

@@ -2,7 +2,7 @@
 title: "A Metropolis-Hastings algorithm for Latitudinal Temperature Gradients"
 author: "Kilian Eichenseer"
 date: '2022-02-12'
-slug: metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients
+slug: a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients
 categories: []
 tags: []
 subtitle: ''
@@ -56,10 +56,10 @@ pre {
   font-size: 13.2px
 }
 </style>
-<p><em>The model presented herein uses modified code from <a href="https://khayatrayen.github.io/MCMC.html" class="uri">https://khayatrayen.github.io/MCMC.html</a>. I am currently developing a Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records with Andrew Millards and Martin Smith at the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
+<p><em>The model presented herein uses modified code from <a href="https://khayatrayen.github.io/MCMC.html" class="uri">https://khayatrayen.github.io/MCMC.html</a>. I am currently developing a Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
 <p>Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the <a href="https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/">sparse and geographically variable sampling of proxy data in most geological intervals</a>. To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified <a href="https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents">Richard’s curve</a>) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously increase from the tropics toward the poles.</p>
 <p>To keep with the familiar notation in regression models, we set denote latitude as <span class="math inline">\(x\)</span> and temperature as <span class="math inline">\(y\)</span>. Temperature is modelled as a function of latitude as:</p>
-<p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu_y}}}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)</span></p>
+<p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu}}}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)</span></p>
 <p><span class="math inline">\(A\)</span> is the lower asymptote, <span class="math inline">\(K\)</span> is the upper asymptote, <span class="math inline">\(M\)</span> is the inflection point, i.e. the steepest point of the curve, <span class="math inline">\(Q\)</span> controls the steepness of the curve, and <span class="math inline">\(\nu\)</span> (the greek letter “nu”) influences whether the slope of the curve is changing faster towards the lower or the upper asymptote. The difference <span class="math inline">\(K-A\)</span> is constrained to be <span class="math inline">\(\ge 0\)</span> to preclude inverse temperature gradients.</p>
 <p>In R code, we turn this into a function named <span class="math inline">\(gradient\)</span>:</p>
 <pre class="r"><code>gradient &lt;- function(x, coeff, sdy) { # sigma is labelled &quot;sdy&quot;

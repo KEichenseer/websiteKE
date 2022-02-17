@@ -2,7 +2,7 @@
 title: "A Metropolis-Hastings algorithm for Latitudinal Temperature Gradients"
 author: "Kilian Eichenseer"
 date: '2022-02-12'
-slug: metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients
+slug: a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients
 categories: []
 tags: []
 subtitle: ''
@@ -61,7 +61,7 @@ pre {
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-*The  model presented herein uses modified code from https://khayatrayen.github.io/MCMC.html. I am currently developing a Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of $\delta$<sup>13</sup>C records with Andrew Millards and Martin Smith at the [Smith Lab at Durham University](https://smithlabdurham.github.io/#!team).*
+*The  model presented herein uses modified code from https://khayatrayen.github.io/MCMC.html. I am currently developing a Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of $\delta$<sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the [Smith Lab at Durham University](https://smithlabdurham.github.io/#!team).*
 
 Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the [sparse and geographically variable sampling of proxy data in most geological intervals](https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/). To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified [Richard's curve](https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents)) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously increase from the tropics toward the poles.
 
@@ -69,7 +69,7 @@ To keep with the familiar notation in regression models, we set denote latitude 
 
 $\begin{aligned} \begin{equation} \begin{array}{l} 
 y_i \sim N(\mu_i, \sigma), ~~\\
-\mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu_y}}}), ~~~~~ i = 1,...,n.  \end{array} 
+\mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu}}}), ~~~~~ i = 1,...,n.  \end{array} 
 \end{equation} \end{aligned}$
 
 $A$ is the lower asymptote, $K$ is the upper asymptote, $M$ is the inflection point, i.e. the steepest point of the curve, $Q$ controls the steepness of the curve, and $\nu$ (the greek letter "nu") influences whether the slope of the curve is changing faster towards the lower or the upper asymptote. The difference $K-A$ is constrained to be $\ge 0$ to preclude inverse temperature gradients.

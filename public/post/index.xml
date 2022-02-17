@@ -122,14 +122,15 @@ We start with the log-likelihood function:&lt;/p&gt;
   for (i in 2:nIter){ 
     
     ## 1. Gibbs step to estimate sdy
-    sdy[i] = sqrt(1/rgamma(1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,coefficients[i-1,],0))^2)))
+    sdy[i] = sqrt(1/rgamma(
+      1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,coefficients[i-1,],0))^2)))
     
     ## 2. Metropolis-Hastings step to estimate the regression coefficients
     proposal = MH_propose(coefficients[i-1,]) # new proposed values
     if(any(proposal[c(4,5)] &amp;lt;= 0)) HR = 0 else # Q and nu need to be &amp;gt;0
     # Hasting&amp;#39;s ratio of the proposal
     HR = exp(logposterior(x = x, y = y, coeff = proposal, sdy = sdy[i]) -
-                   logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
+             logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
     # accept proposal with probability = min(HR,1)
     if (runif(1) &amp;lt; HR){ 
       coefficients[i,] = proposal
@@ -150,7 +151,8 @@ We start with the log-likelihood function:&lt;/p&gt;
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;To run the model, we need to provide starting values for the unknown parameters. We let it run for &lt;span class=&#34;math inline&#34;&gt;\(100,000\)&lt;/span&gt; iterations:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;nIter &amp;lt;- 100000
-m &amp;lt;- run_MCMC(x = sample_data$x, y = sample_data$y, coeff_inits = c(10,20,30,0.4,0.4), sdy_init = 5, nIter = nIter)&lt;/code&gt;&lt;/pre&gt;
+m &amp;lt;- run_MCMC(x = sample_data$x, y = sample_data$y, 
+              coeff_inits = c(10,20,30,0.4,0.4), sdy_init = 5, nIter = nIter)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every 10th iteration is shown to improve readability. The black lines in the density plot denote the parameters of the original sea surface temperature gradient.
 &lt;img src=&#34;/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;691.2&#34; /&gt;
 The parameters have converged reasonably well, although there is considerable uncertainty, especially around &lt;span class=&#34;math inline&#34;&gt;\(\nu\)&lt;/span&gt;.&lt;/p&gt;

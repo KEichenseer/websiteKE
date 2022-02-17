@@ -863,14 +863,15 @@ We start with the log-likelihood function:</p>
   for (i in 2:nIter){ 
     
     ## 1. Gibbs step to estimate sdy
-    sdy[i] = sqrt(1/rgamma(1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,coefficients[i-1,],0))^2)))
+    sdy[i] = sqrt(1/rgamma(
+      1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,coefficients[i-1,],0))^2)))
     
     ## 2. Metropolis-Hastings step to estimate the regression coefficients
     proposal = MH_propose(coefficients[i-1,]) # new proposed values
     if(any(proposal[c(4,5)] &lt;= 0)) HR = 0 else # Q and nu need to be &gt;0
     # Hasting&#39;s ratio of the proposal
     HR = exp(logposterior(x = x, y = y, coeff = proposal, sdy = sdy[i]) -
-                   logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
+             logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
     # accept proposal with probability = min(HR,1)
     if (runif(1) &lt; HR){ 
       coefficients[i,] = proposal
@@ -891,7 +892,8 @@ We start with the log-likelihood function:</p>
 }</code></pre>
 <p>To run the model, we need to provide starting values for the unknown parameters. We let it run for <span class="math inline">\(100,000\)</span> iterations:</p>
 <pre class="r"><code>nIter &lt;- 100000
-m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y, coeff_inits = c(10,20,30,0.4,0.4), sdy_init = 5, nIter = nIter)</code></pre>
+m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y, 
+              coeff_inits = c(10,20,30,0.4,0.4), sdy_init = 5, nIter = nIter)</code></pre>
 <p>To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every 10th iteration is shown to improve readability. The black lines in the density plot denote the parameters of the original sea surface temperature gradient.
 <img src="/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-10-1.png" width="691.2" />
 The parameters have converged reasonably well, although there is considerable uncertainty, especially around <span class="math inline">\(\nu\)</span>.</p>

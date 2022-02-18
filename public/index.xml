@@ -129,11 +129,11 @@ The variance of the distribution is $\sigma^{2}$.
     
     <item>
       <title>A Metropolis-Hastings algorithm for Latitudinal Temperature Gradients</title>
-      <link>/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/</link>
+      <link>/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/</link>
       <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>
-      <guid>/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/</guid>
+      <guid>/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/</guid>
       <description>
-&lt;script src=&#34;/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/index.en_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/index.en_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
 
 
 &lt;style&gt;
@@ -171,10 +171,10 @@ pre {
   font-size: 13.2px
 }
 &lt;/style&gt;
-&lt;p&gt;&lt;em&gt;The model presented herein uses modified code from &lt;a href=&#34;https://khayatrayen.github.io/MCMC.html&#34; class=&#34;uri&#34;&gt;https://khayatrayen.github.io/MCMC.html&lt;/a&gt;. I am currently developing a Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of &lt;span class=&#34;math inline&#34;&gt;\(\delta\)&lt;/span&gt;&lt;sup&gt;13&lt;/sup&gt;C records with Andrew Millards and Martin Smith at the &lt;a href=&#34;https://smithlabdurham.github.io/#!team&#34;&gt;Smith Lab at Durham University&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The model presented herein uses modified code from &lt;a href=&#34;https://khayatrayen.github.io/MCMC.html&#34; class=&#34;uri&#34;&gt;https://khayatrayen.github.io/MCMC.html&lt;/a&gt;. I am currently developing a Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of &lt;span class=&#34;math inline&#34;&gt;\(\delta\)&lt;/span&gt;&lt;sup&gt;13&lt;/sup&gt;C records with Andrew R. Millard and Martin R. Smith at the &lt;a href=&#34;https://smithlabdurham.github.io/#!team&#34;&gt;Smith Lab at Durham University&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the &lt;a href=&#34;https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/&#34;&gt;sparse and geographically variable sampling of proxy data in most geological intervals&lt;/a&gt;. To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified &lt;a href=&#34;https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents&#34;&gt;Richard’s curve&lt;/a&gt;) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously increase from the tropics toward the poles.&lt;/p&gt;
 &lt;p&gt;To keep with the familiar notation in regression models, we set denote latitude as &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; and temperature as &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt;. Temperature is modelled as a function of latitude as:&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu_y}}}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu}}}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(A\)&lt;/span&gt; is the lower asymptote, &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt; is the upper asymptote, &lt;span class=&#34;math inline&#34;&gt;\(M\)&lt;/span&gt; is the inflection point, i.e. the steepest point of the curve, &lt;span class=&#34;math inline&#34;&gt;\(Q\)&lt;/span&gt; controls the steepness of the curve, and &lt;span class=&#34;math inline&#34;&gt;\(\nu\)&lt;/span&gt; (the greek letter “nu”) influences whether the slope of the curve is changing faster towards the lower or the upper asymptote. The difference &lt;span class=&#34;math inline&#34;&gt;\(K-A\)&lt;/span&gt; is constrained to be &lt;span class=&#34;math inline&#34;&gt;\(\ge 0\)&lt;/span&gt; to preclude inverse temperature gradients.&lt;/p&gt;
 &lt;p&gt;In R code, we turn this into a function named &lt;span class=&#34;math inline&#34;&gt;\(gradient\)&lt;/span&gt;:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;gradient &amp;lt;- function(x, coeff, sdy) { # sigma is labelled &amp;quot;sdy&amp;quot;
@@ -192,7 +192,7 @@ sample_lat &amp;lt;- runif(10,0,90)
 sample_data &amp;lt;- data.frame(
   x = sample_lat, 
   y = gradient(x = sample_lat, coeff = c(-2.2, 28, 39, 0.1, 1.2), sd = 2))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;864&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;864&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Now, we build a model that will reconstruct the gradient from the sample data. Before writing the main Markov chain Monte Carlo (MCMC) function, we pre-define a couple of supplementary functions that will make the code easier to read.
 We start with the log-likelihood function:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;loglik &amp;lt;- function(x, y,  coeff, sdy) { 
@@ -269,10 +269,10 @@ We start with the log-likelihood function:&lt;/p&gt;
 m &amp;lt;- run_MCMC(x = sample_data$x, y = sample_data$y, 
               coeff_inits = c(10,20,30,0.4,0.4), sdy_init = 5, nIter = nIter)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every 10th iteration is shown to improve readability. The black lines in the density plot denote the parameters of the original sea surface temperature gradient.
-&lt;img src=&#34;/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;691.2&#34; /&gt;
+&lt;img src=&#34;/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;691.2&#34; /&gt;
 The parameters have converged reasonably well, although there is considerable uncertainty, especially around &lt;span class=&#34;math inline&#34;&gt;\(\nu\)&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;Below, we discard the first &lt;span class=&#34;math inline&#34;&gt;\(10,000\)&lt;/span&gt; iterations as burn-in and plot &lt;span class=&#34;math inline&#34;&gt;\(8\)&lt;/span&gt; gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and 95% credible intervals (blue shading), are shown. Between &lt;span class=&#34;math inline&#34;&gt;\(10^\circ\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(50^\circ\)&lt;/span&gt;, where we have sufficient samples, the estimated gradient very closely resembles the original gradient. The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range (&lt;span class=&#34;math inline&#34;&gt;\(&amp;gt;-4^\circ C\)&lt;/span&gt;), even at latitudes &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt; 65^\circ\)&lt;/span&gt; where we have no data.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/metropolis-hastings-within-gibbs-sampling-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;864&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;864&#34; /&gt;
 In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. A valuable improvement would be the implementation of adaption of &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;, as good values for &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; are difficult to guess &lt;em&gt;a priori&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;You can find the full R code to reproduce all analyses and figures on &lt;a href=&#34;https://github.com/KEichenseer/Methods/blob/e4a68c48fd039bc03e56558ca981f0109b914891/A_Metropolis-Hastings_algorithm_for_estimating_Latitudinal_Temperature_Gradients.R&#34;&gt;Github&lt;/a&gt;&lt;/p&gt;
 </description>

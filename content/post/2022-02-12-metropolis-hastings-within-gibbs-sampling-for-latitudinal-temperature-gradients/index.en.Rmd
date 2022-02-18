@@ -15,7 +15,7 @@ image:
   preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
-summary: Reconstructing climate gradients from only a handful of data points is a challenge ideally suited for Bayesian modelling. Here, I build a Metropolis-Hastings within-Gibbs algorithm in R and use it to estimate a generalised logistic function.
+summary: Reconstructing climate gradients from only a handful of data points is a challenge ideally suited for Bayesian modelling. Here, I build a Metropolis-Hastings algorithm in R and use it to estimate a generalised logistic function.
 ---
 
 
@@ -63,7 +63,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 *The  model presented herein uses modified code from https://khayatrayen.github.io/MCMC.html. I am currently developing a Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of $\delta$<sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the [Smith Lab at Durham University](https://smithlabdurham.github.io/#!team).*
 
-Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the [sparse and geographically variable sampling of proxy data in most geological intervals](https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/). To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified [Richard's curve](https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents)) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously increase from the tropics toward the poles.
+Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the [sparse and geographically variable sampling of proxy data in most geological intervals](https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/). To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified [Richard's curve](https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents)) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously decrease from the tropics toward the poles.
 
 To keep with the familiar notation in regression models, we set denote latitude as $x$ and  temperature as $y$. Temperature is modelled as a function of latitude as: 
 
@@ -126,7 +126,7 @@ loglik <- function(x, y,  coeff, sdy) {
   return(sum(dnorm(y, mean = pred, sd = sdy, log = TRUE)))
 }
 ```
-Next, we need a function to generate the log-priors. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from $-4$ to $40$ are put on $A$ and $K$, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of 45 standard deviation of $10$ is placed on $M$, implying that we expect the steepest temperature gradient in the mid-latitudes, but the data will quickly overwhelm the prior due to the large standard deviation. We constrain $Q$ and $\nu$ to be $>0$ by placing Gamma priors on them:
+Next, we need a function to generate the log-priors. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from $-4$ to $40$ are put on $A$ and $K$, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of $45$ and a standard deviation of $10$ is placed on $M$, implying that we expect the steepest temperature gradient in the mid-latitudes, but the data will quickly overwhelm the prior due to the large standard deviation. We constrain $Q$ and $\nu$ to be $>0$ by placing Gamma priors on them:
 ```{r, warning = FALSE, echo = TRUE}
 logprior <- function(coeff) {
     return(sum(c(
@@ -143,7 +143,7 @@ logposterior <- function(x, y, coeff, sdy){
   return (loglik(x, y, coeff, sdy) + logprior(coeff))
 }
 ```
-Finally, we define a function that proposes new values for the Metropolis-Hastings step. The magnitude of the proposal standard deviations ($\sigma_{proposal}$) is quite important, as low values will lead to the chain exploring the parameter space very slowly, and high values result in a low acceptance rate and an insufficient exploration of the parameter space. As appropriate $\sigma_{proposal}$ are difficult to know a priori, adaptive steps are often used to find better values. For simplicity, we will use fixed $\sigma_{proposal}$. Different $\sigma_{proposal}$ can and usually should be used for different parameters.
+Finally, we define a function that proposes new values for the Metropolis-Hastings step. The magnitude of the proposal standard deviations ($\sigma_{proposal}$) is quite important, as low values will lead to the chain exploring the parameter space very slowly, and high values result in a low acceptance rate and an insufficient exploration of the parameter space. As appropriate $\sigma_{proposal}$ are difficult to know *a priori*, adaptive steps are often used to find better values. For simplicity, we will use fixed $\sigma_{proposal}$. Different $\sigma_{proposal}$ can and usually should be used for different parameters.
 ```{r, warning = FALSE, echo = TRUE}
 MH_propose <- function(coeff, proposal_sd){
   return(rnorm(5,mean = coeff, sd= c(.5,.5,.5,0.01,0.07)))
@@ -172,7 +172,7 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter){
     ## 2. Metropolis-Hastings step to estimate the regression coefficients
     proposal = MH_propose(coefficients[i-1,]) # new proposed values
     if(any(proposal[c(4,5)] <= 0)) HR = 0 else # Q and nu need to be >0
-    # Hasting's ratio of the proposal
+    # Hastings ratio of the proposal
     HR = exp(logposterior(x = x, y = y, coeff = proposal, sdy = sdy[i]) -
              logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
     # accept proposal with probability = min(HR,1)
@@ -200,7 +200,7 @@ nIter <- 100000
 m <- run_MCMC(x = sample_data$x, y = sample_data$y, 
               coeff_inits = c(10,20,30,0.4,0.4), sdy_init = 5, nIter = nIter)
 ```
-To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every 10th iteration is shown to improve readability. The black lines in the density plot denote the parameters of the original sea surface temperature gradient.
+To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every $10^{th}$ iteration is shown to improve readability. The black lines in the density plot denote the parameters of the original sea surface temperature gradient.
 ```{r, fig.width = 7.2, fig.height = 7.2, warning = FALSE, echo = FALSE, message = FALSE}
 library(ggplot2)
 library(dplyr)
@@ -252,7 +252,7 @@ plot_grid(p1, p2, ncol = 2, labels = c("", ""),
 ```
 The parameters have converged reasonably well, although there is considerable uncertainty, especially around $\nu$. 
 
-Below, we discard the first $10,000$ iterations as burn-in and plot $8$ gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the $10$ sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and 95% credible intervals (blue shading), are shown. Between $10^\circ$ and $50^\circ$, where we have sufficient samples, the estimated gradient very closely resembles the original gradient. The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range ($>-4^\circ C$), even at latitudes $> 65^\circ$ where we have no data.
+Below, we discard the first $10,000$ iterations as burn-in and plot $8$ gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the $10$ sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and $95\%$ credible intervals (blue shading), are shown. Between $10^\circ$ and $50^\circ$, where we have sufficient samples, the estimated gradient very closely resembles the original gradient. The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range ($>-4^\circ C$), even at latitudes $> 63^\circ$ where we have no data.
 
 ```{r, fig.width = 9, fig.height = 4, warning = FALSE, echo = FALSE, message = FALSE, results="hide"}
 burnin <- 10000
@@ -294,6 +294,6 @@ points(latitude, gradient(x=latitude, coeff =  apply(m[sample_it,1:5],2,median),
 points(latitude, temperature, type = "l", lwd = 2, lty = 2)
 axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
 ```
-In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. A valuable improvement would be the implementation of adaption of $\sigma_{proposal}$, as good values for $\sigma_{proposal}$ are difficult to guess *a priori*. 
+In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. A valuable improvement would be the implementation of adaption of $\sigma_{proposal}$, which should speed up convergence. 
 
-You can find the full R code to reproduce all analyses and figures on [Github](https://github.com/KEichenseer/Methods/blob/e4a68c48fd039bc03e56558ca981f0109b914891/A_Metropolis-Hastings_algorithm_for_estimating_Latitudinal_Temperature_Gradients.R)
+You can find the full R code to reproduce all analyses and figures on [Github](https://github.com/KEichenseer/Methods/blob/e4a68c48fd039bc03e56558ca981f0109b914891/A_Metropolis-Hastings_algorithm_for_estimating_Latitudinal_Temperature_Gradients.R).

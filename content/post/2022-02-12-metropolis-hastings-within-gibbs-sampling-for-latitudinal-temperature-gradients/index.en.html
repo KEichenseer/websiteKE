@@ -1,8 +1,8 @@
 ---
-title: "A Metropolis-Hastings algorithm for Latitudinal Temperature Gradients"
+title: "A Metropolis algorithm in R - Part 1 - Latitudinal temperature gradients"
 author: "Kilian Eichenseer"
 date: '2022-02-12'
-slug: a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients
+slug: a-metropolis-algorithm-in-R-part-1-latitudinal-temperature-gradients
 categories: []
 tags: []
 subtitle: ''
@@ -15,7 +15,7 @@ image:
   preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
-summary: Reconstructing climate gradients from only a handful of data points is a challenge ideally suited for Bayesian modelling. Here, I build a Metropolis-Hastings algorithm in R and use it to estimate a generalised logistic function.
+summary: Reconstructing climate gradients from only a handful of data points is a challenge ideally suited for Bayesian modelling. Here, I build a Metropolis algorithm in R and use it to estimate a generalised logistic function.
 ---
 
 <script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
@@ -56,7 +56,7 @@ pre {
   font-size: 13.2px
 }
 </style>
-<p><em>The model presented herein uses modified code from <a href="https://khayatrayen.github.io/MCMC.html" class="uri">https://khayatrayen.github.io/MCMC.html</a>. I am currently developing a Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
+<p><em>The model presented herein uses modified code from <a href="https://khayatrayen.github.io/MCMC.html" class="uri">https://khayatrayen.github.io/MCMC.html</a>. I am currently developing a Metropolis-within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
 <p>Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the <a href="https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/">sparse and geographically variable sampling of proxy data in most geological intervals</a>. To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified <a href="https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents">Richard’s curve</a>) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously decrease from the tropics toward the poles.</p>
 <p>To keep with the familiar notation in regression models, we set denote latitude as <span class="math inline">\(x\)</span> and temperature as <span class="math inline">\(y\)</span>. Temperature is modelled as a function of latitude as:</p>
 <p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu}}}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)</span></p>
@@ -71,15 +71,16 @@ pre {
   return(A + max(c(K-A,0))/((1+(nu*exp(Q*(x-M))))^(1/nu)) + rnorm(length(x),0,sdy))
 }</code></pre>
 <p>As an example, let’s look at the modern, average latitudinal sea surface temperature gradient. We approximate it by setting <span class="math inline">\(A = -2.2\)</span>, <span class="math inline">\(K = 28\)</span>, <span class="math inline">\(M = 39\)</span>, <span class="math inline">\(Q = 0.10\)</span>, and <span class="math inline">\(\nu = 1.2\)</span>. The residual standard deviation <span class="math inline">\(\sigma\)</span> is set to <span class="math inline">\(0\)</span>, resulting in a smooth curve without noise (lefthand plot). Note that we are using absolute latitudes, assuming a common latitudinal temperature gradient in both hemispheres.
-We also sample <span class="math inline">\(10\)</span> points from this gradient, introducing some noise by setting <span class="math inline">\(\sigma = 2\)</span>. We will later use these <span class="math inline">\(10\)</span> points to estimate a latitudinal gradient (righthand plot).</p>
+We also sample <span class="math inline">\(10\)</span> points from this gradient, introducing some noise by setting <span class="math inline">\(\sigma = 2\)</span> (righthand plot). In the following, we will use these <span class="math inline">\(10\)</span> points to estimate a latitudinal gradient, using the gradient model specified above.</p>
 <pre class="r"><code>set.seed(10)
 sample_lat &lt;- runif(10,0,90)
 sample_data &lt;- data.frame(
   x = sample_lat, 
   y = gradient(x = sample_lat, coeff = c(-2.2, 28, 39, 0.1, 1.2), sd = 2))</code></pre>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-3-1.png" width="864" /></p>
-<p>Now, we build a model that will reconstruct the gradient from the sample data. Before writing the main Markov chain Monte Carlo (MCMC) function, we pre-define a couple of supplementary functions that will make the code easier to read.
-We start with the log-likelihood function:</p>
+<p>To obtain posterior probabilities for the parameters of the gradient model, we use a Metropolis algorithm. The Metropolis algorithm builds a Markov chain which resembles the posterior distribution. This works by proposing random new values for the parameters, and calculating the posterior probability with the new parameter values. If the joint posterior probability obtained with the new values is higher than that of the current values, the new values will be recorded and added to the Markov chain. Otherwise, the new value will be accepted with a probabilty equal to the ratio of the two joint posterior probabilities.</p>
+<p>Before writing the main Markov chain Monte Carlo (MCMC) function, we pre-define a couple of supplementary functions that we use in every iteration of the Metropolis algorithm.</p>
+<p>We start with the log-likelihood function, which translates to the joint probability of the data, given a specific set of model parameters:</p>
 <pre class="r"><code>loglik &lt;- function(x, y,  coeff, sdy) { 
   A = coeff[1]
   K = coeff[2]
@@ -89,7 +90,7 @@ We start with the log-likelihood function:</p>
   pred = A + max(c(K-A,0))/((1+(nu*exp(Q*(x-M))))^(1/nu))
   return(sum(dnorm(y, mean = pred, sd = sdy, log = TRUE)))
 }</code></pre>
-<p>Next, we need a function to generate the log-priors. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from <span class="math inline">\(-4\)</span> to <span class="math inline">\(40\)</span> are put on <span class="math inline">\(A\)</span> and <span class="math inline">\(K\)</span>, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of <span class="math inline">\(45\)</span> and a standard deviation of <span class="math inline">\(10\)</span> is placed on <span class="math inline">\(M\)</span>, implying that we expect the steepest temperature gradient in the mid-latitudes, but the data will quickly overwhelm the prior due to the large standard deviation. We constrain <span class="math inline">\(Q\)</span> and <span class="math inline">\(\nu\)</span> to be <span class="math inline">\(&gt;0\)</span> by placing Gamma priors on them:</p>
+<p>Next, we need a function to generate the log-priors, i.e. the joint prior probability of the set of model parameters. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from <span class="math inline">\(-4\)</span> to <span class="math inline">\(40\)</span> are put on <span class="math inline">\(A\)</span> and <span class="math inline">\(K\)</span>, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of <span class="math inline">\(45\)</span> and a standard deviation of <span class="math inline">\(10\)</span> is placed on <span class="math inline">\(M\)</span>, implying that we expect the steepest temperature gradient in the mid-latitudes, but the data will quickly overwhelm the prior due to the large standard deviation. We constrain <span class="math inline">\(Q\)</span> and <span class="math inline">\(\nu\)</span> to be <span class="math inline">\(&gt;0\)</span> by placing Gamma priors on them:</p>
 <pre class="r"><code>logprior &lt;- function(coeff) {
     return(sum(c(
     dunif(coeff[1], -4, 40, log = TRUE),
@@ -158,5 +159,5 @@ m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
 The parameters have converged reasonably well, although there is considerable uncertainty, especially around <span class="math inline">\(\nu\)</span>.</p>
 <p>Below, we discard the first <span class="math inline">\(10,000\)</span> iterations as burn-in and plot <span class="math inline">\(8\)</span> gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the <span class="math inline">\(10\)</span> sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and <span class="math inline">\(95\%\)</span> credible intervals (blue shading), are shown. Between <span class="math inline">\(10^\circ\)</span> and <span class="math inline">\(50^\circ\)</span>, where we have sufficient samples, the estimated gradient very closely resembles the original gradient. The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range (<span class="math inline">\(&gt;-4^\circ C\)</span>), even at latitudes <span class="math inline">\(&gt; 63^\circ\)</span> where we have no data.</p>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-11-1.png" width="864" />
-In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. A valuable improvement would be the implementation of adaption of <span class="math inline">\(\sigma_{proposal}\)</span>, which should speed up convergence.</p>
+In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. In the second part of this series, we will implement adaption of <span class="math inline">\(\sigma_{proposal}\)</span>, which means we won’t have to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>. This should speed up convergence, meaning we will need less iterations of the MCMC algorithm to obtain reliable posterior estimates.</p>
 <p>You can find the full R code to reproduce all analyses and figures on <a href="https://github.com/KEichenseer/Methods/blob/e4a68c48fd039bc03e56558ca981f0109b914891/A_Metropolis-Hastings_algorithm_for_estimating_Latitudinal_Temperature_Gradients.R">Github</a>.</p>

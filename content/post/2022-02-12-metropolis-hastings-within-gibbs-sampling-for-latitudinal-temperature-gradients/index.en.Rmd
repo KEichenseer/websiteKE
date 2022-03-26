@@ -1,8 +1,8 @@
 ---
-title: "Metropolis algorithm in R - Latitudinal temperature gradients"
+title: "A Metropolis algorithm in R - Part 1: Generalised logistic function"
 author: "Kilian Eichenseer"
 date: '2022-02-12'
-slug: metropolis-algorithm-in-R-latitudinal-temperature-gradients
+slug: metropolis-algorithm-in-R-part-1-generalised-logistic-function
 categories: []
 tags: []
 subtitle: ''
@@ -15,7 +15,7 @@ image:
   preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
-summary: Reconstructing climate gradients from only a handful of data points is a challenge ideally suited for Bayesian modelling. Here, I build a Metropolis algorithm in R and use it to estimate a generalised logistic function.
+summary: The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use it for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature estimates.
 ---
 
 
@@ -69,7 +69,7 @@ To keep with the familiar notation in regression models, we set denote latitude 
 
 $\begin{aligned} \begin{equation} \begin{array}{l} 
 y_i \sim N(\mu_i, \sigma), ~~\\
-\mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu}}}), ~~~~~ i = 1,...,n.  \end{array} 
+\mu_i = A~+max(K-A,0)/(e^{Q(x_i-M)}), ~~~~~ i = 1,...,n.  \end{array} 
 \end{equation} \end{aligned}$
 
 $A$ is the lower asymptote, $K$ is the upper asymptote, $M$ is the inflection point, i.e. the steepest point of the curve, and $Q$ controls the steepness of the curve. The difference $K-A$ is constrained to be $\ge 0$ to preclude inverse temperature gradients.
@@ -127,7 +127,7 @@ loglik <- function(x, y,  coeff, sdy) {
   return(sum(dnorm(y, mean = pred, sd = sdy, log = TRUE)))
 }
 ```
-Next, we need a function to generate the log-priors, i.e. the joint prior probability of the set of model parameters. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from $-4$ to $40$ are put on $A$ and $K$, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of $45$ and a standard deviation of $10$ is placed on $M$, implying that we expect the steepest temperature gradient in the mid-latitudes, but the data will quickly overwhelm the prior due to the large standard deviation. We constrain $Q$ and $\nu$ to be $>0$ by placing Gamma priors on them:
+Next, we need a function to generate the log-priors, i.e. the joint prior probability of the set of model parameters. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from $-4$ to $40$ are put on $A$ and $K$, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of $45$ and a standard deviation of $10$ is placed on $M$, implying that we expect the steepest temperature gradient in the mid-latitudes. We constrain $Q$ to be $>0$ by placing a log-normal prior on it:
 ```{r, warning = FALSE, echo = TRUE}
 logprior <- function(coeff) {
   return(sum(c(
@@ -197,7 +197,7 @@ To run the model, we need to provide starting values for the unknown parameters.
 ```{r, warning = FALSE, echo = TRUE}
 nIter <- 100000
 m <- run_MCMC(x = sample_data$x, y = sample_data$y, 
-              coeff_inits = c(0,30,30,0.2), sdy_init = 4, nIter = nIter)
+              coeff_inits = c(0,30,45,0.2), sdy_init = 4, nIter = nIter)
 ```
 To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every $10^{th}$ iteration is shown to improve readability. The black lines in the density plot denote the parameters of the original sea surface temperature gradient.
 ```{r, fig.width = 7.2, fig.height = 7.2, warning = FALSE, echo = FALSE, message = FALSE}
@@ -294,4 +294,4 @@ axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
 ```
 In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. In the second part of this series, we will implement adaption of $\sigma_{proposal}$, which means we won't have to guess good values for $\sigma_{proposal}$. This should speed up convergence, meaning we will need less iterations of the MCMC algorithm to obtain reliable posterior estimates.  
 
-You can find the full R code to reproduce all analyses and figures on [Github](https://github.com/KEichenseer/Methods/blob/e4a68c48fd039bc03e56558ca981f0109b914891/A_Metropolis-Hastings_algorithm_for_estimating_Latitudinal_Temperature_Gradients.R).
+You can find the full R code to reproduce all analyses and figures on [Github](https://github.com/KEichenseer/Methods/blob/main/A_Metropolis_algorithm_in_R_generalised_logistic_function.R).

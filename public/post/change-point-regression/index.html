@@ -33,7 +33,7 @@
   <meta name="description" content="Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don&#39;t know when." />
 
   
-  <link rel="alternate" hreflang="en-us" href="/post/change-point-regression/" />
+  <link rel="alternate" hreflang="en-us" href="https://keichenseer.netlify.app/post/change-point-regression/" />
 
   
 
@@ -276,7 +276,7 @@
   <link rel="icon" type="image/png" href="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_32x32_fill_lanczos_center_2.png" />
   <link rel="apple-touch-icon" type="image/png" href="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_180x180_fill_lanczos_center_2.png" />
 
-  <link rel="canonical" href="/post/change-point-regression/" />
+  <link rel="canonical" href="https://keichenseer.netlify.app/post/change-point-regression/" />
 
   
   
@@ -292,10 +292,10 @@
   <meta property="twitter:card" content="summary_large_image" />
   
   <meta property="og:site_name" content="Kilian Eichenseer" />
-  <meta property="og:url" content="/post/change-point-regression/" />
+  <meta property="og:url" content="https://keichenseer.netlify.app/post/change-point-regression/" />
   <meta property="og:title" content="Change Point Regression | Kilian Eichenseer" />
-  <meta property="og:description" content="Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don&#39;t know when." /><meta property="og:image" content="/post/change-point-regression/featured.jpg" />
-    <meta property="twitter:image" content="/post/change-point-regression/featured.jpg" /><meta property="og:locale" content="en-us" />
+  <meta property="og:description" content="Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don&#39;t know when." /><meta property="og:image" content="https://keichenseer.netlify.app/post/change-point-regression/featured.jpg" />
+    <meta property="twitter:image" content="https://keichenseer.netlify.app/post/change-point-regression/featured.jpg" /><meta property="og:locale" content="en-us" />
   
     
       <meta
@@ -327,12 +327,12 @@
   "@type": "BlogPosting",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "/post/change-point-regression/"
+    "@id": "https://keichenseer.netlify.app/post/change-point-regression/"
   },
   "headline": "Change Point Regression",
   
   "image": [
-    "/post/change-point-regression/featured.jpg"
+    "https://keichenseer.netlify.app/post/change-point-regression/featured.jpg"
   ],
   
   "datePublished": "2021-07-28T00:00:00Z",
@@ -348,7 +348,7 @@
     "name": "Kilian Eichenseer",
     "logo": {
       "@type": "ImageObject",
-      "url": "/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_192x192_fill_lanczos_center_2.png"
+      "url": "https://keichenseer.netlify.app/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_192x192_fill_lanczos_center_2.png"
     }
   },
   "description": "Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don't know when."
@@ -759,7 +759,7 @@
 
     <div class="article-style">
       
-<script src="/post/change-point-regression/index_files/header-attrs/header-attrs.js"></script>
+<script src="https://keichenseer.netlify.app/post/change-point-regression/index_files/header-attrs/header-attrs.js"></script>
 
 
 <style>
@@ -808,7 +808,7 @@ n_shift &lt;- 35 # the data point at which we introduce a change
 x &lt;- rnorm(n,0,1) # generate x
 y &lt;- rnorm(n,0,0.5) + 0.5 * x # generate y without a change
 y[n_shift:n] &lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # introduce change</code></pre>
-<p><img src="/post/change-point-regression/index_files/figure-html/unnamed-chunk-2-1.png" width="960" /></p>
+<p><img src="https://keichenseer.netlify.app/post/change-point-regression/index_files/figure-html/unnamed-chunk-2-1.png" width="960" /></p>
 <div id="the-regression-model" class="section level2">
 <h2>The regression model</h2>
 <p>Now we build a model that can recover the change point and the linear relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> before and after the change point.</p>
@@ -926,14 +926,14 @@ based on the probability vector <span class="math inline">\(p\)</span>, which we
 <pre class="r"><code>library(ggmcmc)
 CPR.ggs &lt;- ggs(as.mcmc(CPR)) # convert to ggs object
 ggs_traceplot(CPR.ggs, family = &quot;n_change&quot;) </code></pre>
-<p><img src="/post/change-point-regression/index_files/figure-html/unnamed-chunk-7-1.png" width="1000 %" /></p>
+<p><img src="https://keichenseer.netlify.app/post/change-point-regression/index_files/figure-html/unnamed-chunk-7-1.png" width="1000 %" /></p>
 <p>Looks like the chains converge and mix nicely. We can already see that our model locates the change point somewhere between <span class="math inline">\(30\)</span> and <span class="math inline">\(40\)</span>, although the chains occasionally explore regions further away.</p>
 <p>Let’s look at the posterior probabilities for the possible change points:</p>
 <pre class="r"><code>ggplot(data = CPR.ggs %&gt;% filter(Parameter == &quot;n_change&quot;),
   aes(x=value, y = 3*(..count..)/sum(..count..), fill = as.factor(Chain))) + 
   geom_vline(xintercept = 35,lty = 2) + geom_bar(position = &quot;identity&quot;, alpha = 0.5) +
   ylab(&quot;posterior probability&quot;) + xlab(&quot;n_change&quot;) + labs(fill=&#39;Chain&#39;)</code></pre>
-<p><img src="/post/change-point-regression/index_files/figure-html/unnamed-chunk-8-1.png" width="700 %" /></p>
+<p><img src="https://keichenseer.netlify.app/post/change-point-regression/index_files/figure-html/unnamed-chunk-8-1.png" width="700 %" /></p>
 <p>The <span class="math inline">\(37^{th}\)</span> point has the highest probability of being the change point. That is not far off from where we introduced the change, at the <span class="math inline">\(35^{th}\)</span> point (dashed line). The random generation of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> has led to <span class="math inline">\(37\)</span> being favoured. We also note that there are only minor differences between the three chains, and those differences would likely further dwindle if we were to let the chains run for longer.</p>
 <p>Using the posterior distribution, we can answer questions like: “In which interval does the change point fall with 90 % probability?”</p>
 <pre class="r"><code>quantile(CPR$BUGSoutput$sims.list$n_change, probs = c(0.05, 0.95))</code></pre>
@@ -944,10 +944,10 @@ ggs_traceplot(CPR.ggs, family = &quot;n_change&quot;) </code></pre>
               (CPR$BUGSoutput$n.sims),2)</code></pre>
 <pre><code>## [1] 0.87</code></pre>
 <p>Finally, let’s have a look at the regression parameters and plot the resulting regressions before and after the most likely change point.</p>
-<p><img src="/post/change-point-regression/index_files/figure-html/unnamed-chunk-12-1.png" width="475 %" />
+<p><img src="https://keichenseer.netlify.app/post/change-point-regression/index_files/figure-html/unnamed-chunk-12-1.png" width="475 %" />
 The intercept, slope, and residual variance all increase after the change point.</p>
 <p>This can be immediately seen when plotting the change point regression:
-<img src="/post/change-point-regression/index_files/figure-html/unnamed-chunk-13-1.png" width="375 %" />
+<img src="https://keichenseer.netlify.app/post/change-point-regression/index_files/figure-html/unnamed-chunk-13-1.png" width="375 %" />
 The shaded areas denote <span class="math inline">\(95\)</span> % credible intervals around the regression lines.</p>
 <p>You can find the full R code for this analysis at <a href="https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R" class="uri">https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R</a></p>
 <p>Get in touch if you have any comments or questions!</p>
@@ -989,11 +989,11 @@ The shaded areas denote <span class="math inline">\(95\)</span> % credible inter
   <div class="media author-card content-widget-hr">
     
       
-      <img class="avatar mr-3 avatar-circle" src="/author/kilian-eichenseer-phd/avatar_hucb2b171b2d9632a768b398bf7da88278_391899_270x270_fill_q75_lanczos_center.jpg" alt="Kilian Eichenseer PhD">
+      <a href="https://keichenseer.netlify.app/"><img class="avatar mr-3 avatar-circle" src="/author/kilian-eichenseer-phd/avatar_hucb2b171b2d9632a768b398bf7da88278_391899_270x270_fill_q75_lanczos_center.jpg" alt="Kilian Eichenseer PhD"></a>
     
 
     <div class="media-body">
-      <h5 class="card-title">Kilian Eichenseer PhD</h5>
+      <h5 class="card-title"><a href="https://keichenseer.netlify.app/">Kilian Eichenseer PhD</a></h5>
       <h6 class="card-subtitle">Quantitative Palaeobiology</h6>
       
       <ul class="network-icon" aria-hidden="true">

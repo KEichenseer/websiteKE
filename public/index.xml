@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Kilian Eichenseer</title>
-    <link>/</link>
-      <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <link>https://keichenseer.netlify.app/</link>
+      <atom:link href="https://keichenseer.netlify.app/index.xml" rel="self" type="application/rss+xml" />
     <description>Kilian Eichenseer</description>
     <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language><lastBuildDate>Sat, 01 Jun 2030 13:00:00 +0000</lastBuildDate>
     <image>
-      <url>/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png</url>
+      <url>https://keichenseer.netlify.app/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_512x512_fill_lanczos_center_2.png</url>
       <title>Kilian Eichenseer</title>
-      <link>/</link>
+      <link>https://keichenseer.netlify.app/</link>
     </image>
     
     <item>
       <title>Python basics</title>
-      <link>/courses/example/python/</link>
+      <link>https://keichenseer.netlify.app/courses/example/python/</link>
       <pubDate>Fri, 01 Jan 2021 00:00:00 +0000</pubDate>
-      <guid>/courses/example/python/</guid>
+      <guid>https://keichenseer.netlify.app/courses/example/python/</guid>
       <description>&lt;p&gt;Build a foundation in Python.&lt;/p&gt;
 &lt;p&gt;
   &lt;i class=&#34;fas fa-clock  pr-1 fa-fw&#34;&gt;&lt;/i&gt; 1-2 hours per week, for 8 weeks&lt;/p&gt;
@@ -51,9 +51,9 @@
     
     <item>
       <title>Visualization</title>
-      <link>/courses/example/visualization/</link>
+      <link>https://keichenseer.netlify.app/courses/example/visualization/</link>
       <pubDate>Fri, 01 Jan 2021 00:00:00 +0000</pubDate>
-      <guid>/courses/example/visualization/</guid>
+      <guid>https://keichenseer.netlify.app/courses/example/visualization/</guid>
       <description>&lt;p&gt;Learn how to visualize data with Plotly.&lt;/p&gt;
 &lt;p&gt;
   &lt;i class=&#34;fas fa-clock  pr-1 fa-fw&#34;&gt;&lt;/i&gt; 1-2 hours per week, for 8 weeks&lt;/p&gt;
@@ -81,9 +81,9 @@ fig.show()
     
     <item>
       <title>Statistics</title>
-      <link>/courses/example/stats/</link>
+      <link>https://keichenseer.netlify.app/courses/example/stats/</link>
       <pubDate>Fri, 01 Jan 2021 00:00:00 +0000</pubDate>
-      <guid>/courses/example/stats/</guid>
+      <guid>https://keichenseer.netlify.app/courses/example/stats/</guid>
       <description>&lt;p&gt;Introduction to statistics for data science.&lt;/p&gt;
 &lt;p&gt;
   &lt;i class=&#34;fas fa-clock  pr-1 fa-fw&#34;&gt;&lt;/i&gt; 1-2 hours per week, for 8 weeks&lt;/p&gt;
@@ -109,9 +109,9 @@ The variance of the distribution is $\sigma^{2}$.
     
     <item>
       <title>Example Talk</title>
-      <link>/talk/example-talk/</link>
+      <link>https://keichenseer.netlify.app/talk/example-talk/</link>
       <pubDate>Sat, 01 Jun 2030 13:00:00 +0000</pubDate>
-      <guid>/talk/example-talk/</guid>
+      <guid>https://keichenseer.netlify.app/talk/example-talk/</guid>
       <description>&lt;div class=&#34;alert alert-note&#34;&gt;
   &lt;div&gt;
     Click on the &lt;strong&gt;Slides&lt;/strong&gt; button above to view the built-in slides feature.
@@ -128,14 +128,50 @@ The variance of the distribution is $\sigma^{2}$.
     </item>
     
     <item>
-      <title>A Metropolis-Hastings algorithm for Latitudinal Temperature Gradients</title>
-      <link>/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/</link>
-      <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>
-      <guid>/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/</guid>
+      <title>A Metropolis algorithm in R - Part 2: Adaptive proposal standard deviation</title>
+      <link>https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposal-standard-deviation/</link>
+      <pubDate>Sat, 26 Mar 2022 00:00:00 +0000</pubDate>
+      <guid>https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposal-standard-deviation/</guid>
       <description>
-&lt;script src=&#34;/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/index.en_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposal-standard-deviation/index.en_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
 
 
+&lt;style&gt;
+.math {
+  font-size: small;
+}
+&lt;/style&gt;
+&lt;style type=&#34;text/css&#34;&gt;
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 12px;
+}
+pre {
+  font-size: 13.2px
+}
+&lt;/style&gt;
+&lt;p&gt;&lt;em&gt;The model presented herein uses modified code from &lt;a href=&#34;https://khayatrayen.github.io/MCMC.html&#34; class=&#34;uri&#34;&gt;https://khayatrayen.github.io/MCMC.html&lt;/a&gt;. I am currently developing a Metropolis-within-Gibbs algorithm for stratigraphic correlation of &lt;span class=&#34;math inline&#34;&gt;\(\delta\)&lt;/span&gt;&lt;sup&gt;13&lt;/sup&gt;C records with Andrew R. Millard and Martin R. Smith at the &lt;a href=&#34;https://smithlabdurham.github.io/#!team&#34;&gt;Smith Lab at Durham University&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;In the the &lt;a href=&#34;https://keichenseer.netlify.app/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients&#34;&gt;previous post&lt;/a&gt;, we&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.tandfonline.com/doi/abs/10.1198/jcgs.2009.06134&#34;&gt;test&lt;/a&gt;, we developed a Metropolis algorithm to construct a latitudinal temperature gradient from a small sample of temperatures values.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>A Metropolis algorithm in R - Part 1: Generalised logistic function</title>
+      <link>https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-1-generalised-logistic-function/</link>
+      <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>
+      <guid>https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-1-generalised-logistic-function/</guid>
+      <description>
+&lt;script src=&#34;https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-1-generalised-logistic-function/index.en_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;style&gt;
+.math {
+  font-size: small;
+}
+&lt;/style&gt;
 &lt;style&gt;
 &lt;p&gt;.column-left{
 float: left;
@@ -171,60 +207,58 @@ pre {
   font-size: 13.2px
 }
 &lt;/style&gt;
-&lt;p&gt;&lt;em&gt;The model presented herein uses modified code from &lt;a href=&#34;https://khayatrayen.github.io/MCMC.html&#34; class=&#34;uri&#34;&gt;https://khayatrayen.github.io/MCMC.html&lt;/a&gt;. I am currently developing a Metropolis-Hastings within-Gibbs algorithm for stratigraphic correlation of &lt;span class=&#34;math inline&#34;&gt;\(\delta\)&lt;/span&gt;&lt;sup&gt;13&lt;/sup&gt;C records with Andrew R. Millard and Martin R. Smith at the &lt;a href=&#34;https://smithlabdurham.github.io/#!team&#34;&gt;Smith Lab at Durham University&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the &lt;a href=&#34;https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/&#34;&gt;sparse and geographically variable sampling of proxy data in most geological intervals&lt;/a&gt;. To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified &lt;a href=&#34;https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents&#34;&gt;Richard’s curve&lt;/a&gt;) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously increase from the tropics toward the poles.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The model presented herein uses modified code from &lt;a href=&#34;https://khayatrayen.github.io/MCMC.html&#34; class=&#34;uri&#34;&gt;https://khayatrayen.github.io/MCMC.html&lt;/a&gt;. I am currently developing a Metropolis-within-Gibbs algorithm for stratigraphic correlation of &lt;span class=&#34;math inline&#34;&gt;\(\delta\)&lt;/span&gt;&lt;sup&gt;13&lt;/sup&gt;C records with Andrew R. Millard and Martin R. Smith at the &lt;a href=&#34;https://smithlabdurham.github.io/#!team&#34;&gt;Smith Lab at Durham University&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the &lt;a href=&#34;https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/&#34;&gt;sparse and geographically variable sampling of proxy data in most geological intervals&lt;/a&gt;. To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified &lt;a href=&#34;https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents&#34;&gt;Richard’s curve&lt;/a&gt;) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously decrease from the tropics toward the poles.&lt;/p&gt;
 &lt;p&gt;To keep with the familiar notation in regression models, we set denote latitude as &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; and temperature as &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt;. Temperature is modelled as a function of latitude as:&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(\nu\ e^{Q(x_i-M)^{\frac{1}{\nu}}}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(A\)&lt;/span&gt; is the lower asymptote, &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt; is the upper asymptote, &lt;span class=&#34;math inline&#34;&gt;\(M\)&lt;/span&gt; is the inflection point, i.e. the steepest point of the curve, &lt;span class=&#34;math inline&#34;&gt;\(Q\)&lt;/span&gt; controls the steepness of the curve, and &lt;span class=&#34;math inline&#34;&gt;\(\nu\)&lt;/span&gt; (the greek letter “nu”) influences whether the slope of the curve is changing faster towards the lower or the upper asymptote. The difference &lt;span class=&#34;math inline&#34;&gt;\(K-A\)&lt;/span&gt; is constrained to be &lt;span class=&#34;math inline&#34;&gt;\(\ge 0\)&lt;/span&gt; to preclude inverse temperature gradients.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(e^{Q(x_i-M)}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(A\)&lt;/span&gt; is the lower asymptote, &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt; is the upper asymptote, &lt;span class=&#34;math inline&#34;&gt;\(M\)&lt;/span&gt; is the inflection point, i.e. the steepest point of the curve, and &lt;span class=&#34;math inline&#34;&gt;\(Q\)&lt;/span&gt; controls the steepness of the curve. The difference &lt;span class=&#34;math inline&#34;&gt;\(K-A\)&lt;/span&gt; is constrained to be &lt;span class=&#34;math inline&#34;&gt;\(\ge 0\)&lt;/span&gt; to preclude inverse temperature gradients.&lt;/p&gt;
 &lt;p&gt;In R code, we turn this into a function named &lt;span class=&#34;math inline&#34;&gt;\(gradient\)&lt;/span&gt;:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;gradient &amp;lt;- function(x, coeff, sdy) { # sigma is labelled &amp;quot;sdy&amp;quot;
   A = coeff[1]
   K = coeff[2]
   M = coeff[3]
   Q = coeff[4]
-  nu = coeff[5]
-  return(A + max(c(K-A,0))/((1+(nu*exp(Q*(x-M))))^(1/nu)) + rnorm(length(x),0,sdy))
+  return(A + max(c(K-A,0))/((1+(exp(Q*(x-M))))) + rnorm(length(x),0,sdy))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;As an example, let’s look at the modern, average latitudinal sea surface temperature gradient. We approximate it by setting &lt;span class=&#34;math inline&#34;&gt;\(A = -2.2\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(K = 28\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(M = 39\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(Q = 0.10\)&lt;/span&gt;, and &lt;span class=&#34;math inline&#34;&gt;\(\nu = 1.2\)&lt;/span&gt;. The residual standard deviation &lt;span class=&#34;math inline&#34;&gt;\(\sigma\)&lt;/span&gt; is set to &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt;, resulting in a smooth curve without noise (lefthand plot). Note that we are using absolute latitudes, assuming a common latitudinal temperature gradient in both hemispheres.
-We also sample &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; points from this gradient, introducing some noise by setting &lt;span class=&#34;math inline&#34;&gt;\(\sigma = 2\)&lt;/span&gt;. We will later use these &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; points to estimate a latitudinal gradient (righthand plot).&lt;/p&gt;
+&lt;p&gt;As an example, let’s look at the modern, average latitudinal sea surface temperature gradient. We approximate it by setting &lt;span class=&#34;math inline&#34;&gt;\(A = -2.0\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(K = 28\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(M = 41\)&lt;/span&gt;, and &lt;span class=&#34;math inline&#34;&gt;\(Q = 0.10\)&lt;/span&gt;. The residual standard deviation &lt;span class=&#34;math inline&#34;&gt;\(\sigma\)&lt;/span&gt; is set to &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt;, resulting in a smooth curve without noise (lefthand plot). Note that we are using absolute latitudes, assuming a common latitudinal temperature gradient in both hemispheres.
+We also sample &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; points from this gradient, introducing some noise by setting &lt;span class=&#34;math inline&#34;&gt;\(\sigma = 2\)&lt;/span&gt; (righthand plot). In the following, we will use these &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; points to estimate a latitudinal gradient, using the gradient model specified above.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;set.seed(10)
 sample_lat &amp;lt;- runif(10,0,90)
 sample_data &amp;lt;- data.frame(
   x = sample_lat, 
-  y = gradient(x = sample_lat, coeff = c(-2.2, 28, 39, 0.1, 1.2), sd = 2))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;864&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Now, we build a model that will reconstruct the gradient from the sample data. Before writing the main Markov chain Monte Carlo (MCMC) function, we pre-define a couple of supplementary functions that will make the code easier to read.
-We start with the log-likelihood function:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;loglik &amp;lt;- function(x, y,  coeff, sdy) { 
+  y = gradient(x = sample_lat, coeff = c(-2.0, 28, 41, 0.1), sd = 2))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-1-generalised-logistic-function/index.en_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;864&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;To obtain posterior probabilities for the parameters of the gradient model, we use a Metropolis algorithm. The Metropolis algorithm builds a Markov chain which resembles the posterior distribution. This works by proposing random new values for the parameters, and calculating the posterior probability with the new parameter values. If the joint posterior probability obtained with the new values is higher than that of the current values, the new values will be recorded and added to the Markov chain. Otherwise, the new value will be accepted with a probabilty equal to the ratio of the two joint posterior probabilities.&lt;/p&gt;
+&lt;p&gt;Before writing the main Markov chain Monte Carlo (MCMC) function, we pre-define a couple of supplementary functions that we use in every iteration of the Metropolis algorithm.&lt;/p&gt;
+&lt;p&gt;We start with the log-likelihood function, which translates to the joint probability of the data, given a specific set of model parameters:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;loglik &amp;lt;- function(x, y,  coeff, sdy) {
   A = coeff[1]
   K = coeff[2]
   M = coeff[3]
   Q = coeff[4]
-  nu = coeff[5]
-  pred = A + max(c(K-A,0))/((1+(nu*exp(Q*(x-M))))^(1/nu))
+  pred = A + max(c(K-A,0))/((1+(exp(Q*(x-M)))))
   return(sum(dnorm(y, mean = pred, sd = sdy, log = TRUE)))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Next, we need a function to generate the log-priors. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from &lt;span class=&#34;math inline&#34;&gt;\(-4\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(40\)&lt;/span&gt; are put on &lt;span class=&#34;math inline&#34;&gt;\(A\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt;, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of 45 standard deviation of &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; is placed on &lt;span class=&#34;math inline&#34;&gt;\(M\)&lt;/span&gt;, implying that we expect the steepest temperature gradient in the mid-latitudes, but the data will quickly overwhelm the prior due to the large standard deviation. We constrain &lt;span class=&#34;math inline&#34;&gt;\(Q\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\nu\)&lt;/span&gt; to be &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt;0\)&lt;/span&gt; by placing Gamma priors on them:&lt;/p&gt;
+&lt;p&gt;Next, we need a function to generate the log-priors, i.e. the joint prior probability of the set of model parameters. We specify the parameters of the prior distribution within the function for convenience. Uniform priors ranging from &lt;span class=&#34;math inline&#34;&gt;\(-4\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(40\)&lt;/span&gt; are put on &lt;span class=&#34;math inline&#34;&gt;\(A\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt;, signifying that the temperature gradient cannot exceed this range. A normal prior with a mean of &lt;span class=&#34;math inline&#34;&gt;\(45\)&lt;/span&gt; and a standard deviation of &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; is placed on &lt;span class=&#34;math inline&#34;&gt;\(M\)&lt;/span&gt;, implying that we expect the steepest temperature gradient in the mid-latitudes. We constrain &lt;span class=&#34;math inline&#34;&gt;\(Q\)&lt;/span&gt; to be &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt;0\)&lt;/span&gt; by placing a log-normal prior on it:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;logprior &amp;lt;- function(coeff) {
-    return(sum(c(
+  return(sum(c(
     dunif(coeff[1], -4, 40, log = TRUE),
     dunif(coeff[2], -4, 40, log = TRUE),
     dnorm(coeff[3], 45, 10, log = TRUE),
-    dgamma(coeff[4], 0.2, 0.2, log = TRUE),
-    dgamma(coeff[5], 1, 1, log = TRUE))))
+    dlnorm(coeff[4], -2, 1, log = TRUE))))
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The posterior is proportional to the likelihood &lt;span class=&#34;math inline&#34;&gt;\(\times\)&lt;/span&gt; prior. On the log scale, we can simply add them:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;logposterior &amp;lt;- function(x, y, coeff, sdy){
   return (loglik(x, y, coeff, sdy) + logprior(coeff))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Finally, we define a function that proposes new values for the Metropolis-Hastings step. The magnitude of the proposal standard deviations (&lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;) is quite important, as low values will lead to the chain exploring the parameter space very slowly, and high values result in a low acceptance rate and an insufficient exploration of the parameter space. As appropriate &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; are difficult to know a priori, adaptive steps are often used to find better values. For simplicity, we will use fixed &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;. Different &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; can and usually should be used for different parameters.&lt;/p&gt;
+&lt;p&gt;Finally, we define a function that proposes new values for the Metropolis-Hastings step. The magnitude of the proposal standard deviations (&lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;) is quite important, as low values will lead to the chain exploring the parameter space very slowly, and high values result in a low acceptance rate and an insufficient exploration of the parameter space. As appropriate &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; are difficult to know &lt;em&gt;a priori&lt;/em&gt;, adaptive steps are often used to find better values. For simplicity, we will use fixed &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;. Different &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; can and usually should be used for different parameters.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;MH_propose &amp;lt;- function(coeff, proposal_sd){
-  return(rnorm(5,mean = coeff, sd= c(.5,.5,.5,0.01,0.07)))
+  return(rnorm(4,mean = coeff, sd= c(.5,.5,.5,0.01)))
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;With all the prerequisites in place, we can build the MCMC function. The model will update &lt;span class=&#34;math inline&#34;&gt;\(\sigma\)&lt;/span&gt; with a Gibbs step, and update the other coefficients with a Metropolis-Hastings step:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;run_MCMC &amp;lt;- function(x, y, coeff_inits, sdy_init, nIter){
   ### Initialisation
-  coefficients = array(dim = c(nIter,5)) # set up array to store coefficients
+  coefficients = array(dim = c(nIter,4)) # set up array to store coefficients
   coefficients[1,] = coeff_inits # initialise coefficients
   sdy = rep(NA_real_,nIter) # set up vector to store sdy
   sdy[1] = sdy_init # intialise sdy
@@ -242,8 +276,8 @@ We start with the log-likelihood function:&lt;/p&gt;
     
     ## 2. Metropolis-Hastings step to estimate the regression coefficients
     proposal = MH_propose(coefficients[i-1,]) # new proposed values
-    if(any(proposal[c(4,5)] &amp;lt;= 0)) HR = 0 else # Q and nu need to be &amp;gt;0
-    # Hasting&amp;#39;s ratio of the proposal
+    if(any(proposal[4] &amp;lt;= 0)) HR = 0 else # Q needs to be &amp;gt;0
+    # Hastings ratio of the proposal
     HR = exp(logposterior(x = x, y = y, coeff = proposal, sdy = sdy[i]) -
              logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))
     # accept proposal with probability = min(HR,1)
@@ -260,31 +294,30 @@ We start with the log-likelihood function:&lt;/p&gt;
                       K = coefficients[,2],
                       M = coefficients[,3],
                       Q = coefficients[,4],
-                      nu = coefficients[,5],
                       sdy = sdy)
   return(output)
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;To run the model, we need to provide starting values for the unknown parameters. We let it run for &lt;span class=&#34;math inline&#34;&gt;\(100,000\)&lt;/span&gt; iterations:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;nIter &amp;lt;- 100000
 m &amp;lt;- run_MCMC(x = sample_data$x, y = sample_data$y, 
-              coeff_inits = c(10,20,30,0.4,0.4), sdy_init = 5, nIter = nIter)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every 10th iteration is shown to improve readability. The black lines in the density plot denote the parameters of the original sea surface temperature gradient.
-&lt;img src=&#34;/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;691.2&#34; /&gt;
-The parameters have converged reasonably well, although there is considerable uncertainty, especially around &lt;span class=&#34;math inline&#34;&gt;\(\nu\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;Below, we discard the first &lt;span class=&#34;math inline&#34;&gt;\(10,000\)&lt;/span&gt; iterations as burn-in and plot &lt;span class=&#34;math inline&#34;&gt;\(8\)&lt;/span&gt; gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and 95% credible intervals (blue shading), are shown. Between &lt;span class=&#34;math inline&#34;&gt;\(10^\circ\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(50^\circ\)&lt;/span&gt;, where we have sufficient samples, the estimated gradient very closely resembles the original gradient. The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range (&lt;span class=&#34;math inline&#34;&gt;\(&amp;gt;-4^\circ C\)&lt;/span&gt;), even at latitudes &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt; 65^\circ\)&lt;/span&gt; where we have no data.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/a-metropolis-hastings-algorithm-for-latitudinal-temperature-gradients/index.en_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;864&#34; /&gt;
-In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. A valuable improvement would be the implementation of adaption of &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;, as good values for &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; are difficult to guess &lt;em&gt;a priori&lt;/em&gt;.&lt;/p&gt;
-&lt;p&gt;You can find the full R code to reproduce all analyses and figures on &lt;a href=&#34;https://github.com/KEichenseer/Methods/blob/e4a68c48fd039bc03e56558ca981f0109b914891/A_Metropolis-Hastings_algorithm_for_estimating_Latitudinal_Temperature_Gradients.R&#34;&gt;Github&lt;/a&gt;&lt;/p&gt;
+              coeff_inits = c(0,30,45,0.2), sdy_init = 4, nIter = nIter)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;To assess the model output, we produce trace plots and density plots of the posterior estimates of the parameters. For the trace plot, only every &lt;span class=&#34;math inline&#34;&gt;\(10^{th}\)&lt;/span&gt; iteration is shown to improve readability. The black lines in the density plot denote the parameters of the original sea surface temperature gradient.
+&lt;img src=&#34;https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-1-generalised-logistic-function/index.en_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;691.2&#34; /&gt;
+The parameters have converged reasonably well.&lt;/p&gt;
+&lt;p&gt;Below, we discard the first &lt;span class=&#34;math inline&#34;&gt;\(10,000\)&lt;/span&gt; iterations as burn-in and plot &lt;span class=&#34;math inline&#34;&gt;\(8\)&lt;/span&gt; gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt; sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and &lt;span class=&#34;math inline&#34;&gt;\(95\%\)&lt;/span&gt; credible intervals (blue shading), are shown. Between &lt;span class=&#34;math inline&#34;&gt;\(10^\circ\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(50^\circ\)&lt;/span&gt;, where we have sufficient samples, the estimated gradient very closely resembles the original gradient. The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range (&lt;span class=&#34;math inline&#34;&gt;\(&amp;gt;-4^\circ C\)&lt;/span&gt;), even at latitudes &lt;span class=&#34;math inline&#34;&gt;\(&amp;gt; 63^\circ\)&lt;/span&gt; where we have no data.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-1-generalised-logistic-function/index.en_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;864&#34; /&gt;
+In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. In the second part of this series, we will implement adaption of &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;, which means we won’t have to guess good values for &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;. This should speed up convergence, meaning we will need less iterations of the MCMC algorithm to obtain reliable posterior estimates.&lt;/p&gt;
+&lt;p&gt;You can find the full R code to reproduce all analyses and figures on &lt;a href=&#34;https://github.com/KEichenseer/Methods/blob/main/A_Metropolis_algorithm_in_R_generalised_logistic_function.R&#34;&gt;Github&lt;/a&gt;.&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>Change Point Regression</title>
-      <link>/post/change-point-regression/</link>
+      <link>https://keichenseer.netlify.app/post/change-point-regression/</link>
       <pubDate>Wed, 28 Jul 2021 00:00:00 +0000</pubDate>
-      <guid>/post/change-point-regression/</guid>
+      <guid>https://keichenseer.netlify.app/post/change-point-regression/</guid>
       <description>
-&lt;script src=&#34;/post/change-point-regression/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://keichenseer.netlify.app/post/change-point-regression/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
 
 
 &lt;style&gt;
@@ -333,7 +366,7 @@ n_shift &amp;lt;- 35 # the data point at which we introduce a change
 x &amp;lt;- rnorm(n,0,1) # generate x
 y &amp;lt;- rnorm(n,0,0.5) + 0.5 * x # generate y without a change
 y[n_shift:n] &amp;lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # introduce change&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/change-point-regression/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://keichenseer.netlify.app/post/change-point-regression/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;the-regression-model&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;The regression model&lt;/h2&gt;
 &lt;p&gt;Now we build a model that can recover the change point and the linear relationship between &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; before and after the change point.&lt;/p&gt;
@@ -451,14 +484,14 @@ based on the probability vector &lt;span class=&#34;math inline&#34;&gt;\(p\)&lt
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ggmcmc)
 CPR.ggs &amp;lt;- ggs(as.mcmc(CPR)) # convert to ggs object
 ggs_traceplot(CPR.ggs, family = &amp;quot;n_change&amp;quot;) &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/change-point-regression/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;1000 %&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://keichenseer.netlify.app/post/change-point-regression/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;1000 %&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Looks like the chains converge and mix nicely. We can already see that our model locates the change point somewhere between &lt;span class=&#34;math inline&#34;&gt;\(30\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(40\)&lt;/span&gt;, although the chains occasionally explore regions further away.&lt;/p&gt;
 &lt;p&gt;Let’s look at the posterior probabilities for the possible change points:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(data = CPR.ggs %&amp;gt;% filter(Parameter == &amp;quot;n_change&amp;quot;),
   aes(x=value, y = 3*(..count..)/sum(..count..), fill = as.factor(Chain))) + 
   geom_vline(xintercept = 35,lty = 2) + geom_bar(position = &amp;quot;identity&amp;quot;, alpha = 0.5) +
   ylab(&amp;quot;posterior probability&amp;quot;) + xlab(&amp;quot;n_change&amp;quot;) + labs(fill=&amp;#39;Chain&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/change-point-regression/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;700 %&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://keichenseer.netlify.app/post/change-point-regression/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;700 %&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The &lt;span class=&#34;math inline&#34;&gt;\(37^{th}\)&lt;/span&gt; point has the highest probability of being the change point. That is not far off from where we introduced the change, at the &lt;span class=&#34;math inline&#34;&gt;\(35^{th}\)&lt;/span&gt; point (dashed line). The random generation of &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; has led to &lt;span class=&#34;math inline&#34;&gt;\(37\)&lt;/span&gt; being favoured. We also note that there are only minor differences between the three chains, and those differences would likely further dwindle if we were to let the chains run for longer.&lt;/p&gt;
 &lt;p&gt;Using the posterior distribution, we can answer questions like: “In which interval does the change point fall with 90 % probability?”&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;quantile(CPR$BUGSoutput$sims.list$n_change, probs = c(0.05, 0.95))&lt;/code&gt;&lt;/pre&gt;
@@ -469,10 +502,10 @@ ggs_traceplot(CPR.ggs, family = &amp;quot;n_change&amp;quot;) &lt;/code&gt;&lt;/
               (CPR$BUGSoutput$n.sims),2)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## [1] 0.87&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Finally, let’s have a look at the regression parameters and plot the resulting regressions before and after the most likely change point.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/change-point-regression/index_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;475 %&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;https://keichenseer.netlify.app/post/change-point-regression/index_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;475 %&#34; /&gt;
 The intercept, slope, and residual variance all increase after the change point.&lt;/p&gt;
 &lt;p&gt;This can be immediately seen when plotting the change point regression:
-&lt;img src=&#34;/post/change-point-regression/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;375 %&#34; /&gt;
+&lt;img src=&#34;https://keichenseer.netlify.app/post/change-point-regression/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;375 %&#34; /&gt;
 The shaded areas denote &lt;span class=&#34;math inline&#34;&gt;\(95\)&lt;/span&gt; % credible intervals around the regression lines.&lt;/p&gt;
 &lt;p&gt;You can find the full R code for this analysis at &lt;a href=&#34;https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R&#34; class=&#34;uri&#34;&gt;https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Get in touch if you have any comments or questions!&lt;/p&gt;
@@ -482,9 +515,9 @@ The shaded areas denote &lt;span class=&#34;math inline&#34;&gt;\(95\)&lt;/span&
     
     <item>
       <title>An example preprint / working paper</title>
-      <link>/publication/preprint/</link>
+      <link>https://keichenseer.netlify.app/publication/preprint/</link>
       <pubDate>Sun, 07 Apr 2019 00:00:00 +0000</pubDate>
-      <guid>/publication/preprint/</guid>
+      <guid>https://keichenseer.netlify.app/publication/preprint/</guid>
       <description>&lt;div class=&#34;alert alert-note&#34;&gt;
   &lt;div&gt;
     Create your slides in Markdown - click the &lt;em&gt;Slides&lt;/em&gt; button to check out the example.
@@ -496,9 +529,9 @@ The shaded areas denote &lt;span class=&#34;math inline&#34;&gt;\(95\)&lt;/span&
     
     <item>
       <title>Slides</title>
-      <link>/slides/example/</link>
+      <link>https://keichenseer.netlify.app/slides/example/</link>
       <pubDate>Tue, 05 Feb 2019 00:00:00 +0000</pubDate>
-      <guid>/slides/example/</guid>
+      <guid>https://keichenseer.netlify.app/slides/example/</guid>
       <description>&lt;h1 id=&#34;create-slides-in-markdown-with-wowchemy&#34;&gt;Create slides in Markdown with Wowchemy&lt;/h1&gt;
 &lt;p&gt;&lt;a href=&#34;https://wowchemy.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Wowchemy&lt;/a&gt; | &lt;a href=&#34;https://owchemy.com/docs/managing-content/#create-slides&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Documentation&lt;/a&gt;&lt;/p&gt;
 &lt;hr&gt;
@@ -625,17 +658,17 @@ Three
     
     <item>
       <title>External Project</title>
-      <link>/project/external-project/</link>
+      <link>https://keichenseer.netlify.app/project/external-project/</link>
       <pubDate>Wed, 27 Apr 2016 00:00:00 +0000</pubDate>
-      <guid>/project/external-project/</guid>
+      <guid>https://keichenseer.netlify.app/project/external-project/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Internal Project</title>
-      <link>/project/internal-project/</link>
+      <link>https://keichenseer.netlify.app/project/internal-project/</link>
       <pubDate>Wed, 27 Apr 2016 00:00:00 +0000</pubDate>
-      <guid>/project/internal-project/</guid>
+      <guid>https://keichenseer.netlify.app/project/internal-project/</guid>
       <description>&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis posuere tellus ac convallis placerat. Proin tincidunt magna sed ex sollicitudin condimentum. Sed ac faucibus dolor, scelerisque sollicitudin nisi. Cras purus urna, suscipit quis sapien eu, pulvinar tempor diam. Quisque risus orci, mollis id ante sit amet, gravida egestas nisl. Sed ac tempus magna. Proin in dui enim. Donec condimentum, sem id dapibus fringilla, tellus enim condimentum arcu, nec volutpat est felis vel metus. Vestibulum sit amet erat at nulla eleifend gravida.&lt;/p&gt;
 &lt;p&gt;Nullam vel molestie justo. Curabitur vitae efficitur leo. In hac habitasse platea dictumst. Sed pulvinar mauris dui, eget varius purus congue ac. Nulla euismod, lorem vel elementum dapibus, nunc justo porta mi, sed tempus est est vel tellus. Nam et enim eleifend, laoreet sem sit amet, elementum sem. Morbi ut leo congue, maximus velit ut, finibus arcu. In et libero cursus, rutrum risus non, molestie leo. Nullam congue quam et volutpat malesuada. Sed risus tortor, pulvinar et dictum nec, sodales non mi. Phasellus lacinia commodo laoreet. Nam mollis, erat in feugiat consectetur, purus eros egestas tellus, in auctor urna odio at nibh. Mauris imperdiet nisi ac magna convallis, at rhoncus ligula cursus.&lt;/p&gt;
 &lt;p&gt;Cras aliquam rhoncus ipsum, in hendrerit nunc mattis vitae. Duis vitae efficitur metus, ac tempus leo. Cras nec fringilla lacus. Quisque sit amet risus at ipsum pharetra commodo. Sed aliquam mauris at consequat eleifend. Praesent porta, augue sed viverra bibendum, neque ante euismod ante, in vehicula justo lorem ac eros. Suspendisse augue libero, venenatis eget tincidunt ut, malesuada at lorem. Donec vitae bibendum arcu. Aenean maximus nulla non pretium iaculis. Quisque imperdiet, nulla in pulvinar aliquet, velit quam ultrices quam, sit amet fringilla leo sem vel nunc. Mauris in lacinia lacus.&lt;/p&gt;
@@ -646,9 +679,9 @@ Three
     
     <item>
       <title>An example journal article</title>
-      <link>/publication/journal-article/</link>
+      <link>https://keichenseer.netlify.app/publication/journal-article/</link>
       <pubDate>Tue, 01 Sep 2015 00:00:00 +0000</pubDate>
-      <guid>/publication/journal-article/</guid>
+      <guid>https://keichenseer.netlify.app/publication/journal-article/</guid>
       <description>&lt;div class=&#34;alert alert-note&#34;&gt;
   &lt;div&gt;
     Click the &lt;em&gt;Cite&lt;/em&gt; button above to demo the feature to enable visitors to import publication metadata into their reference management software.
@@ -665,9 +698,9 @@ Three
     
     <item>
       <title>An example conference paper</title>
-      <link>/publication/conference-paper/</link>
+      <link>https://keichenseer.netlify.app/publication/conference-paper/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 +0000</pubDate>
-      <guid>/publication/conference-paper/</guid>
+      <guid>https://keichenseer.netlify.app/publication/conference-paper/</guid>
       <description>&lt;div class=&#34;alert alert-note&#34;&gt;
   &lt;div&gt;
     Click the &lt;em&gt;Cite&lt;/em&gt; button above to demo the feature to enable visitors to import publication metadata into their reference management software.
@@ -684,9 +717,9 @@ Three
     
     <item>
       <title></title>
-      <link>/admin/config.yml</link>
+      <link>https://keichenseer.netlify.app/admin/config.yml</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/admin/config.yml</guid>
+      <guid>https://keichenseer.netlify.app/admin/config.yml</guid>
       <description></description>
     </item>
     

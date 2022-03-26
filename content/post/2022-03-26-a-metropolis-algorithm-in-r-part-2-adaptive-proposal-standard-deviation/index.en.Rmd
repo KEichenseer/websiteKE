@@ -1,0 +1,47 @@
+---
+title: 'A Metropolis algorithm in R - Part 2: Adaptive proposal standard deviation'
+author: ''
+date: '2022-03-26'
+slug: a-metropolis-algorithm-in-r-part-2-adaptive-proposal-standard-deviation
+categories: []
+tags: []
+subtitle: ''
+authors: []
+lastmod: '2022-03-26T20:13:04Z'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+header-includes: \usepackage{graphics}
+summary: The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use it for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature estimates.
+---
+
+<style>
+.math {
+  font-size: small;
+}
+</style>
+
+
+<style type="text/css">
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 12px;
+}
+pre {
+  font-size: 13.2px
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+*The  model presented herein uses modified code from https://khayatrayen.github.io/MCMC.html. I am currently developing a Metropolis-within-Gibbs algorithm for stratigraphic correlation of $\delta$<sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the [Smith Lab at Durham University](https://smithlabdurham.github.io/#!team).*
+
+In the [previous post](/a-metropolis-algorithm-in-r-part-1-generalised-logistic-function), we
+
+[test](https://www.tandfonline.com/doi/abs/10.1198/jcgs.2009.06134), we developed a Metropolis algorithm to construct a latitudinal temperature gradient from a small sample of temperatures values. 

@@ -2,7 +2,7 @@
 title: "A Metropolis algorithm in R - Part 1: Generalised logistic function"
 author: "Kilian Eichenseer"
 date: '2022-02-12'
-slug: metropolis-algorithm-in-R-part-1-generalised-logistic-function
+slug: a-metropolis-algorithm-in-R-part-1-generalised-logistic-function
 categories: []
 tags: []
 subtitle: ''

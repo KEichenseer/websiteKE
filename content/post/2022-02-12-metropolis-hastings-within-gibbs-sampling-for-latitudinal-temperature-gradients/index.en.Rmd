@@ -17,7 +17,11 @@ projects: []
 header-includes: \usepackage{graphics}
 summary: The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use it for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature estimates.
 ---
-
+<style>
+.math {
+  font-size: small;
+}
+</style>
 
 <style>
 .column-left{

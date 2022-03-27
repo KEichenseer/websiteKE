@@ -2,14 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Kilian Eichenseer PhD | Kilian Eichenseer</title>
-    <link>https://keichenseer.netlify.app/author/kilian-eichenseer-phd/</link>
-      <atom:link href="https://keichenseer.netlify.app/author/kilian-eichenseer-phd/index.xml" rel="self" type="application/rss+xml" />
+    <link>/author/kilian-eichenseer-phd/</link>
+      <atom:link href="/author/kilian-eichenseer-phd/index.xml" rel="self" type="application/rss+xml" />
     <description>Kilian Eichenseer PhD</description>
     <generator>Wowchemy (https://wowchemy.com)</generator><language>en-us</language>
     <image>
-      <url>https://keichenseer.netlify.app/author/kilian-eichenseer-phd/avatar_hucb2b171b2d9632a768b398bf7da88278_391899_270x270_fill_q75_lanczos_center.jpg</url>
+      <url>/author/kilian-eichenseer-phd/avatar_hucb2b171b2d9632a768b398bf7da88278_391899_270x270_fill_q75_lanczos_center.jpg</url>
       <title>Kilian Eichenseer PhD</title>
-      <link>https://keichenseer.netlify.app/author/kilian-eichenseer-phd/</link>
+      <link>/author/kilian-eichenseer-phd/</link>
     </image>
     
   </channel>

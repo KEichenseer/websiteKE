@@ -1,8 +1,8 @@
 ---
-title: "A Metropolis algorithm in R - Part 1: Generalised logistic function"
+title: "A Metropolis algorithm in R - Part 1: Implementation"
 author: "Kilian Eichenseer"
 date: '2022-02-12'
-slug: a-metropolis-algorithm-in-R-part-1-generalised-logistic-function
+slug: a-metropolis-algorithm-in-R-part-1-implementation
 categories: []
 tags: []
 subtitle: ''
@@ -15,10 +15,10 @@ image:
   preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
-summary: The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use it for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature estimates.
+summary: The Metropolis algorithm is a common MCMC method. Here, it is used for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature values.
 ---
 
-<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
 
 
 <style>
@@ -61,8 +61,11 @@ pre {
   font-size: 13.2px
 }
 </style>
+<blockquote>
 <p><em>The model presented herein uses modified code from <a href="https://khayatrayen.github.io/MCMC.html" class="uri">https://khayatrayen.github.io/MCMC.html</a>. I am currently developing a Metropolis-within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
-<p>Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the <a href="https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/">sparse and geographically variable sampling of proxy data in most geological intervals</a>. To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified <a href="https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents">Richard’s curve</a>) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously decrease from the tropics toward the poles.</p>
+</blockquote>
+<p>Markov chain Monte Carlo (MCMC) methods are widely used to obtain posterior probabilities for the unknown parameters of Bayesian models. The <a href="https://arxiv.org/pdf/1504.01896.pdf">Metropolis algorithm</a> builds a Markov chain for each parameter, which resembles the posterior distribution. This works by selecting arbitrary starting values for the parameters and calculating the resulting joint posterior probability. Then, new values for the parameters are randomly proposed, and the joint posterior probability is calculated with the new parameter values. If the posterior obtained with the new values is higher than that of the current values, the new values will be recorded and added to the Markov chains. Otherwise, the new value will be accepted with a probability equal to the ratio of the two posterior probabilities. If the proposed values result in a much lower posterior probability than the current values, the proposal will most likely be rejected. This process is repeated many times, and the resulting Markov chains converge on the posterior distributions of the parameters. The Metropolis algorithm requires symmetric proposal distributions and is a special case of the Metropolis-Hastings algorithm.</p>
+<p>To illustrate the implementation of the Metropolis algorithm, we turn to climatology: Latitudinal temperature gradients from Earth history are difficult to reconstruct due to the <a href="https://www.lewisajones.com/post/uneven-spatial-sampling-and-reconstructing-global-palaeotemperatures/">sparse and geographically variable sampling of proxy data in most geological intervals</a>. To reconstruct plausible temperature gradients from a fragmentary proxy record, classical solutions like LOESS or standard generalised additive models are not optimal, as earth scientists have additional information on past temperature gradients that those models do not incorporate. Instead, I propose the use of a generalised logistic function (a modified <a href="https://www.jstor.org/stable/23686557?seq=1#metadata_info_tab_contents">Richard’s curve</a>) that can readily incorporate information in addition to the proxy data. For example, we can instruct the model to force temperature to continuously decrease from the tropics toward the poles.</p>
 <p>To keep with the familiar notation in regression models, we set denote latitude as <span class="math inline">\(x\)</span> and temperature as <span class="math inline">\(y\)</span>. Temperature is modelled as a function of latitude as:</p>
 <p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma), ~~\\ \mu_i = A~+max(K-A,0)/(e^{Q(x_i-M)}), ~~~~~ i = 1,...,n. \end{array} \end{equation} \end{aligned}\)</span></p>
 <p><span class="math inline">\(A\)</span> is the lower asymptote, <span class="math inline">\(K\)</span> is the upper asymptote, <span class="math inline">\(M\)</span> is the inflection point, i.e. the steepest point of the curve, and <span class="math inline">\(Q\)</span> controls the steepness of the curve. The difference <span class="math inline">\(K-A\)</span> is constrained to be <span class="math inline">\(\ge 0\)</span> to preclude inverse temperature gradients.</p>
@@ -82,7 +85,6 @@ sample_data &lt;- data.frame(
   x = sample_lat, 
   y = gradient(x = sample_lat, coeff = c(-2.0, 28, 41, 0.1), sd = 2))</code></pre>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-3-1.png" width="864" /></p>
-<p>To obtain posterior probabilities for the parameters of the gradient model, we use a Metropolis algorithm. The Metropolis algorithm builds a Markov chain which resembles the posterior distribution. This works by proposing random new values for the parameters, and calculating the posterior probability with the new parameter values. If the joint posterior probability obtained with the new values is higher than that of the current values, the new values will be recorded and added to the Markov chain. Otherwise, the new value will be accepted with a probabilty equal to the ratio of the two joint posterior probabilities.</p>
 <p>Before writing the main Markov chain Monte Carlo (MCMC) function, we pre-define a couple of supplementary functions that we use in every iteration of the Metropolis algorithm.</p>
 <p>We start with the log-likelihood function, which translates to the joint probability of the data, given a specific set of model parameters:</p>
 <pre class="r"><code>loglik &lt;- function(x, y,  coeff, sdy) {
@@ -160,5 +162,5 @@ m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
 The parameters have converged reasonably well.</p>
 <p>Below, we discard the first <span class="math inline">\(10,000\)</span> iterations as burn-in and plot <span class="math inline">\(8\)</span> gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the <span class="math inline">\(10\)</span> sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and <span class="math inline">\(95\%\)</span> credible intervals (blue shading), are shown. Between <span class="math inline">\(10^\circ\)</span> and <span class="math inline">\(50^\circ\)</span>, where we have sufficient samples, the estimated gradient very closely resembles the original gradient. The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range (<span class="math inline">\(&gt;-4^\circ C\)</span>), even at latitudes <span class="math inline">\(&gt; 63^\circ\)</span> where we have no data.</p>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-11-1.png" width="864" />
-In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. In the second part of this series, we will implement adaption of <span class="math inline">\(\sigma_{proposal}\)</span>, which means we won’t have to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>. This should speed up convergence, meaning we will need less iterations of the MCMC algorithm to obtain reliable posterior estimates.</p>
+In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. In the <a href="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals">second part</a> of this series, we will implement adaption of <span class="math inline">\(\sigma_{proposal}\)</span>, which means we won’t have to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>. This should speed up convergence, meaning we will need less iterations of the MCMC algorithm to obtain reliable posterior estimates.</p>
 <p>You can find the full R code to reproduce all analyses and figures on <a href="https://github.com/KEichenseer/Methods/blob/main/A_Metropolis_algorithm_in_R_generalised_logistic_function.R">Github</a>.</p>

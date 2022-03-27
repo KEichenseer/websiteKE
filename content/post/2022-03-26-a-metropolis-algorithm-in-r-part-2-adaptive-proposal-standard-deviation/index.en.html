@@ -1,8 +1,8 @@
 ---
-title: 'A Metropolis algorithm in R - Part 2: Adaptive proposal standard deviation'
+title: 'A Metropolis algorithm in R - Part 2: Adaptive proposals'
 author: ''
 date: '2022-03-26'
-slug: a-metropolis-algorithm-in-r-part-2-adaptive-proposal-standard-deviation
+slug: a-metropolis-algorithm-in-r-part-2-adaptive-proposals
 categories: []
 tags: []
 subtitle: ''
@@ -18,7 +18,7 @@ header-includes: \usepackage{graphics}
 summary: The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use it for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature estimates.
 ---
 
-<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
 
 
 <style>
@@ -37,6 +37,11 @@ pre {
   font-size: 13.2px
 }
 </style>
+<blockquote>
 <p><em>The model presented herein uses modified code from <a href="https://khayatrayen.github.io/MCMC.html" class="uri">https://khayatrayen.github.io/MCMC.html</a>. I am currently developing a Metropolis-within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
-<p>In the <a href="/a-metropolis-algorithm-in-r-part-1-generalised-logistic-function">previous post</a>, we</p>
-<p><a href="https://www.tandfonline.com/doi/abs/10.1198/jcgs.2009.06134">test</a>, we developed a Metropolis algorithm to construct a latitudinal temperature gradient from a small sample of temperatures values.</p>
+</blockquote>
+<p>In the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous post</a>, we built a Metropolis algorithm to estimate latitudinal temperature gradients, approximated by a generalised logistic function. Recall that the Metropolis algorithm works by proposing new parameter values and evaluating the joint posterior probability of the model with these values, against the posterior with the current values.</p>
+<p>How do we chose a new value for a parameter? A common approach is to sample a normal distribution, centred at the current value (i.e. the mean of the distribution is the current value). Choosing the standard deviation of the proposal distribution (<span class="math inline">\(\sigma_{proposal}\)</span>) is more tricky. If <span class="math inline">\(\sigma_{proposal}\)</span> is too high, we end up proposing a lot of values at the far tail ends of the target posterior distribution, which will usually be rejected (see below, green proposals). This leads to inefficient sampling and patchy coverage of the posterior distribution. Conversely, a very small <span class="math inline">\(\sigma_{proposal}\)</span> leads to most new values being accepted, but the resulting Markov chain will move very slowly through the parameter space, leading to a low effective sample size (red proposals below). Instead, some intermediate <span class="math inline">\(\sigma_{proposal}\)</span> is desirable, at which the Markov chain moves quickly through the parameter space, without too many rejections (e.g., yellow proposals below).</p>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>It turns out that, for multidimensional problems, sampling is most efficient if the acceptance rate of proposals is roughly <span class="math inline">\(1/4\)</span> <a href="https://projecteuclid.org/journals/annals-of-applied-probability/volume-7/issue-1/Weak-convergence-and-optimal-scaling-of-random-walk-Metropolis-algorithms/10.1214/aoap/1034625254.full">(Gelman et al. 1997)</a>.</p>
+<p><a href="https://www.tandfonline.com/doi/abs/10.1198/jcgs.2009.06134">source 2</a></p>

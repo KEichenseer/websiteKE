@@ -1,0 +1,1291 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  
+  
+  
+    <meta name="generator" content="Wowchemy 5.1.0 for Hugo" />
+  
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Kilian Eichenseer PhD" />
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don&#39;t know when." />
+
+  
+  <link rel="alternate" hreflang="en-us" href="/change-point-regression/" />
+
+  
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  
+
+  
+  
+  
+    <meta name="theme-color" content="#1565c0" />
+  
+
+  
+  
+    
+    <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha256-FMvZuGapsJLjouA6k7Eo2lusoAX9i0ShlWFG6qt7SLc=" crossorigin="anonymous">
+
+    
+    
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/styles/github.min.css" crossorigin="anonymous" title="hl-light" media="print" onload="this.media='all'">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" media="print" onload="this.media='all'" disabled>
+        
+      
+    
+
+    
+    
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css" integrity="sha512-1xoFisiGdy9nvho8EgXuXvnpR5GAMSjFwp40gSRE3NwdUdIMIKuPa7bqoUhLD0O/5tPNhteAsE5XyyMi5reQVA==" crossorigin="anonymous" media="print" onload="this.media='all'">
+    
+
+    
+
+    
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+      
+      
+
+      
+      
+
+      
+    
+  
+
+  
+  
+  
+    
+      
+      <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto+Mono&family=Roboto:wght@400;700&display=swap">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto+Mono&family=Roboto:wght@400;700&display=swap" media="print" onload="this.media='all'">
+    
+  
+
+  
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/wowchemy.ddb2a9c79d7760a321f1b5392a04566a.css" />
+
+  
+
+
+
+  
+
+  
+
+  
+
+
+
+
+  
+  
+  
+
+  
+
+  
+    <link rel="manifest" href="/index.webmanifest" />
+  
+
+  <link rel="icon" type="image/png" href="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_32x32_fill_lanczos_center_2.png" />
+  <link rel="apple-touch-icon" type="image/png" href="/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_180x180_fill_lanczos_center_2.png" />
+
+  <link rel="canonical" href="/change-point-regression/" />
+
+  
+  
+  
+  
+  
+  
+  
+  
+    
+  
+  
+  <meta property="twitter:card" content="summary_large_image" />
+  
+  <meta property="og:site_name" content="Kilian Eichenseer" />
+  <meta property="og:url" content="/change-point-regression/" />
+  <meta property="og:title" content="Change Point Regression | Kilian Eichenseer" />
+  <meta property="og:description" content="Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don&#39;t know when." /><meta property="og:image" content="/change-point-regression/featured.jpg" />
+    <meta property="twitter:image" content="/change-point-regression/featured.jpg" /><meta property="og:locale" content="en-us" />
+  
+    
+      <meta
+        property="article:published_time"
+        content="2021-07-28T00:00:00&#43;00:00"
+      />
+    
+    <meta property="article:modified_time" content="2021-07-28T10:58:49&#43;02:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/change-point-regression/"
+  },
+  "headline": "Change Point Regression",
+  
+  "image": [
+    "/change-point-regression/featured.jpg"
+  ],
+  
+  "datePublished": "2021-07-28T00:00:00Z",
+  "dateModified": "2021-07-28T10:58:49+02:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Kilian Eichenseer PhD"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Kilian Eichenseer",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "Assume we want to investigate the relationship between two variables, $x$ and $y$, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don't know when."
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+  <title>Change Point Regression | Kilian Eichenseer</title>
+</head>
+
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="page-wrapper   " data-wc-page-id="88ac832bdb2c666a211891011443bad9" >
+
+  
+  
+  
+  
+  
+  
+  
+  
+  <script src="/js/wowchemy-init.min.f16be01fc8fb2b5885dd67ce942d1185.js"></script>
+
+  
+
+
+<aside class="search-modal" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#" aria-label="Close"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search" class="form-control"
+        aria-label="Search...">
+        
+      </div>
+
+      
+      
+
+      
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+
+  <div class="page-header">
+    
+
+
+
+
+
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container-xl">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Kilian Eichenseer</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Kilian Eichenseer</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+
+        
+        
+        
+        
+
+        
+          
+            
+            
+          
+          
+            
+            
+            
+              
+            
+            
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+
+      
+      
+        
+          
+          <li class="nav-item d-none d-lg-inline-flex">
+            <a class="nav-link" href="/"  aria-label="">
+              <i class="fas fa-" aria-hidden="true"></i>
+            </a>
+          </li>
+        
+      
+
+      
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+      
+      <li class="nav-item dropdown theme-dropdown">
+        <a href="#" class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-label="Display preferences">
+          <i class="fas fa-moon" aria-hidden="true"></i>
+        </a>
+        <div class="dropdown-menu">
+          <a href="#" class="dropdown-item js-set-theme-light">
+            <span>Light</span>
+          </a>
+          <a href="#" class="dropdown-item js-set-theme-dark">
+            <span>Dark</span>
+          </a>
+          <a href="#" class="dropdown-item js-set-theme-auto">
+            <span>Automatic</span>
+          </a>
+        </div>
+      </li>
+      
+
+      
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  </div>
+
+  <div class="page-body">
+    <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Change Point Regression</h1>
+
+  
+
+  
+ 
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    Jul 28, 2021
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    7 min read
+  </span>
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+  
+
+</div>
+
+    
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+<script src="/change-point-regression/index_files/header-attrs/header-attrs.js"></script>
+
+
+<style>
+<p>.column-left{
+float: left;
+width: 52%;
+text-align: left;</p>
+<p>}</p>
+<style>
+.column-center{
+  float: center;
+  width: 100%;
+  text-align: left;
+
+}
+
+.column-right{
+  float: right;
+  width: 48%;
+  text-align: left;
+  margin-top: 6px;
+  line-height: 1.83;
+  font-size: 12px;
+
+}
+</style>
+<style type="text/css">
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 12px;
+}
+pre {
+  font-size: 13.2px
+}
+</style>
+<blockquote>
+<p><em>This implementation of change point regression was developed by <a href="https://www.plymouth.ac.uk/staff/julian-stander">Julian Stander</a> (University of Plymouth) in <a href="https://www.nature.com/articles/s41561-019-0392-9">Eichenseer et al. (2019)</a>.</em></p>
+</blockquote>
+<p>Assume we want to investigate the relationship between two variables, <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, that we have collected over a certain period of time. We have reason to believe that the relationship changed at some point, but we don’t know when.</p>
+<p>Let’s generate <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> and plot them. <span class="math inline">\(y\)</span> is linearly dependent on <span class="math inline">\(x\)</span> across the whole time series, but we induce an increase in the intercept, slope and residual variance at the <span class="math inline">\(35^{th}\)</span> observation:</p>
+<pre class="r"><code>set.seed(10) # change the seed for a different sequence of random numbers
+n &lt;- 60 # number of total data points
+n_shift &lt;- 35 # the data point at which we introduce a change
+x &lt;- rnorm(n,0,1) # generate x
+y &lt;- rnorm(n,0,0.5) + 0.5 * x # generate y without a change
+y[n_shift:n] &lt;- rnorm(length(n_shift:n),0,1) + 1 * x[n_shift:n] + 0.75 # introduce change</code></pre>
+<p><img src="/change-point-regression/index_files/figure-html/unnamed-chunk-2-1.png" width="960" /></p>
+<div id="the-regression-model" class="section level2">
+<h2>The regression model</h2>
+<p>Now we build a model that can recover the change point and the linear relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> before and after the change point.</p>
+<p>The first part of this model looks like an ordinary least squares regression of <span class="math inline">\(y\)</span> against <span class="math inline">\(x\)</span>:</p>
+<p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma_1^2), ~~\\ \mu_i = \alpha_1~+~\beta_1~x_i, ~~~~~ i = 1,...,n_{change}-1 \end{array} \end{equation} \end{aligned}\)</span></p>
+<p>Here we have a single intercept (<span class="math inline">\(\alpha_1\)</span>), slope (<span class="math inline">\(\beta_1\)</span>), and residual variance (<span class="math inline">\(\sigma^2_1\)</span>). <span class="math inline">\(n_{change}\)</span> - 1 denotes the number of obervations before the change point.</p>
+<p>From the change point <span class="math inline">\(n_{change}\)</span> onwards, we add an additional intercept, <span class="math inline">\(\alpha_2\)</span>, to the intercept from the first part (<span class="math inline">\(\alpha_1\)</span>). We do the same for the slope and the residual variance:</p>
+<p><span class="math inline">\(\begin{aligned} \begin{equation} \begin{array}{l} y_i \sim N(\mu_i, \sigma_1^2+\sigma_2^2), ~~\\ \mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i, ~~~~~ i = n_{change},...,n \end{array} \end{equation} \end{aligned}\)</span></p>
+<p><span class="math inline">\(n\)</span> denotes the total number of observations, 60 in this case. But how do we actually find the change point <span class="math inline">\(n_{change}\)</span>?</p>
+</div>
+<div id="implementation-in-jags" class="section level2">
+<h2>Implementation in JAGS</h2>
+<p>Here, we turn to the <a href="https://mcmc-jags.sourceforge.io/">JAGS programming environment</a>. Understanding a model written for JAGS is not easy at first. If you are keen on learning Bayesian modeling from scratch I can highly recommend Richard McElreath’s book <a href="https://xcelab.net/rm/statistical-rethinking/">Statistical Rethinking</a>. We will access JAGS with the <a href="https://CRAN.R-project.org/package=R2jags">R2jags package</a>, so we can keep using R even if we are writing a model for JAGS.</p>
+<blockquote>
+<p><em>Bayesian methods for detecting change points are also available in <a href="https://mc-stan.org/">Stan</a>, as discussed <a href="https://mc-stan.org/docs/2_27/stan-users-guide/change-point-section.html">here</a>. An application using English league football data can be found <a href="https://www.significancemagazine.com/sports/693-has-english-league-football-become-less-exciting">here</a>.</em></p>
+</blockquote>
+<p>Below, we look at the model. The R code that will be passed to JAGS later is on the left. On the right is an explanation for each line of the model.</p>
+<div class="column-right">
+<p>We save the model as a function named<br />
+<em>model_CPR</em>
+<br/></p>
+<p>Loop over all the data points <span class="math inline">\(1,...,n\)</span></p>
+<p><span class="math inline">\(y_i \sim N(\mu_i, \tau_i)\)</span><br />
+note that JAGS uses the precision <span class="math inline">\(\tau\)</span> instead<br />
+of <span class="math inline">\(\sigma^2\)</span>.     <span class="math inline">\(\tau = 1/\sigma^2\)</span></p>
+<p><em>step</em> takes the value <span class="math inline">\(1\)</span> if its argument is <span class="math inline">\(\ge 0\)</span>,<br />
+and <span class="math inline">\(0\)</span> otherwise, resulting in<br />
+<span class="math inline">\(\mu_i = \alpha_1~+~\beta_1~x_i\)</span>     before <span class="math inline">\(n_{change}\)</span> and<br />
+<span class="math inline">\(\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i\)</span><br />
+from <span class="math inline">\(n_{change}\)</span>   onwards.</p>
+<p>back-transform <span class="math inline">\(\log(\tau)\)</span> to <span class="math inline">\(\tau\)</span>.</p>
+<p>again, the <em>step</em> function is used to define <span class="math inline">\(\log(\tau)\)</span> before and after <span class="math inline">\(n_{change}\)</span>. Log-transformation is used to ensure that the <span class="math inline">\(\tau\)</span> resulting from <span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> is positive.</p>
+<p>We have to define priors for all parameters that are not specified by data.</p>
+<p><span class="math inline">\(\alpha_1 \sim N(\mu = 0, \tau = 10^{-4})\)</span> That is a normal distribution with mean <span class="math inline">\(\mu = 0\)</span> and standard deviation <span class="math inline">\(\sigma = 100\)</span>,<br />
+because <span class="math inline">\(\sigma = 1/\sqrt{\tau}\)</span><br />
+<span class="math inline">\(\alpha_2 \sim N(0, 10^{-4})\)</span></p>
+<p><span class="math inline">\(\beta_1 \sim N(0, 10^{-4})\)</span><br />
+<span class="math inline">\(\beta_2 \sim N(0, 10^{-4})\)</span></p>
+<p><span class="math inline">\(\log(\tau_1) \sim N(0, 10^{-4})\)</span><br />
+<span class="math inline">\(\log(\tau_2) \sim N(0, 10^{-4})\)</span></p>
+<p>Discrete prior on the change point. <span class="math inline">\(K\)</span> indicates one of the possible change points,
+based on the probability vector <span class="math inline">\(p\)</span>, which we need to specify beforehand.</p>
+</div>
+<pre class="r"><code>model_CPR &lt;- function(){
+  
+  ### Likelihood or data model part
+  for(i in 1:n){
+    
+  y[i] ~ dnorm(mu[i], tau[i]) 
+
+    
+    
+  mu[i] &lt;- alpha_1 + 
+  alpha_2 * step(i - n_change) +
+  (beta_1 + beta_2 * step(i - n_change))*x[i]
+  
+  
+  
+  tau[i] &lt;- exp(log_tau[i])
+  
+  log_tau[i] &lt;- log_tau_1 + log_tau_2 * 
+  step(i - n_change)
+  } 
+  
+  ### Priors
+  
+  
+  alpha_1 ~ dnorm(0, 1.0E-4)
+  
+  
+  alpha_2 ~ dnorm(0, 1.0E-4)
+  
+  beta_1 ~ dnorm(0, 1.0E-4)
+  beta_2 ~ dnorm(0, 1.0E-4)
+  
+  log_tau_1 ~ dnorm(0, 1.0E-4)
+  log_tau_2 ~ dnorm(0, 1.0E-4)
+  
+  K ~ dcat(p)
+  n_change &lt;- possible_change_points[K]
+
+}</code></pre>
+<p>Note that we put priors on <span class="math inline">\(\log(\tau_1)\)</span> and <span class="math inline">\(\log(\tau_2)\)</span>, rather than on <span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> directly, to ensure that the precision <span class="math inline">\(\tau\)</span> in the second part of the regression always remains positive. <span class="math inline">\(e^{\log(\tau_1) + \log(\tau_2)}\)</span> is always <span class="math inline">\(&gt; 0\)</span>, even if the term <span class="math inline">\(\log(\tau_1)\)</span> + <span class="math inline">\(\log(\tau_2)\)</span> becomes negative.</p>
+<p>Prepare the data which we pass to JAGS along with the model:</p>
+<pre class="r"><code># minimum number of the data points before and after the change
+  min_segment_length &lt;- 5 
+
+# assign indices to the potential change points we allow
+  possible_change_points &lt;- (1:n)[(min_segment_length+1):(n+1-min_segment_length)] 
+ 
+# number of possible change points
+  M &lt;- length(possible_change_points)  
+
+# probabilities for the discrete uniform prior on the possible change points, 
+# i.e. all possible change points have the same prior probability
+  p &lt;- rep(1 / M, length = M) 
+ 
+# save the data to a list for jags
+  data_CPR &lt;- list(&quot;x&quot;, &quot;y&quot;, &quot;n&quot;, &quot;possible_change_points&quot;, &quot;p&quot;) </code></pre>
+<p>Load the <em>R2jags</em> package to access <em>JAGS</em> in <em>R</em>:</p>
+<pre class="r"><code>  library(R2jags) </code></pre>
+<p>Now we execute the change point regression. We instruct JAGS to run three seperate chains so we can verify that the results are consistent. We allow 2000 iterations of the Markov chain Monte Carlo algorithm for each chain, the first 1000 of which will automatically be discarded as burn-in.</p>
+<pre class="r"><code> CPR  &lt;- jags(data = data_CPR, 
+                         parameters.to.save = c(&quot;alpha_1&quot;, &quot;alpha_2&quot;, 
+                                                &quot;beta_1&quot;,&quot;beta_2&quot;,
+                                                &quot;log_tau_1&quot;,&quot;log_tau_2&quot;,
+                                                &quot;n_change&quot;), 
+                         n.iter = 2000, 
+                         n.chains = 3,
+                         model.file = model_CPR)</code></pre>
+</div>
+<div id="the-results" class="section level2">
+<h2>The results</h2>
+<p>To visualise the results and inspect the posterior, we are using the <em>ggmcmc</em> package, which relies on the <em>ggplot2</em> package. For brevity, we just look at the <span class="math inline">\(n_{change}\)</span> parameter here.</p>
+<pre class="r"><code>library(ggmcmc)
+CPR.ggs &lt;- ggs(as.mcmc(CPR)) # convert to ggs object
+ggs_traceplot(CPR.ggs, family = &quot;n_change&quot;) </code></pre>
+<p><img src="/change-point-regression/index_files/figure-html/unnamed-chunk-7-1.png" width="1000 %" /></p>
+<p>Looks like the chains converge and mix nicely. We can already see that our model locates the change point somewhere between <span class="math inline">\(30\)</span> and <span class="math inline">\(40\)</span>, although the chains occasionally explore regions further away.</p>
+<p>Let’s look at the posterior probabilities for the possible change points:</p>
+<pre class="r"><code>ggplot(data = CPR.ggs %&gt;% filter(Parameter == &quot;n_change&quot;),
+  aes(x=value, y = 3*(..count..)/sum(..count..), fill = as.factor(Chain))) + 
+  geom_vline(xintercept = 35,lty = 2) + geom_bar(position = &quot;identity&quot;, alpha = 0.5) +
+  ylab(&quot;posterior probability&quot;) + xlab(&quot;n_change&quot;) + labs(fill=&#39;Chain&#39;)</code></pre>
+<p><img src="/change-point-regression/index_files/figure-html/unnamed-chunk-8-1.png" width="700 %" /></p>
+<p>The <span class="math inline">\(37^{th}\)</span> point has the highest probability of being the change point. That is not far off from where we introduced the change, at the <span class="math inline">\(35^{th}\)</span> point (dashed line). The random generation of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> has led to <span class="math inline">\(37\)</span> being favoured. We also note that there are only minor differences between the three chains, and those differences would likely further dwindle if we were to let the chains run for longer.</p>
+<p>Using the posterior distribution, we can answer questions like: “In which interval does the change point fall with 90 % probability?”</p>
+<pre class="r"><code>quantile(CPR$BUGSoutput$sims.list$n_change, probs = c(0.05, 0.95))</code></pre>
+<pre><code>##  5% 95% 
+##  33  39</code></pre>
+<p>We can also inquire about the probability that the change point falls in the interval <span class="math inline">\(34\)</span> to <span class="math inline">\(38\)</span>:</p>
+<pre class="r"><code>round(length(which(CPR$BUGSoutput$sims.list$n_change %in% 34:38))/
+              (CPR$BUGSoutput$n.sims),2)</code></pre>
+<pre><code>## [1] 0.87</code></pre>
+<p>Finally, let’s have a look at the regression parameters and plot the resulting regressions before and after the most likely change point.</p>
+<p><img src="/change-point-regression/index_files/figure-html/unnamed-chunk-12-1.png" width="475 %" />
+The intercept, slope, and residual variance all increase after the change point.</p>
+<p>This can be immediately seen when plotting the change point regression:
+<img src="/change-point-regression/index_files/figure-html/unnamed-chunk-13-1.png" width="375 %" />
+The shaded areas denote <span class="math inline">\(95\)</span> % credible intervals around the regression lines.</p>
+<p>You can find the full R code for this analysis at <a href="https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R" class="uri">https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R</a></p>
+<p>Get in touch if you have any comments or questions!</p>
+</div>
+
+    </div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+  
+  
+    
+  
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="avatar mr-3 avatar-circle" src="/author/kilian-eichenseer-phd/avatar_hucb2b171b2d9632a768b398bf7da88278_391899_270x270_fill_q75_lanczos_center.jpg" alt="Kilian Eichenseer PhD">
+    
+
+    <div class="media-body">
+      <h5 class="card-title">Kilian Eichenseer PhD</h5>
+      <h6 class="card-subtitle">Quantitative Palaeobiology</h6>
+      
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="/#contact" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="/" >
+        <i class="fas fa-"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.co.uk/citations?hl=en&amp;user=mZkIeK8AAAAJ" target="_blank" rel="noopener">
+        <i class="fas fa-graduation-cap"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.researchgate.net/profile/Kilian-Eichenseer" target="_blank" rel="noopener">
+        <i class="fab fa-researchgate"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/KEichenseer" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  </div>
+</article>
+  </div>
+
+  <div class="page-footer">
+    
+    
+    <div class="container">
+      <footer class="site-footer">
+
+  
+
+  
+
+  
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    
+    
+    
+      
+      
+      
+      
+      
+      
+      Published with <a href="https://wowchemy.com/?utm_campaign=poweredby" target="_blank" rel="noopener">Wowchemy</a> — the free, <a href="https://github.com/wowchemy/wowchemy-hugo-modules" target="_blank" rel="noopener">open source</a> website builder that empowers creators.
+    
+  </p>
+</footer>
+
+    </div>
+    
+  </div>
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/instant.page/5.1.0/instantpage.min.js" integrity="sha512-1+qUtKoh9XZW7j+6LhRMAyOrgSQKenQ4mluTR+cvxXjP1Z54RxZuzstR/H9kgPXQsVB8IW7DMDFUJpzLjvhGSQ==" crossorigin="anonymous"></script>
+
+      
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      
+
+      
+      
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/highlight.min.js" integrity="sha512-TDKKr+IvoqZnPzc3l35hdjpHD0m+b2EC2SrLEgKDRWpxf2rFCxemkgvJ5kfU48ip+Y+m2XVKyOCD85ybtlZDmw==" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/python.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/latex.min.js"></script>
+        
+      
+
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js" integrity="sha512-SeiQaaDh73yrb56sTW/RgVdi/mMqNeM2oBwubFHagc5BkixSpP1fvqF47mKzPGWYSSy4RwbBunrJBQ4Co8fRWA==" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+    
+      
+      <script id="search-hit-fuse-template" type="text/x-template">
+        <div class="search-hit" id="summary-{{key}}">
+          <div class="search-hit-content">
+            <div class="search-hit-name">
+              <a href="{{relpermalink}}">{{title}}</a>
+              <div class="article-metadata search-hit-type">{{type}}</div>
+              <p class="search-hit-description">{{snippet}}</p>
+            </div>
+          </div>
+        </div>
+      </script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+      
+    
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    <script src="/js/bootstrap.bundle.min.8b7df62fd2da18ce73e29c13cc0a6198.js"></script>
+
+    
+    
+      
+      
+      
+      
+      
+      
+      
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+      
+      
+    
+    
+    <script src="/en/js/wowchemy.min.71e713848164e269bc250f377042949d.js"></script>
+
+    
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+
+
+
+</body>
+</html>

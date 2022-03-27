@@ -2,108 +2,108 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://keichenseer.netlify.app/courses/example/python/</loc>
+    <loc>/courses/example/python/</loc>
     <lastmod>2021-01-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/post/</loc>
+    <loc>/post/</loc>
     <lastmod>2022-03-26T20:13:04+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/courses/example/visualization/</loc>
+    <loc>/courses/example/visualization/</loc>
     <lastmod>2021-01-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/courses/example/stats/</loc>
+    <loc>/courses/example/stats/</loc>
     <lastmod>2021-01-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/talk/example-talk/</loc>
+    <loc>/talk/example-talk/</loc>
     <lastmod>2030-06-01T13:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/</loc>
+    <loc>/</loc>
     <lastmod>2030-06-01T13:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/event/</loc>
+    <loc>/event/</loc>
     <lastmod>2030-06-01T13:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposal-standard-deviation/</loc>
+    <loc>/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/</loc>
     <lastmod>2022-03-26T20:13:04+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/post/a-metropolis-algorithm-in-r-part-1-generalised-logistic-function/</loc>
+    <loc>/post/a-metropolis-algorithm-in-r-part-1-implementation/</loc>
     <lastmod>2022-02-12T21:20:10+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/post/change-point-regression/</loc>
+    <loc>/post/change-point-regression/</loc>
     <lastmod>2021-07-28T10:58:49+02:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/courses/</loc>
+    <loc>/courses/</loc>
     <lastmod>2021-01-24T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/courses/example/</loc>
+    <loc>/courses/example/</loc>
     <lastmod>2021-01-24T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/publication-type/3/</loc>
+    <loc>/publication-type/3/</loc>
     <lastmod>2019-04-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/author/admin/</loc>
+    <loc>/author/admin/</loc>
     <lastmod>2019-04-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/publication/preprint/</loc>
+    <loc>/publication/preprint/</loc>
     <lastmod>2019-04-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/authors/</loc>
+    <loc>/authors/</loc>
     <lastmod>2019-04-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/publication_types/</loc>
+    <loc>/publication_types/</loc>
     <lastmod>2019-04-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/publication/</loc>
+    <loc>/publication/</loc>
     <lastmod>2019-04-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/tag/source-themes/</loc>
+    <loc>/tag/source-themes/</loc>
     <lastmod>2019-04-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/tags/</loc>
+    <loc>/tags/</loc>
     <lastmod>2019-04-07T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/slides/</loc>
+    <loc>/slides/</loc>
     <lastmod>2019-02-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/slides/example/</loc>
+    <loc>/slides/example/</loc>
     <lastmod>2019-02-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/tag/deep-learning/</loc>
+    <loc>/tag/deep-learning/</loc>
     <lastmod>2016-04-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/tag/demo/</loc>
+    <loc>/tag/demo/</loc>
     <lastmod>2016-04-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/project/external-project/</loc>
+    <loc>/project/external-project/</loc>
     <lastmod>2016-04-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/project/internal-project/</loc>
+    <loc>/project/internal-project/</loc>
     <lastmod>2016-04-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/project/</loc>
+    <loc>/project/</loc>
     <lastmod>2016-04-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/publication-type/2/</loc>
+    <loc>/publication-type/2/</loc>
     <lastmod>2015-09-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/publication/journal-article/</loc>
+    <loc>/publication/journal-article/</loc>
     <lastmod>2015-09-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/author/robert-ford/</loc>
+    <loc>/author/robert-ford/</loc>
     <lastmod>2015-09-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/publication-type/1/</loc>
+    <loc>/publication-type/1/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/publication/conference-paper/</loc>
+    <loc>/publication/conference-paper/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://keichenseer.netlify.app/admin/</loc>
+    <loc>/admin/</loc>
   </url><url>
-    <loc>https://keichenseer.netlify.app/categories/</loc>
+    <loc>/categories/</loc>
   </url><url>
-    <loc>https://keichenseer.netlify.app/author/kilian-eichenseer-phd/</loc>
+    <loc>/author/kilian-eichenseer-phd/</loc>
   </url><url>
-    <loc>https://keichenseer.netlify.app/author/%E5%90%B3%E6%81%A9%E9%81%94/</loc>
+    <loc>/author/%E5%90%B3%E6%81%A9%E9%81%94/</loc>
   </url>
 </urlset>

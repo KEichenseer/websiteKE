@@ -18,7 +18,7 @@ header-includes: \usepackage{graphics}
 summary: The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use it for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature estimates.
 ---
 
-<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
 
 
 <style>
@@ -64,7 +64,6 @@ run_MCMC &lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = r
   sd_it &lt;- 1 # iteration index for the proposal standard deviation
   coeff_sd &lt;- array(NA_real_,dim = c(nAdapt,4)) # array to store proposal SDs
   coeff_sd[1:3,] &lt;- proposal_sd_init # proposal SDs before adaptation
-  coeff_diff &lt;- array(NA_real_,dim = c(nAdapt,4)) # array to store the coeff. differences
   # pre-define exp. decaying weights for weighted variance
   allWeights &lt;- exp((-(nAdapt-2)):0/adaptation_decay) 
   accept &lt;- rep(NA,nIter) # vector to store the acceptance or rejection of proposals
@@ -94,12 +93,10 @@ run_MCMC &lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = r
     }
     # Adaptation of proposal SD
     if(i &lt; nAdapt){ # stop adaptation after nAdapt iterations
-
-    coeff_diff[i,] &lt;- coefficients[i,]-coefficients[i-1,] # change of the coefficients
     if(i&gt;=3) {
     weights = allWeights[(nAdapt-i+2):nAdapt-1] # select weights for current iteration
     sum_weights = sum(weights) 
-    weighted_var_coeff &lt;- apply(coeff_diff[2:i,], 2, # calculate weighted variance
+    weighted_var_coeff &lt;- apply(coefficients[2:i,], 2, # calculate weighted variance
           function(f) weighted_var(
           f, weights = weights, sum_weights = sum_weights))
 
@@ -123,5 +120,20 @@ run_MCMC &lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = r
                 accept)
   return(output)
 }</code></pre>
+<pre class="r"><code>### Taking samples
+set.seed(9)
+sample_lat &lt;- runif(10,0,90)
+sample_data &lt;- data.frame(
+  x = sample_lat, 
+  y = gradient(x = sample_lat, coeff = c(-2.0, 28, 41, 0.1), sd = 2))
+
+### Analysis
+nIter &lt;- 100000
+print(system.time({m7 &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
+                                 coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
+                                 nIter = nIter, nAdapt = 5000, adaptation_decay =500,
+                                 proposal_sd_init = rep(5,4))}))</code></pre>
+<pre><code>##    user  system elapsed 
+##    3.95    0.70    4.66</code></pre>
 <p><span class="math inline">\(1/4\)</span> <a href="https://projecteuclid.org/journals/annals-of-applied-probability/volume-7/issue-1/Weak-convergence-and-optimal-scaling-of-random-walk-Metropolis-algorithms/10.1214/aoap/1034625254.full">(Gelman et al. 1997)</a>.</p>
 <p><a href="https://www.tandfonline.com/doi/abs/10.1198/jcgs.2009.06134">source 2</a></p>

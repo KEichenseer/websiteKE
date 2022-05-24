@@ -118,8 +118,7 @@ weighted_var <- function(x, weights, sum_weights) {
 }
 ```
 
-We can re-use the auxiliary functions of the [standard Metropolis algorithm](/post/a-metropolis-algorithm-in-r-part-1-implementation). The specification of the weights and the adaption of $\sigma_{proposal}$ is implemented in the updated main MCMC loop. `nAdapt` specifies the number of iterations in which adaptations takes place. These iterations need to be discarded as burn-in to not bias the estimate of the posterior. `adaptation_decay` is a constant that influences the exponential decay of the weights for the weighted variance function, with larger values leading to slower decay.
-
+We can re-use most of the auxiliary functions of the [standard Metropolis algorithm](/post/a-metropolis-algorithm-in-r-part-1-implementation), but update the proposal function to add a mixture of a normal distribution $N(current~value,0.01)$
 ```{r, warning = FALSE, echo = FALSE}
 gradient <- function(x, coeff, sdy) { # sigma is labelled "sdy"
   A = coeff[1]
@@ -150,10 +149,15 @@ logposterior <- function(x, y, coeff, sdy){
   return (loglik(x, y, coeff, sdy) + logprior(coeff))
 }
 
+```
+
+```{r, warning = FALSE, echo = TRUE}
 MH_propose <- function(coeff, proposal_sd){
-  return(rnorm(4,mean = coeff, sd= proposal_sd))
+  return(rnorm(4,mean = 0.95*coeff, sd= proposal_sd)+rnorm(4,mean = 0.05*coeff, sd= 0.01))
 }
 ```
+
+The specification of the weights and the adaption of $\sigma_{proposal}$ is implemented in the updated main MCMC loop. `nAdapt` specifies the number of iterations in which adaptations takes place. These iterations need to be discarded as burn-in to not bias the estimate of the posterior. `adaptation_decay` is a constant that influences the exponential decay of the weights for the weighted variance function, with larger values leading to slower decay.
 
 ```{r, warning = FALSE, echo = TRUE}
 # Main MCMCM function
@@ -242,8 +246,8 @@ sample_data <- data.frame(
 nIter <- 100000
 print(system.time({m7 <- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
-                                 nIter = nIter, nAdapt = 5000, adaptation_decay =500,
-                                 proposal_sd_init = rep(5,4))}))
+                                 nIter = nIter, nAdapt = 5000, adaptation_decay =1000,
+                                 proposal_sd_init = c(1,1,1,0.1))}))
 
 ```
 

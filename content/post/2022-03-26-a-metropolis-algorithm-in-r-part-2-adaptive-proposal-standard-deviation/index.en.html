@@ -1,13 +1,13 @@
 ---
-title: 'A Metropolis algorithm in R - Part 2: Adaptive proposals'
+title: "A Metropolis algorithm in R - Part 2: Adaptive proposals"
 author: ''
-date: '2022-03-26'
-slug: a-metropolis-algorithm-in-r-part-2-adaptive-proposals
+date: "2022-03-26"
+output: pdf_document
 categories: []
 tags: []
 subtitle: ''
 authors: []
-lastmod: '2022-03-26T20:13:04Z'
+lastmod: "2022-03-26T20:13:04Z"
 featured: no
 image:
   caption: ''
@@ -15,7 +15,10 @@ image:
   preview_only: no
 projects: []
 header-includes: \usepackage{graphics}
-summary: The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use it for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature estimates.
+summary: The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use
+  it for estimating a generalised logistic function to reconstruct a latitudinal climate
+  gradient from a small sample of temperature estimates.
+slug: "a-metropolis-algorithm-in-r-part-2-adaptive-proposals"
 ---
 
 
@@ -38,17 +41,22 @@ pre {
 }
 </style>
 <blockquote>
-<p><em>The model presented herein uses modified code from <a href="https://khayatrayen.github.io/MCMC.html" class="uri">https://khayatrayen.github.io/MCMC.html</a>. I am currently developing a Metropolis-within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
+<p><em>I am currently developing a Metropolis-within-Gibbs algorithm for stratigraphic correlation of <span class="math inline">\(\delta\)</span><sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the <a href="https://smithlabdurham.github.io/#!team">Smith Lab at Durham University</a>.</em></p>
 </blockquote>
 <p>In the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous post</a>, we built a Metropolis algorithm to estimate latitudinal temperature gradients, approximated by a generalised logistic function. Recall that the Metropolis algorithm works by proposing new parameter values and evaluating the joint posterior probability of the model with these values, against the posterior with the current values.</p>
 <p>How do we chose a new value for a parameter? A common approach is to sample a normal distribution, centred at the current value (i.e. the mean of the distribution is the current value). Choosing the standard deviation of the proposal distribution (<span class="math inline">\(\sigma_{proposal}\)</span>) is more tricky. If <span class="math inline">\(\sigma_{proposal}\)</span> is too high, we end up proposing a lot of values at the far tail ends of the target posterior distribution, which will usually be rejected (see below, green proposals). This leads to inefficient sampling and patchy coverage of the posterior distribution. Conversely, a very small <span class="math inline">\(\sigma_{proposal}\)</span> leads to most new values being accepted, but the resulting Markov chain will move very slowly through the parameter space, leading to a low effective sample size (red proposals below). Instead, some intermediate <span class="math inline">\(\sigma_{proposal}\)</span> is desirable, at which the Markov chain moves quickly through the parameter space, without too many rejections (e.g., yellow proposals below).</p>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
-<p>It turns out that the Metropolis algorithm is most efficient when the acceptance rate of proposals is between $ 0.1$ and <span class="math inline">\(0.5\)</span> (see <a href="https://www.jstor.org/stable/pdf/3182776.pdf?casa_token=L8a1gJYi1SgAAAAA:ZVa-bCWzwBW3vAat13KRVDkDRu63BWmdxddvp2xLGAjV0bt1j72SP_tEXsxJrU1GqRDyu_23QMDMnCrMJM9Ydrc3bUAylT9eeJeqs5cmPrk9EFIiq9i-">Roberts and Rosenthal 2001</a>). In practice, this could be achieved e.g. by monitoring the acceptance rate or the standard deviation of the target distribution (<span class="math inline">\(\sigma_{target}\)</span>), and adjusting <span class="math inline">\(\sigma_{proposal}\)</span> accordingly. For a univariate Gaussian target distribution, the optimal <span class="math inline">\(\sigma_{proposal}\)</span> is around <span class="math inline">\(~2.4 \times \sigma_{target}\)</span> (<a href="http://people.ee.duke.edu/~lcarin/baystat5.pdf">Gelman et al. 1996</a>). Our target distributions are not exactly Gaussian, but we will try adapting <span class="math inline">\(\sigma_{proposal}\)</span> and check whether we achieve reasonable acceptance rates.</p>
+<p>It turns out that the Metropolis algorithm is usually most efficient when the acceptance rate of proposals is between $ 0.2$ and <span class="math inline">\(0.5\)</span> (see <a href="https://www.jstor.org/stable/pdf/3182776.pdf?casa_token=L8a1gJYi1SgAAAAA:ZVa-bCWzwBW3vAat13KRVDkDRu63BWmdxddvp2xLGAjV0bt1j72SP_tEXsxJrU1GqRDyu_23QMDMnCrMJM9Ydrc3bUAylT9eeJeqs5cmPrk9EFIiq9i-">Roberts and Rosenthal 2001</a>). In practice, this could be achieved e.g. by monitoring the acceptance rate or the standard deviation of the target distribution (<span class="math inline">\(\sigma_{target}\)</span>), and adjusting <span class="math inline">\(\sigma_{proposal}\)</span> accordingly. For a four-dimensional Gaussian target distribution, the optimal <span class="math inline">\(\sigma_{proposal}\)</span> should be around <span class="math inline">\(~2.4/sqrt(4) \times \sigma_{target}\)</span> (<a href="http://people.ee.duke.edu/~lcarin/baystat5.pdf">Gelman et al. 1996</a>). Our target distributions are not exactly Gaussian, but we will try adapting <span class="math inline">\(\sigma_{proposal}\)</span> and check whether we achieve reasonable acceptance rates.</p>
 <p>In order to allow for <span class="math inline">\(\sigma_{proposal}\)</span> to quickly converge on the optimum, the weighted variance of the samples from the Markov chains from previous iterations is calculated. The weights decrease backwards in time, so that the recent values have more influence on the new value for <span class="math inline">\(\sigma_{proposal}\)</span>. The weighted variance is calculated with the following function, where <code>x</code> denotes a vector of samples from the Markov chain, weights a vector of <code>weights</code> (see below), and <code>sum_weights</code> records the sum of the weights vector:</p>
 <pre class="r"><code>weighted_var &lt;- function(x, weights, sum_weights) {
   sum(weights*((x-sum(weights*x)/sum_weights)^2))/(sum_weights)
 }</code></pre>
-<p>We can re-use the auxiliary functions of the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">standard Metropolis algorithm</a>. The specification of the weights and the adaption of <span class="math inline">\(\sigma_{proposal}\)</span> is implemented in the updated main MCMC loop. <code>nAdapt</code> specifies the number of iterations in which adaptations takes place. These iterations need to be discarded as burn-in to not bias the estimate of the posterior. <code>adaptation_decay</code> is a constant that influences the exponential decay of the weights for the weighted variance function, with larger values leading to slower decay.</p>
+<p>We can re-use most of the auxiliary functions of the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">standard Metropolis algorithm</a>. Notably, the value of <code>propose_sd</code> will change during the adaptation.</p>
+<pre class="r"><code>MH_propose &lt;- function(coeff, proposal_sd){
+  rnorm(4,mean = coeff, sd= proposal_sd)
+}</code></pre>
+<p>The specification of the weights and the adaption of <span class="math inline">\(\sigma_{proposal}\)</span> is implemented in the updated MCMC loop. <code>nAdapt</code> specifies the number of iterations in which adaptations takes place. These iterations need to be discarded as burn-in to not bias the estimate of the posterior. <code>adaptation_decay</code> is a constant that influences the exponential decay of the weights for the weighted variance function, with larger values leading to slower decay.</p>
+<p>Below is the full MCMC loop:</p>
 <pre class="r"><code># Main MCMCM function
 run_MCMC &lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = rep(5,4), 
                      nAdapt = 5000, adaptation_decay = 500){
@@ -102,7 +110,7 @@ run_MCMC &lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = r
 
     for(v in 1:4) {if(weighted_var_coeff[v]==0)   { # 
               coeff_sd[i+1,v] &lt;- sqrt(coeff_sd[i,v]^2/10)
-      } else  coeff_sd[i+1,v] &lt;- 2.4 * sqrt(weighted_var_coeff[v])
+      } else  coeff_sd[i+1,v] &lt;- 2.4/sqrt(4) * sqrt(weighted_var_coeff[v])
     }                   
                            
     }
@@ -131,9 +139,9 @@ sample_data &lt;- data.frame(
 nIter &lt;- 100000
 print(system.time({m7 &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
-                                 nIter = nIter, nAdapt = 5000, adaptation_decay =500,
-                                 proposal_sd_init = rep(5,4))}))</code></pre>
+                                 nIter = nIter, nAdapt = 5000, adaptation_decay =1000,
+                                 proposal_sd_init = c(1,1,1,0.1))}))</code></pre>
 <pre><code>##    user  system elapsed 
-##    3.95    0.70    4.66</code></pre>
+##    5.42    0.63    6.04</code></pre>
 <p><span class="math inline">\(1/4\)</span> <a href="https://projecteuclid.org/journals/annals-of-applied-probability/volume-7/issue-1/Weak-convergence-and-optimal-scaling-of-random-walk-Metropolis-algorithms/10.1214/aoap/1034625254.full">(Gelman et al. 1997)</a>.</p>
 <p><a href="https://www.tandfonline.com/doi/abs/10.1198/jcgs.2009.06134">source 2</a></p>

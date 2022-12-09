@@ -15,9 +15,7 @@ image:
   preview_only: no
 projects: []
 header-includes: \usepackage{graphics}
-summary: The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use
-  it for estimating a generalised logistic function to reconstruct a latitudinal climate
-  gradient from a small sample of temperature estimates.
+summary: To work well, the Metropolis algorithm relies on good proposal values. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling.
 slug: "a-metropolis-algorithm-in-r-part-2-adaptive-proposals"
 ---
 

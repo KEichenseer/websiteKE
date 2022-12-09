@@ -30,7 +30,7 @@
   
     
   
-  <meta name="description" content="The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use it for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature estimates." />
+  <meta name="description" content="To work well, the Metropolis algorithm relies on good proposal values. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling." />
 
   
   <link rel="alternate" hreflang="en-us" href="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/" />
@@ -294,7 +294,7 @@
   <meta property="og:site_name" content="Kilian Eichenseer" />
   <meta property="og:url" content="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/" />
   <meta property="og:title" content="A Metropolis algorithm in R - Part 2: Adaptive proposals | Kilian Eichenseer" />
-  <meta property="og:description" content="The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use it for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature estimates." /><meta property="og:image" content="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/featured.PNG" />
+  <meta property="og:description" content="To work well, the Metropolis algorithm relies on good proposal values. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling." /><meta property="og:image" content="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/featured.PNG" />
     <meta property="twitter:image" content="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/featured.PNG" /><meta property="og:locale" content="en-us" />
   
     
@@ -351,7 +351,7 @@
       "url": "/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_192x192_fill_lanczos_center_2.png"
     }
   },
-  "description": "The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use it for estimating a generalised logistic function to reconstruct a latitudinal climate gradient from a small sample of temperature estimates."
+  "description": "To work well, the Metropolis algorithm relies on good proposal values. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling."
 }
 </script>
 
@@ -760,7 +760,7 @@
 </div>
 
 
-<div class="article-header article-container featured-image-wrapper mt-4 mb-4" style="max-width: 566px; max-height: 598px;">
+<div class="article-header article-container featured-image-wrapper mt-4 mb-4" style="max-width: 618px; max-height: 656px;">
   <div style="position: relative">
     <img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/featured.PNG" alt="" class="featured-image">
     
@@ -892,7 +892,7 @@ print(system.time({m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  nIter = nIter, nAdapt = 5000, adaptation_decay =500,
                                  proposal_sd_init = c(5,5,5,5))}))</code></pre>
 <pre><code>##    user  system elapsed 
-##    4.97    0.53    5.51</code></pre>
+##    4.26    0.67    4.94</code></pre>
 <p>Looking at the traceplots, the MCMC runs well after an initial burn-in period, in which <span class="math inline">\(\sigma_{proposal}\)</span> was adjusted.
 <img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-7-1.png" width="691.2" />
 The traceplot below shows how the standard deviations of the proposals were adapted during the first <span class="math inline">\(5000\)</span> iterations. Despite a very bad initial guess for the <span class="math inline">\(\sigma_{proposal}\)</span> of <span class="math inline">\(Q\)</span>, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. The effective sample size after adaptation is <span class="math inline">\(3720\)</span>, which is <span class="math inline">\(52\%\)</span> higher than the effective sample size obtained with the same number of iterations in the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous version</a> of this model, where we tried to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>.

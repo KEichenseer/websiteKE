@@ -304,7 +304,7 @@ plot_grid(p1, p2, ncol = 2, labels = c("", ""),
 
 ```
 The traceplot below shows how the standard deviations of the proposals were adapted during the first $5000$ iterations. Despite a very bad initial guess for the $\sigma_{proposal}$ of $Q$, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. The effective sample size after adaptation is $`r round( mcmcse::multiESS(m$coeff[5001:nIter,]),0)`$, which is $`r round((mcmcse::multiESS(m$coeff[5001:nIter,])/2453 - 1)*100,0)`\%$ higher than the effective sample size obtained with the same number of iterations in the [previous version](/post/a-metropolis-algorithm-in-r-part-1-implementation) of this model, where we tried to guess good values for $\sigma_{proposal}$.
-```{r, fig.width = 7.2, fig.height = 7.2, warning = FALSE, echo = FALSE, message = FALSE}
+```{r, fig.width = 5.6, fig.height = 5.6, warning = FALSE, echo = FALSE, message = FALSE}
 colnames(m$proposal_sd) <- c("A","K", "M", "Q")
 mm <- m$proposal_sd %>% dplyr::mutate(iteration = 1:nrow(.))
 mm <- melt(mm,id.vars = "iteration")

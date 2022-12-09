@@ -12,7 +12,7 @@ lastmod: "2022-03-26T20:13:04Z"
 image:
   caption: ''
   focal_point: ''
-  preview_only: no
+  preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
 summary: To work well, the Metropolis algorithm relies on good proposal values. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling.
@@ -138,7 +138,7 @@ print(system.time({m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  nIter = nIter, nAdapt = 5000, adaptation_decay =500,
                                  proposal_sd_init = c(5,5,5,5))}))</code></pre>
 <pre><code>##    user  system elapsed 
-##    4.26    0.67    4.94</code></pre>
+##    4.56    0.52    5.08</code></pre>
 <p>Looking at the traceplots, the MCMC runs well after an initial burn-in period, in which <span class="math inline">\(\sigma_{proposal}\)</span> was adjusted.
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-7-1.png" width="691.2" />
 The traceplot below shows how the standard deviations of the proposals were adapted during the first <span class="math inline">\(5000\)</span> iterations. Despite a very bad initial guess for the <span class="math inline">\(\sigma_{proposal}\)</span> of <span class="math inline">\(Q\)</span>, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. The effective sample size after adaptation is <span class="math inline">\(3720\)</span>, which is <span class="math inline">\(52\%\)</span> higher than the effective sample size obtained with the same number of iterations in the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous version</a> of this model, where we tried to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>.

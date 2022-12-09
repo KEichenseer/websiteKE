@@ -701,8 +701,6 @@
 
   
   
-    
-  
 
 
 <div class="article-container pt-3">
@@ -762,9 +760,9 @@
 </div>
 
 
-<div class="article-header article-container featured-image-wrapper mt-4 mb-4" style="max-width: 720px; max-height: 551px;">
+<div class="article-header article-container featured-image-wrapper mt-4 mb-4" style="max-width: 566px; max-height: 598px;">
   <div style="position: relative">
-    <img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/featured_hu92797261cce9963b5428e26af04732db_85046_720x0_resize_lanczos_2.PNG" alt="" class="featured-image">
+    <img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/featured.PNG" alt="" class="featured-image">
     
   </div>
 </div>
@@ -894,7 +892,7 @@ print(system.time({m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  nIter = nIter, nAdapt = 5000, adaptation_decay =500,
                                  proposal_sd_init = c(5,5,5,5))}))</code></pre>
 <pre><code>##    user  system elapsed 
-##    4.71    0.46    5.16</code></pre>
+##    4.97    0.53    5.51</code></pre>
 <p>Looking at the traceplots, the MCMC runs well after an initial burn-in period, in which <span class="math inline">\(\sigma_{proposal}\)</span> was adjusted.
 <img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-7-1.png" width="691.2" />
 The traceplot below shows how the standard deviations of the proposals were adapted during the first <span class="math inline">\(5000\)</span> iterations. Despite a very bad initial guess for the <span class="math inline">\(\sigma_{proposal}\)</span> of <span class="math inline">\(Q\)</span>, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. The effective sample size after adaptation is <span class="math inline">\(3720\)</span>, which is <span class="math inline">\(52\%\)</span> higher than the effective sample size obtained with the same number of iterations in the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous version</a> of this model, where we tried to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>.

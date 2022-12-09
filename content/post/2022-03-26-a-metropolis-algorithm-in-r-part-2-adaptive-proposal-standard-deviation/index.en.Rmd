@@ -12,7 +12,7 @@ lastmod: "2022-03-26T20:13:04Z"
 image:
   caption: ''
   focal_point: ''
-  preview_only: no
+  preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
 summary: To work well, the Metropolis algorithm relies on good proposal values. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling.

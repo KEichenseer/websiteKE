@@ -43,7 +43,6 @@ pre {
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-> *I am currently developing a Metropolis-within-Gibbs algorithm for stratigraphic correlation of $\delta$<sup>13</sup>C records with Andrew R. Millard and Martin R. Smith at the [Smith Lab at Durham University](https://smithlabdurham.github.io/#!team).*
 
 In the [previous post](/post/a-metropolis-algorithm-in-r-part-1-implementation), we built a Metropolis algorithm to estimate latitudinal temperature gradients, approximated by a generalised logistic function. Recall that the Metropolis algorithm works by proposing new parameter values and evaluating the joint posterior probability of the model with these values, against the posterior with the current values.
 
@@ -111,7 +110,7 @@ legend("topright", as.expression(sapply(1:3, function(x) bquote(italic(sigma["pr
 
 ```
 
-It turns out that the Metropolis algorithm is usually most efficient when the acceptance rate of proposals is between $ 0.2$ and $0.5$ (see [Roberts and Rosenthal 2001](https://www.jstor.org/stable/pdf/3182776.pdf?casa_token=L8a1gJYi1SgAAAAA:ZVa-bCWzwBW3vAat13KRVDkDRu63BWmdxddvp2xLGAjV0bt1j72SP_tEXsxJrU1GqRDyu_23QMDMnCrMJM9Ydrc3bUAylT9eeJeqs5cmPrk9EFIiq9i-)). In practice, this could be achieved e.g. by monitoring the acceptance rate or the standard deviation of the target distribution ($\sigma_{target}$), and adjusting $\sigma_{proposal}$ accordingly. For a four-dimensional Gaussian target distribution, the optimal $\sigma_{proposal}$ should be around $~2.4/sqrt(4) \times \sigma_{target}$ ([Gelman et al. 1996](http://people.ee.duke.edu/~lcarin/baystat5.pdf)). 
+It turns out that the Metropolis algorithm is usually most efficient when the acceptance rate of proposals is between $ 0.2$ and $0.5$ (see [Roberts and Rosenthal 2001](https://www.jstor.org/stable/pdf/3182776.pdf?casa_token=L8a1gJYi1SgAAAAA:ZVa-bCWzwBW3vAat13KRVDkDRu63BWmdxddvp2xLGAjV0bt1j72SP_tEXsxJrU1GqRDyu_23QMDMnCrMJM9Ydrc3bUAylT9eeJeqs5cmPrk9EFIiq9i-)). In practice, this could be achieved e.g. by monitoring the acceptance rate or the standard deviation of the target distribution ($\sigma_{target}$), and adjusting $\sigma_{proposal}$ accordingly. Here, we will take the latter approach. For a four-dimensional Gaussian target distribution, the optimal $\sigma_{proposal}$ should be around $~2.4/sqrt(4) \times \sigma_{target}$ ([Gelman et al. 1996](http://people.ee.duke.edu/~lcarin/baystat5.pdf)), so we will adapt $\sigma_{proposal}$ towards this target. 
 
 In order to allow for $\sigma_{proposal}$ to quickly converge on the optimum, the weighted variance of the samples from the Markov chains from previous iterations is used as the $\sigma_{proposal}$ for the next iteration. The weights decrease backwards in time, so that the recent values have more influence on the new value for $\sigma_{proposal}$. The weighted variance is calculated with the following function, where `x` denotes a vector of samples from the Markov chain, weights a vector of `weights` (see below), and `sum_weights` records the sum of the weights vector:
 
@@ -179,8 +178,8 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = rep(
   n <- length(y)
   shape_sdy <- A_sdy+n/2 # shape parameter for the inverse gamma
   sd_it <- 1 # iteration index for the proposal standard deviation
-  coeff_sd <- array(NA_real_,dim = c(nAdapt,4)) # array to store proposal SDs
-  coeff_sd[1:3,] <- proposal_sd_init # proposal SDs before adaptation
+  proposal_sd <- array(NA_real_,dim = c(nAdapt,4)) # array to store proposal SDs
+  proposal_sd[1:3,] <- proposal_sd_init # proposal SDs before adaptation
   # pre-define exp. decaying weights for weighted variance
   allWeights <- exp((-(nAdapt-2)):0/adaptation_decay) 
   accept <- rep(NA,nIter) # vector to store the acceptance or rejection of proposals
@@ -192,7 +191,7 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = rep(
       1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,coefficients[i-1,],0))^2)))
 
    ## 2. Metropolis-Hastings step to estimate the regression coefficients
-    proposal = MH_propose(coefficients[i-1,],coeff_sd[sd_it,]) # new proposed values
+    proposal = MH_propose(coefficients[i-1,],proposal_sd[sd_it,]) # new proposed values
     if(any(proposal[4] <= 0)) HR = 0 else {# Q and nu need to be >0
       # Hasting's ratio of the proposal
       HR = exp(logposterior(x = x, y = y, coeff = proposal, sdy = sdy[i]) -
@@ -219,8 +218,8 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = rep(
 
 
     for(v in 1:4) {if(weighted_var_coeff[v]==0)   { # 
-              coeff_sd[i+1,v] <- sqrt(coeff_sd[i,v]^2/10)
-      } else  coeff_sd[i+1,v] <- 2.4/sqrt(4) * sqrt(weighted_var_coeff[v])
+              proposal_sd[i+1,v] <- sqrt(proposal_sd[i,v]^2/5)
+      } else  proposal_sd[i+1,v] <- 2.4/sqrt(4) * sqrt(weighted_var_coeff[v]) + 0.0001
     }                   
                            
     }
@@ -229,13 +228,13 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = rep(
   } # end of the MCMC loop
 
   ###  Function output
-  output = list(data.frame(A = coefficients[,1],
+  output = list(coeff = data.frame(A = coefficients[,1],
                            K = coefficients[,2],
                            M = coefficients[,3],
                            Q = coefficients[,4],
                            sdy = sdy),
-                coeff_sd,
-                accept)
+                proposal_sd = data.frame(proposal_sd),
+                accept = accept)
   return(output)
 }
 ```
@@ -243,7 +242,7 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = rep(
 We set the initial standard deviation of the proposals to $5$. 
 ```{r, warning = FALSE, echo = TRUE}
 ### Taking samples
-set.seed(9)
+set.seed(10)
 sample_lat <- runif(10,0,90)
 sample_data <- data.frame(
   x = sample_lat, 
@@ -253,20 +252,20 @@ sample_data <- data.frame(
 nIter <- 100000
 print(system.time({m <- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
-                                 nIter = nIter, nAdapt = 5000, adaptation_decay =100,
+                                 nIter = nIter, nAdapt = 5000, adaptation_decay =500,
                                  proposal_sd_init = c(5,5,5,5))}))
 
 ```
-
+Looking at the traceplots, the MCMC runs well after an initial burn-in period, in which $\sigma_{proposal}$ was adjusted.
 ```{r, fig.width = 7.2, fig.height = 7.2, warning = FALSE, echo = FALSE, message = FALSE}
 library(ggplot2)
 library(dplyr)
 library(reshape)
 library(cowplot)
-m <- m %>% mutate(iteration = 1:nrow(.))
-mm <- melt(m,id.vars = "iteration")
+mm <- m$coeff %>% dplyr::mutate(iteration = 1:nrow(.))
+mm <- melt(mm,id.vars = "iteration")
 
-facet.labs = c("F", "K", "M", "Q", expression(sigma["y"]))
+facet.labs = c("A", "K", "M", "Q", expression(sigma["y"]))
 names(facet.labs) <- c("A", "K", "M", "Q", "sdy")
 
 p1 <- ggplot(mm %>% filter(iteration %% 10 == 0)) + geom_line(aes(x = iteration, y = value),
@@ -283,7 +282,7 @@ p1 <- ggplot(mm %>% filter(iteration %% 10 == 0)) + geom_line(aes(x = iteration,
             axis.title=element_text(size=13), axis.text.y=element_blank(),)
 
 
-p2 <- ggplot(mm %>% filter(iteration %% 10 == 0)) +
+p2 <- ggplot(mm %>% filter(iteration %% 10 == 0 & iteration > 5000)) +
   #geom_vline(aes(xintercept = trueval), colour = "black", size = 1,linetype = "solid")+
 
  stat_density(aes(x = value, y =..scaled..), 
@@ -306,50 +305,27 @@ plot_grid(p1, p2, ncol = 2, labels = c("", ""),
          rel_widths = c(7,2))
 
 ```
+The traceplot below shows how the standard deviations of the proposals were adapted during the first $5000$ iterations. Despite a very bad initial guess for the $\sigma_{proposal}$ of $Q$, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. The effective sample size after adaptation is $`r round( mcmcse::multiESS(m$coeff[5001:nIter,]),0)`$, which is $`r round((mcmcse::multiESS(m$coeff[5001:nIter,])/2453 - 1)*100,0)`\%$ higher than the effective sample size obtained with the same number of iterations in the [previous version](/post/a-metropolis-algorithm-in-r-part-1-implementation) of this model, where we tried to guess good values for $\sigma_{proposal}$.
+```{r, fig.width = 7.2, fig.height = 7.2, warning = FALSE, echo = FALSE, message = FALSE}
+colnames(m$proposal_sd) <- c("A","K", "M", "Q")
+mm <- m$proposal_sd %>% dplyr::mutate(iteration = 1:nrow(.))
+mm <- melt(mm,id.vars = "iteration")
+facet.labs = c("A", "K", "M", "Q")
+names(facet.labs) <- c("A", "K", "M", "Q")
 
-```{r, fig.width = 9, fig.height = 4, warning = FALSE, echo = FALSE, message = FALSE}
-burnin <- 10000
-latseq <- seq(0,90,0.2)
-
-layout(matrix(c(1,2), nrow = 1, ncol = 2, byrow = TRUE))
-par(mar = c(4,4.25,1.25,0.75), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
-latitude <- seq(0,90,by=0.5)
-temperature <- gradient(x = latitude, coeff = c(-2.2, 28, 39, 0.1, 1.2), sdy = 0)
-plot(latitude, temperature, type = "l", lwd = 2, ylim = c(-4.5,32), xlab = expression ("absolute latitude ("*degree*")"), yaxt = "n", ylab = expression("temperature ("*degree~"C)"), yaxs = "i", xaxs = "i", lty = 2,
-     xlim = c(0,90), main = "8 draws from the posterior", cex.main = 1)
-points(sample_data$x, sample_data$y,  pch = 19, cex = 1.2, col = rgb(0,0,0,0.6), xpd = T)
-replicate(8, points(latitude, gradient(x = latitude, coeff = unlist(m[sample((burnin+1):nIter,1),1:5]), sdy = 0), type = "l", col = rgb(0,0.35,0.7,0.33), lwd = 2))
-axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
-
-
-### Calculate confidence intervals
-sample_it <- sample((burnin+1):nIter,1000)
-grad_025 <- sapply(1:length(latitude), function(f) quantile(apply(m[sample_it,1:5],1,function(a) gradient(x=latitude[f], coeff =  a, sdy = 0)), probs = 0.025))
-grad_975 <- sapply(1:length(latitude), function(f) quantile(apply(m[sample_it,1:5],1,function(a) gradient(x=latitude[f], coeff =  a, sdy = 0)), probs = 0.975))
-
-
-### Calculate confidence intervals
-sample_it <- sample((burnin+1):nIter,1000)
-grad_025 <- sapply(1:length(latitude), function(f) quantile(apply(m[sample_it,1:5],1,function(a) gradient(x=latitude[f], coeff =  a, sdy = 0)), probs = 0.025))
-grad_975 <- sapply(1:length(latitude), function(f) quantile(apply(m[sample_it,1:5],1,function(a) gradient(x=latitude[f], coeff =  a, sdy = 0)), probs = 0.975))
-
-
-plot(latitude, temperature, type = "n", lwd = 2, ylim = c(-4.5,32), xlab = expression ("absolute latitude ("*degree*")"), yaxt = "n", ylab = expression("temperature ("*degree~"C)"), yaxs = "i", xaxs = "i", lty = 2,
-     xlim = c(0,90), main = "posterior median and 95% CI", cex.main = 1)
-
-error_polygon <- function(x,en,ep,color) {
-  polygon( c(x[1], x, x[length(x)], x[length(x)], rev(x), x[1]),
-           c((ep)[1],ep, (ep)[length(ep)], (en)[length(en)], rev(en), (en)[1]),
-           border = NA, col = color)
-}
-error_polygon(latitude,grad_025,grad_975,rgb(0,0.35,0.7,0.33))
-points(latitude, gradient(x=latitude, coeff =  apply(m[sample_it,1:5],2,median), sdy = 0), type = "l", lwd = 3, col = rgb(0,0.35,0.7,0.75))
-points(latitude, temperature, type = "l", lwd = 2, lty = 2)
-axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
+ggplot(mm) + geom_line(aes(x = iteration, y = value),
+                             colour = rgb(0,0.35,0.7,1))+
+      facet_grid(variable ~ ., switch = "y",scales = "free_y",
+      labeller = labeller(variable = facet.labs)) + 
+      theme(legend.position = "none")+
+      theme_bw(base_size = 14)+
+      theme(strip.text.y.left = element_text(angle = 0))+
+      scale_y_continuous(position = "right")+
+      ylab(NULL)+
+      ggtitle(expression("traceplot of "*sigma["proposal"]))+ 
+      theme(plot.title = element_text(size = 13, face = "bold",hjust = 0.5),
+            axis.title=element_text(size=13))
 ```
+Checking the acceptance rate shows that it is somewhat low even after the adaptation, at **`r round(table(m$accept[5001:nIter])[2]/length(m$accept[5001:nIter]),2)`**. In multi-dimensional models, a good acceptance rate would be around $0.25$ [(Gelman et al. 1997)](https://projecteuclid.org/journals/annals-of-applied-probability/volume-7/issue-1/Weak-convergence-and-optimal-scaling-of-random-walk-Metropolis-algorithms/10.1214/aoap/1034625254.full). To further improve this algorithm and achieve more efficient sampling at a higher acceptance rate, we could use multivariate proposals that account for the correlation of parameters (see e.g. [Haario et al. 2001](https://www.jstor.org/stable/3318737?seq=1#metadata_info_tab_contents)).
 
-
-$1/4$ [(Gelman et al. 1997)](https://projecteuclid.org/journals/annals-of-applied-probability/volume-7/issue-1/Weak-convergence-and-optimal-scaling-of-random-walk-Metropolis-algorithms/10.1214/aoap/1034625254.full). 
-
-
-[source 2](https://www.tandfonline.com/doi/abs/10.1198/jcgs.2009.06134)
+You can find the full R code to reproduce all analyses and figures on [Github](https://github.com/KEichenseer/Methods/blob/main/Adaptive_Metropolis-Hastings.R).

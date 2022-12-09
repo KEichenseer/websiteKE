@@ -1,0 +1,149 @@
+---
+title: "A Metropolis algorithm in R - Part 2: Adaptive proposals"
+author: ''
+date: "2022-03-26"
+output: pdf_document
+categories: []
+tags: []
+subtitle: ''
+authors: []
+lastmod: "2022-03-26T20:13:04Z"
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+header-includes: \usepackage{graphics}
+summary: The Metropolis algorithm is a simple, but powerful MCMC method. Here, I use
+  it for estimating a generalised logistic function to reconstruct a latitudinal climate
+  gradient from a small sample of temperature estimates.
+slug: "a-metropolis-algorithm-in-r-part-2-adaptive-proposals"
+---
+
+
+
+
+<style>
+.math {
+  font-size: small;
+}
+</style>
+<style type="text/css">
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 12px;
+}
+pre {
+  font-size: 13.2px
+}
+</style>
+<p>In the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous post</a>, we built a Metropolis algorithm to estimate latitudinal temperature gradients, approximated by a generalised logistic function. Recall that the Metropolis algorithm works by proposing new parameter values and evaluating the joint posterior probability of the model with these values, against the posterior with the current values.</p>
+<p>How do we chose a new value for a parameter? A common approach is to sample a normal distribution, centred at the current value (i.e. the mean of the distribution is the current value). Choosing the standard deviation of the proposal distribution (<span class="math inline">\(\sigma_{proposal}\)</span>) is more tricky. If <span class="math inline">\(\sigma_{proposal}\)</span> is too high, we end up proposing a lot of values at the far tail ends of the target posterior distribution, which will usually be rejected (see below, green proposals). This leads to inefficient sampling and patchy coverage of the posterior distribution. Conversely, a very small <span class="math inline">\(\sigma_{proposal}\)</span> leads to most new values being accepted, but the resulting Markov chain will move very slowly through the parameter space, leading to a low effective sample size (red proposals below). Instead, some intermediate <span class="math inline">\(\sigma_{proposal}\)</span> is desirable, at which the Markov chain moves quickly through the parameter space, without too many rejections (e.g., yellow proposals below).</p>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>It turns out that the Metropolis algorithm is usually most efficient when the acceptance rate of proposals is between $ 0.2$ and <span class="math inline">\(0.5\)</span> (see <a href="https://www.jstor.org/stable/pdf/3182776.pdf?casa_token=L8a1gJYi1SgAAAAA:ZVa-bCWzwBW3vAat13KRVDkDRu63BWmdxddvp2xLGAjV0bt1j72SP_tEXsxJrU1GqRDyu_23QMDMnCrMJM9Ydrc3bUAylT9eeJeqs5cmPrk9EFIiq9i-">Roberts and Rosenthal 2001</a>). In practice, this could be achieved e.g. by monitoring the acceptance rate or the standard deviation of the target distribution (<span class="math inline">\(\sigma_{target}\)</span>), and adjusting <span class="math inline">\(\sigma_{proposal}\)</span> accordingly. Here, we will take the latter approach. For a four-dimensional Gaussian target distribution, the optimal <span class="math inline">\(\sigma_{proposal}\)</span> should be around <span class="math inline">\(~2.4/sqrt(4) \times \sigma_{target}\)</span> (<a href="http://people.ee.duke.edu/~lcarin/baystat5.pdf">Gelman et al. 1996</a>), so we will adapt <span class="math inline">\(\sigma_{proposal}\)</span> towards this target.</p>
+<p>In order to allow for <span class="math inline">\(\sigma_{proposal}\)</span> to quickly converge on the optimum, the weighted variance of the samples from the Markov chains from previous iterations is used as the <span class="math inline">\(\sigma_{proposal}\)</span> for the next iteration. The weights decrease backwards in time, so that the recent values have more influence on the new value for <span class="math inline">\(\sigma_{proposal}\)</span>. The weighted variance is calculated with the following function, where <code>x</code> denotes a vector of samples from the Markov chain, weights a vector of <code>weights</code> (see below), and <code>sum_weights</code> records the sum of the weights vector:</p>
+<pre class="r"><code>weighted_var &lt;- function(x, weights, sum_weights) {
+  sum(weights*((x-sum(weights*x)/sum_weights)^2))/(sum_weights)
+}</code></pre>
+<p>We can re-use most of the auxiliary functions of the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">standard Metropolis algorithm</a>. Notably, the value of <span class="math inline">\(\sigma_{proposal}\)</span> (<code>propose_sd</code>) will change during the adaptation.</p>
+<pre class="r"><code>MH_propose &lt;- function(coeff, proposal_sd){
+  rnorm(4,mean = coeff, sd= proposal_sd)
+}</code></pre>
+<p>The specification of the weights and the adaption of <span class="math inline">\(\sigma_{proposal}\)</span> is implemented in the updated MCMC loop. <code>nAdapt</code> specifies the number of iterations in which adaptations takes place. These iterations need to be discarded as burn-in to not bias the estimate of the posterior. <code>adaptation_decay</code> is a constant that influences the exponential decay of the weights for the weighted variance function, with larger values leading to slower decay.</p>
+<p>Below is the full MCMC loop:</p>
+<pre class="r"><code># Main MCMCM function
+run_MCMC &lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = rep(5,4), 
+                     nAdapt = 5000, adaptation_decay = 500){
+  ### Initialisation
+  coefficients = array(dim = c(nIter,4)) # set up array to store coefficients
+  coefficients[1,] = coeff_inits # initialise coefficients
+  sdy = rep(NA_real_,nIter) # set up vector to store sdy
+  sdy[1] = sdy_init # intialise sdy
+  A_sdy = 3 # parameter for the prior on the inverse gamma distribution of sdy
+  B_sdy = 0.1 # parameter for the prior on the inverse gamma distribution of sdy
+  n &lt;- length(y)
+  shape_sdy &lt;- A_sdy+n/2 # shape parameter for the inverse gamma
+  sd_it &lt;- 1 # iteration index for the proposal standard deviation
+  proposal_sd &lt;- array(NA_real_,dim = c(nAdapt,4)) # array to store proposal SDs
+  proposal_sd[1:3,] &lt;- proposal_sd_init # proposal SDs before adaptation
+  # pre-define exp. decaying weights for weighted variance
+  allWeights &lt;- exp((-(nAdapt-2)):0/adaptation_decay) 
+  accept &lt;- rep(NA,nIter) # vector to store the acceptance or rejection of proposals
+  ### The MCMC loop
+  for (i in 2:nIter){
+
+   ## 1. Gibbs step to estimate sdy
+    sdy[i] = sqrt(1/rgamma(
+      1,shape_sdy,B_sdy+0.5*sum((y-gradient(x,coefficients[i-1,],0))^2)))
+
+   ## 2. Metropolis-Hastings step to estimate the regression coefficients
+    proposal = MH_propose(coefficients[i-1,],proposal_sd[sd_it,]) # new proposed values
+    if(any(proposal[4] &lt;= 0)) HR = 0 else {# Q and nu need to be &gt;0
+      # Hasting&#39;s ratio of the proposal
+      HR = exp(logposterior(x = x, y = y, coeff = proposal, sdy = sdy[i]) -
+                 logposterior(x = x, y = y, coeff = coefficients[i-1,], sdy = sdy[i]))}
+
+    #if(gradient(65, proposal,0) &gt;10) HR = 0
+    # accept proposal with probability = min(HR,1)
+    if (runif(1) &lt; HR){
+      accept[i] &lt;- 1
+      coefficients[i,] = proposal
+      # if proposal is rejected, keep the values from the previous iteration
+    }else{
+      accept[i] &lt;- 0
+      coefficients[i,] = coefficients[i-1,]
+    }
+    # Adaptation of proposal SD
+    if(i &lt; nAdapt){ # stop adaptation after nAdapt iterations
+    if(i&gt;=3) {
+    weights = allWeights[(nAdapt-i+2):nAdapt-1] # select weights for current iteration
+    sum_weights = sum(weights) 
+    weighted_var_coeff &lt;- apply(coefficients[2:i,], 2, # calculate weighted variance
+          function(f) weighted_var(
+          f, weights = weights, sum_weights = sum_weights))
+
+    for(v in 1:4) {if(weighted_var_coeff[v]==0)   { # 
+              proposal_sd[i+1,v] &lt;- sqrt(proposal_sd[i,v]^2/5)
+      } else  proposal_sd[i+1,v] &lt;- 2.4/sqrt(4) * sqrt(weighted_var_coeff[v]) + 0.0001
+    }                   
+                           
+    }
+    sd_it &lt;- i+1
+    }
+  } # end of the MCMC loop
+
+  ###  Function output
+  output = list(coeff = data.frame(A = coefficients[,1],
+                           K = coefficients[,2],
+                           M = coefficients[,3],
+                           Q = coefficients[,4],
+                           sdy = sdy),
+                proposal_sd = data.frame(proposal_sd),
+                accept = accept)
+  return(output)
+}</code></pre>
+<p>We set the initial standard deviation of the proposals to <span class="math inline">\(5\)</span>.</p>
+<pre class="r"><code>### Taking samples
+set.seed(10)
+sample_lat &lt;- runif(10,0,90)
+sample_data &lt;- data.frame(
+  x = sample_lat, 
+  y = gradient(x = sample_lat, coeff = c(-2.0, 28, 41, 0.1), sd = 2))
+
+### Analysis
+nIter &lt;- 100000
+print(system.time({m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
+                                 coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
+                                 nIter = nIter, nAdapt = 5000, adaptation_decay =500,
+                                 proposal_sd_init = c(5,5,5,5))}))</code></pre>
+<pre><code>##    user  system elapsed 
+##    4.71    0.46    5.16</code></pre>
+<p>Looking at the traceplots, the MCMC runs well after an initial burn-in period, in which <span class="math inline">\(\sigma_{proposal}\)</span> was adjusted.
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-7-1.png" width="691.2" />
+The traceplot below shows how the standard deviations of the proposals were adapted during the first <span class="math inline">\(5000\)</span> iterations. Despite a very bad initial guess for the <span class="math inline">\(\sigma_{proposal}\)</span> of <span class="math inline">\(Q\)</span>, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. The effective sample size after adaptation is <span class="math inline">\(3720\)</span>, which is <span class="math inline">\(52\%\)</span> higher than the effective sample size obtained with the same number of iterations in the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous version</a> of this model, where we tried to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>.
+<img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-8-1.png" width="691.2" />
+Checking the acceptance rate shows that it is somewhat low even after the adaptation, at <strong>0.16</strong>. In multi-dimensional models, a good acceptance rate would be around <span class="math inline">\(0.25\)</span> <a href="https://projecteuclid.org/journals/annals-of-applied-probability/volume-7/issue-1/Weak-convergence-and-optimal-scaling-of-random-walk-Metropolis-algorithms/10.1214/aoap/1034625254.full">(Gelman et al. 1997)</a>. To further improve this algorithm and achieve more efficient sampling at a higher acceptance rate, we could use multivariate proposals that account for the correlation of parameters (see e.g. <a href="https://www.jstor.org/stable/3318737?seq=1#metadata_info_tab_contents">Haario et al. 2001</a>).</p>
+<p>You can find the full R code to reproduce all analyses and figures on <a href="https://github.com/KEichenseer/Methods/blob/main/Adaptive_Metropolis-Hastings.R">Github</a>.</p>

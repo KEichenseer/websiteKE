@@ -15,7 +15,7 @@ image:
   preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
-summary: To work well, the Metropolis algorithm relies on good proposal values. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling.
+summary: To work well, the Metropolis algorithm needs proposals that are accepted reasonably often. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling.
 slug: "a-metropolis-algorithm-in-r-part-2-adaptive-proposals"
 ---
 
@@ -44,7 +44,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 In the [previous post](/post/a-metropolis-algorithm-in-r-part-1-implementation), we built a Metropolis algorithm to estimate latitudinal temperature gradients, approximated by a generalised logistic function. Recall that the Metropolis algorithm works by proposing new parameter values and evaluating the joint posterior probability of the model with these values, against the posterior with the current values.
 
-How do we chose a new value for a parameter? A common approach is to sample a normal distribution, centred at the current value (i.e. the mean of the distribution is the current value). Choosing the standard deviation of the proposal distribution ($\sigma_{proposal}$) is more tricky. If $\sigma_{proposal}$ is too high, we end up proposing a lot of values at the far tail ends of the target posterior distribution, which will usually be rejected (see below, green proposals). This leads to inefficient sampling and patchy coverage of the posterior distribution. Conversely, a very small $\sigma_{proposal}$ leads to most new values being accepted, but the resulting Markov chain will move very slowly through the parameter space, leading to a low effective sample size (red proposals below). Instead, some intermediate $\sigma_{proposal}$ is desirable, at which the Markov chain moves quickly through the parameter space, without too many rejections (e.g., yellow proposals below). 
+How do we chose a new value for a parameter? A common approach is to sample from a normal distribution, centred at the current value (i.e. the mean of the distribution is the current value). Choosing the standard deviation of the proposal distribution ($\sigma_{proposal}$) is more tricky. If $\sigma_{proposal}$ is too high, we end up proposing a lot of values at the far tail ends of the target posterior distribution, which will usually be rejected (see below, yellow proposals). This leads to inefficient sampling and patchy coverage of the posterior distribution. Conversely, a very small $\sigma_{proposal}$ leads to most new values being accepted, but the resulting Markov chain will move very slowly through the parameter space, leading to a low effective sample size (red proposals). Instead, some intermediate $\sigma_{proposal}$ is desirable, at which the Markov chain moves quickly through the parameter space, without too many rejections (e.g., orange proposals). 
 
 ```{r, fig.width = 7, fig.height = 4, warning = FALSE, echo = FALSE}
 
@@ -72,7 +72,7 @@ p1 <- -0.75
 sd3 <- p1+rnorm(10,0,0.2)
 points(sd3,dnorm(sd3,-1.5,1)+dnorm(sd3,1.5,1), pch = 4, cex = 1.2, lwd = 2, col = col1, xpd = T)
 
-sd2 <- p1+rnorm(10,0,2.5)
+sd2 <- p1+rnorm(10,0,1.5)
 points(sd2,dnorm(sd2,-1.5,1)+dnorm(sd2,1.5,1), pch = 4, cex = 1.2, lwd = 2, col = col2, xpd = T)
 
 sd1 <- p1+rnorm(10,0,8)
@@ -80,7 +80,7 @@ points(sd1,dnorm(sd1,-1.5,1)+dnorm(sd1,1.5,1), pch = 4, cex = 1.2, lwd = 2, col 
 
 abline(v= -0.75, lty = 3, lwd = 2)
 points(-0.75,dnorm(-0.75,-1.5,1)+dnorm(-0.75,1.5,1), pch = 4, cex = 1.75, lwd = 3, col = rgb(0,0,0,0.67), xpd = T)
-sigmas <- c(8,2,0.2)
+sigmas <- c(8,1.5,0.2)
 legend("topright", as.expression(c("current value",sapply(1:3, function(x) bquote(italic(sigma["proposal"]~"="~.(rev(sigmas)[x])))))), 
        col = c(rgb(0,0,0,0.67),col1,col2,col3), border = NA, bty = "n", pch = 4, 
        pt.cex = c(1.7,1.2,1.2,1.2), pt.lwd = c(3,2,2,2), cex = 0.95)
@@ -97,7 +97,7 @@ col2 <- rgb(0.8,0.5,0,0.4)
 col3 <- rgb(1,0,0,0.4)
 
 error_polygon(xd,rep(0,length(xd)),dnorm(xd,p1,8)*4,col1)
-error_polygon(xd,rep(0,length(xd)),dnorm(xd,p1,2)*1.8,col2)
+error_polygon(xd,rep(0,length(xd)),dnorm(xd,p1,1.5)*1.2,col2)
 error_polygon(xd,rep(0,length(xd)),dnorm(xd,p1,0.2)*0.2,col3)
 
 
@@ -110,7 +110,7 @@ legend("topright", as.expression(sapply(1:3, function(x) bquote(italic(sigma["pr
 
 It turns out that the Metropolis algorithm is usually most efficient when the acceptance rate of proposals is between $ 0.2$ and $0.5$ (see [Roberts and Rosenthal 2001](https://www.jstor.org/stable/pdf/3182776.pdf?casa_token=L8a1gJYi1SgAAAAA:ZVa-bCWzwBW3vAat13KRVDkDRu63BWmdxddvp2xLGAjV0bt1j72SP_tEXsxJrU1GqRDyu_23QMDMnCrMJM9Ydrc3bUAylT9eeJeqs5cmPrk9EFIiq9i-)). In practice, this could be achieved e.g. by monitoring the acceptance rate or the standard deviation of the target distribution ($\sigma_{target}$), and adjusting $\sigma_{proposal}$ accordingly. Here, we will take the latter approach. For a four-dimensional Gaussian target distribution, the optimal $\sigma_{proposal}$ should be around $~2.4/sqrt(4) \times \sigma_{target}$ ([Gelman et al. 1996](http://people.ee.duke.edu/~lcarin/baystat5.pdf)), so we will adapt $\sigma_{proposal}$ towards this target. 
 
-In order to allow for $\sigma_{proposal}$ to quickly converge on the optimum, the weighted variance of the samples from the Markov chains from previous iterations is used as the $\sigma_{proposal}$ for the next iteration. The weights decrease backwards in time, so that the recent values have more influence on the new value for $\sigma_{proposal}$. The weighted variance is calculated with the following function, where `x` denotes a vector of samples from the Markov chain, weights a vector of `weights` (see below), and `sum_weights` records the sum of the weights vector:
+In order to allow for $\sigma_{proposal}$ to quickly converge on the optimum, the square root of the weighted variance of the samples from the Markov chains from previous iterations is used as the $\sigma_{proposal}$ for the next iteration. The weights decrease backwards in time, so that the recent values have more influence on the new value for $\sigma_{proposal}$. The weighted variance is calculated with the following function, where `x` denotes a vector of samples from the Markov chain, weights a vector of `weights` (see below), and `sum_weights` records the sum of the weights vector:
 
 ```{r, warning = FALSE, echo = TRUE}
 weighted_var <- function(x, weights, sum_weights) {
@@ -215,13 +215,14 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = rep(
           f, weights = weights, sum_weights = sum_weights))
 
 
-    for(v in 1:4) {if(weighted_var_coeff[v]==0)   { # 
+    for(v in 1:4) {if(weighted_var_coeff[v]==0)   { # if variance is zero, reduce sd
               proposal_sd[i+1,v] <- sqrt(proposal_sd[i,v]^2/5)
-      } else  proposal_sd[i+1,v] <- 2.4/sqrt(4) * sqrt(weighted_var_coeff[v]) + 0.0001
+      } else  proposal_sd[i+1,v] <- 2.4/sqrt(4) * sqrt(weighted_var_coeff[v]) + 0.0001 
+      # note that a small value is added to prevent that the adaptation gets stuck.
     }                   
                            
     }
-    sd_it <- i+1
+    sd_it <- i+1 # index to access proposal_sd in the next iteration
     }
   } # end of the MCMC loop
 
@@ -233,25 +234,30 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = rep(
                            sdy = sdy),
                 proposal_sd = data.frame(proposal_sd),
                 accept = accept)
-  return(output)
+  # return output
+    output
 }
 ```
 
-We set the initial standard deviation of the proposals to $5$. 
-```{r, warning = FALSE, echo = TRUE}
+We re-use the data from the [previous post](/post/a-metropolis-algorithm-in-r-part-1-implementation), and set the initial standard deviation of the proposals to $5$. This is probably too high, but we want to test whether the adaptation finds good values.
+```{r, warning = FALSE, echo = FALSE}
 ### Taking samples
 set.seed(10)
 sample_lat <- runif(10,0,90)
 sample_data <- data.frame(
   x = sample_lat, 
   y = gradient(x = sample_lat, coeff = c(-2.0, 28, 41, 0.1), sd = 2))
+```
+
+```{r, warning = FALSE, echo = TRUE}
 
 ### Analysis
+proposal_sd_initial <- 5
 nIter <- 100000
-print(system.time({m <- run_MCMC(x = sample_data$x, y = sample_data$y,
+m <- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
                                  nIter = nIter, nAdapt = 5000, adaptation_decay =500,
-                                 proposal_sd_init = c(5,5,5,5))}))
+                                 proposal_sd_init = proposal_sd_initial)
 
 ```
 Looking at the traceplots, the MCMC runs well after an initial burn-in period, in which $\sigma_{proposal}$ was adjusted.

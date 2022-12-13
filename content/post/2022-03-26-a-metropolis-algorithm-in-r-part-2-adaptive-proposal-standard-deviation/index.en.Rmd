@@ -15,7 +15,7 @@ image:
   preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
-summary: To work well, the Metropolis algorithm needs proposals that are accepted reasonably often. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling.
+summary: To work well, the Metropolis algorithm needs proposals that are accepted reasonably often. Here, I improve the model from the previous post by using draws from the posterior to iteratively improve proposals, resulting in more efficient sampling.
 slug: "a-metropolis-algorithm-in-r-part-2-adaptive-proposals"
 ---
 
@@ -239,7 +239,7 @@ run_MCMC <- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = rep(
 }
 ```
 
-We re-use the data from the [previous post](/post/a-metropolis-algorithm-in-r-part-1-implementation), and set the initial standard deviation of the proposals to $5$. This is probably too high, but we want to test whether the adaptation finds good values.
+We re-use the data from the [previous post](/post/a-metropolis-algorithm-in-r-part-1-implementation), and set the initial standard deviation of the proposals to $5$. This is probably too high, but we want to test whether the adaptation finds good values. We set the total number of iterations to $100~000$, and use the first $5000$ iterations as the adapation phase: 
 ```{r, warning = FALSE, echo = FALSE}
 ### Taking samples
 set.seed(10)
@@ -254,9 +254,11 @@ sample_data <- data.frame(
 ### Analysis
 proposal_sd_initial <- 5
 nIter <- 100000
+adaptation_phase <- 5000
 m <- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
-                                 nIter = nIter, nAdapt = 5000, adaptation_decay =500,
+                                 nIter = nIter, nAdapt = adaptation_phase, 
+                                 adaptation_decay = adaptation_phase/10,
                                  proposal_sd_init = proposal_sd_initial)
 
 ```
@@ -309,7 +311,7 @@ plot_grid(p1, p2, ncol = 2, labels = c("", ""),
          rel_widths = c(7,2))
 
 ```
-The traceplot below shows how the standard deviations of the proposals were adapted during the first $5000$ iterations. Despite a very bad initial guess for the $\sigma_{proposal}$ of $Q$, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. The effective sample size after adaptation is $`r round( mcmcse::multiESS(m$coeff[5001:nIter,]),0)`$, which is $`r round((mcmcse::multiESS(m$coeff[5001:nIter,])/2453 - 1)*100,0)`\%$ higher than the effective sample size obtained with the same number of iterations in the [previous version](/post/a-metropolis-algorithm-in-r-part-1-implementation) of this model, where we tried to guess good values for $\sigma_{proposal}$.
+The traceplot below shows how the standard deviations of the proposals were adapted during the first $5000$ iterations. Despite a very bad initial guess for the $\sigma_{proposal}$ of $Q$, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. After the adaptation (at iteration $5000$), the most recent proposal values are used for the remainder of the iterations. The effective sample size after adaptation is $`r round( mcmcse::multiESS(m$coeff[5001:nIter,]),0)`$, which is $`r round((mcmcse::multiESS(m$coeff[5001:nIter,])/2453 - 1)*100,0)`\%$ higher than the effective sample size obtained with the same number of iterations in the [previous version](/post/a-metropolis-algorithm-in-r-part-1-implementation) of this model, where we tried to guess good values for $\sigma_{proposal}$.
 ```{r, fig.width = 5.6, fig.height = 5.6, warning = FALSE, echo = FALSE, message = FALSE}
 colnames(m$proposal_sd) <- c("A","K", "M", "Q")
 mm <- m$proposal_sd %>% dplyr::mutate(iteration = 1:nrow(.))
@@ -318,7 +320,7 @@ facet.labs = c("A", "K", "M", "Q")
 names(facet.labs) <- c("A", "K", "M", "Q")
 
 ggplot(mm) + geom_line(aes(x = iteration, y = value),
-                             colour = rgb(0,0.35,0.7,1))+
+                             colour = rgb(0,0.35,0.7,1), size = 1.1)+
       facet_grid(variable ~ ., switch = "y",scales = "free_y",
       labeller = labeller(variable = facet.labs)) + 
       theme(legend.position = "none")+

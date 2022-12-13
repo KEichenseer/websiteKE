@@ -30,7 +30,7 @@
   
     
   
-  <meta name="description" content="To work well, the Metropolis algorithm relies on good proposal values. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling." />
+  <meta name="description" content="To work well, the Metropolis algorithm needs proposals that are accepted reasonably often. Here, I improve the model from the previous post by using draws from the posterior to iteratively improve proposals, resulting in more efficient sampling." />
 
   
   <link rel="alternate" hreflang="en-us" href="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/" />
@@ -294,7 +294,7 @@
   <meta property="og:site_name" content="Kilian Eichenseer" />
   <meta property="og:url" content="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/" />
   <meta property="og:title" content="A Metropolis algorithm in R - Part 2: Adaptive proposals | Kilian Eichenseer" />
-  <meta property="og:description" content="To work well, the Metropolis algorithm relies on good proposal values. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling." /><meta property="og:image" content="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/featured.PNG" />
+  <meta property="og:description" content="To work well, the Metropolis algorithm needs proposals that are accepted reasonably often. Here, I improve the model from the previous post by using draws from the posterior to iteratively improve proposals, resulting in more efficient sampling." /><meta property="og:image" content="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/featured.PNG" />
     <meta property="twitter:image" content="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/featured.PNG" /><meta property="og:locale" content="en-us" />
   
     
@@ -351,7 +351,7 @@
       "url": "/media/icon_hua2ec155b4296a9c9791d015323e16eb5_11927_192x192_fill_lanczos_center_2.png"
     }
   },
-  "description": "To work well, the Metropolis algorithm relies on good proposal values. Here, I show how draws from the posterior can be used to iteratively improve proposals, resulting in more efficient sampling."
+  "description": "To work well, the Metropolis algorithm needs proposals that are accepted reasonably often. Here, I improve the model from the previous post by using draws from the posterior to iteratively improve proposals, resulting in more efficient sampling."
 }
 </script>
 
@@ -779,10 +779,10 @@ pre {
 }
 </style>
 <p>In the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous post</a>, we built a Metropolis algorithm to estimate latitudinal temperature gradients, approximated by a generalised logistic function. Recall that the Metropolis algorithm works by proposing new parameter values and evaluating the joint posterior probability of the model with these values, against the posterior with the current values.</p>
-<p>How do we chose a new value for a parameter? A common approach is to sample a normal distribution, centred at the current value (i.e. the mean of the distribution is the current value). Choosing the standard deviation of the proposal distribution (<span class="math inline">\(\sigma_{proposal}\)</span>) is more tricky. If <span class="math inline">\(\sigma_{proposal}\)</span> is too high, we end up proposing a lot of values at the far tail ends of the target posterior distribution, which will usually be rejected (see below, green proposals). This leads to inefficient sampling and patchy coverage of the posterior distribution. Conversely, a very small <span class="math inline">\(\sigma_{proposal}\)</span> leads to most new values being accepted, but the resulting Markov chain will move very slowly through the parameter space, leading to a low effective sample size (red proposals below). Instead, some intermediate <span class="math inline">\(\sigma_{proposal}\)</span> is desirable, at which the Markov chain moves quickly through the parameter space, without too many rejections (e.g., yellow proposals below).</p>
+<p>How do we chose a new value for a parameter? A common approach is to sample from a normal distribution, centred at the current value (i.e. the mean of the distribution is the current value). Choosing the standard deviation of the proposal distribution (<span class="math inline">\(\sigma_{proposal}\)</span>) is more tricky. If <span class="math inline">\(\sigma_{proposal}\)</span> is too high, we end up proposing a lot of values at the far tail ends of the target posterior distribution, which will usually be rejected (see below, yellow proposals). This leads to inefficient sampling and patchy coverage of the posterior distribution. Conversely, a very small <span class="math inline">\(\sigma_{proposal}\)</span> leads to most new values being accepted, but the resulting Markov chain will move very slowly through the parameter space, leading to a low effective sample size (red proposals). Instead, some intermediate <span class="math inline">\(\sigma_{proposal}\)</span> is desirable, at which the Markov chain moves quickly through the parameter space, without too many rejections (e.g., orange proposals).</p>
 <p><img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>It turns out that the Metropolis algorithm is usually most efficient when the acceptance rate of proposals is between $ 0.2$ and <span class="math inline">\(0.5\)</span> (see <a href="https://www.jstor.org/stable/pdf/3182776.pdf?casa_token=L8a1gJYi1SgAAAAA:ZVa-bCWzwBW3vAat13KRVDkDRu63BWmdxddvp2xLGAjV0bt1j72SP_tEXsxJrU1GqRDyu_23QMDMnCrMJM9Ydrc3bUAylT9eeJeqs5cmPrk9EFIiq9i-">Roberts and Rosenthal 2001</a>). In practice, this could be achieved e.g. by monitoring the acceptance rate or the standard deviation of the target distribution (<span class="math inline">\(\sigma_{target}\)</span>), and adjusting <span class="math inline">\(\sigma_{proposal}\)</span> accordingly. Here, we will take the latter approach. For a four-dimensional Gaussian target distribution, the optimal <span class="math inline">\(\sigma_{proposal}\)</span> should be around <span class="math inline">\(~2.4/sqrt(4) \times \sigma_{target}\)</span> (<a href="http://people.ee.duke.edu/~lcarin/baystat5.pdf">Gelman et al. 1996</a>), so we will adapt <span class="math inline">\(\sigma_{proposal}\)</span> towards this target.</p>
-<p>In order to allow for <span class="math inline">\(\sigma_{proposal}\)</span> to quickly converge on the optimum, the weighted variance of the samples from the Markov chains from previous iterations is used as the <span class="math inline">\(\sigma_{proposal}\)</span> for the next iteration. The weights decrease backwards in time, so that the recent values have more influence on the new value for <span class="math inline">\(\sigma_{proposal}\)</span>. The weighted variance is calculated with the following function, where <code>x</code> denotes a vector of samples from the Markov chain, weights a vector of <code>weights</code> (see below), and <code>sum_weights</code> records the sum of the weights vector:</p>
+<p>In order to allow for <span class="math inline">\(\sigma_{proposal}\)</span> to quickly converge on the optimum, the square root of the weighted variance of the samples from the Markov chains from previous iterations is used as the <span class="math inline">\(\sigma_{proposal}\)</span> for the next iteration. The weights decrease backwards in time, so that the recent values have more influence on the new value for <span class="math inline">\(\sigma_{proposal}\)</span>. The weighted variance is calculated with the following function, where <code>x</code> denotes a vector of samples from the Markov chain, weights a vector of <code>weights</code> (see below), and <code>sum_weights</code> records the sum of the weights vector:</p>
 <pre class="r"><code>weighted_var &lt;- function(x, weights, sum_weights) {
   sum(weights*((x-sum(weights*x)/sum_weights)^2))/(sum_weights)
 }</code></pre>
@@ -843,13 +843,14 @@ run_MCMC &lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = r
           function(f) weighted_var(
           f, weights = weights, sum_weights = sum_weights))
 
-    for(v in 1:4) {if(weighted_var_coeff[v]==0)   { # 
+    for(v in 1:4) {if(weighted_var_coeff[v]==0)   { # if variance is zero, reduce sd
               proposal_sd[i+1,v] &lt;- sqrt(proposal_sd[i,v]^2/5)
-      } else  proposal_sd[i+1,v] &lt;- 2.4/sqrt(4) * sqrt(weighted_var_coeff[v]) + 0.0001
+      } else  proposal_sd[i+1,v] &lt;- 2.4/sqrt(4) * sqrt(weighted_var_coeff[v]) + 0.0001 
+      # note that a small value is added to prevent that the adaptation gets stuck.
     }                   
                            
     }
-    sd_it &lt;- i+1
+    sd_it &lt;- i+1 # index to access proposal_sd in the next iteration
     }
   } # end of the MCMC loop
 
@@ -861,28 +862,23 @@ run_MCMC &lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = r
                            sdy = sdy),
                 proposal_sd = data.frame(proposal_sd),
                 accept = accept)
-  return(output)
+  # return output
+    output
 }</code></pre>
-<p>We set the initial standard deviation of the proposals to <span class="math inline">\(5\)</span>.</p>
-<pre class="r"><code>### Taking samples
-set.seed(10)
-sample_lat &lt;- runif(10,0,90)
-sample_data &lt;- data.frame(
-  x = sample_lat, 
-  y = gradient(x = sample_lat, coeff = c(-2.0, 28, 41, 0.1), sd = 2))
-
-### Analysis
+<p>We re-use the data from the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous post</a>, and set the initial standard deviation of the proposals to <span class="math inline">\(5\)</span>. This is probably too high, but we want to test whether the adaptation finds good values. We set the total number of iterations to <span class="math inline">\(100~000\)</span>, and use the first <span class="math inline">\(5000\)</span> iterations as the adapation phase:</p>
+<pre class="r"><code>### Analysis
+proposal_sd_initial &lt;- 5
 nIter &lt;- 100000
-print(system.time({m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
+adaptation_phase &lt;- 5000
+m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
-                                 nIter = nIter, nAdapt = 5000, adaptation_decay =500,
-                                 proposal_sd_init = c(5,5,5,5))}))</code></pre>
-<pre><code>##    user  system elapsed 
-##    4.63    0.51    5.14</code></pre>
+                                 nIter = nIter, nAdapt = adaptation_phase, 
+                                 adaptation_decay = adaptation_phase/10,
+                                 proposal_sd_init = proposal_sd_initial)</code></pre>
 <p>Looking at the traceplots, the MCMC runs well after an initial burn-in period, in which <span class="math inline">\(\sigma_{proposal}\)</span> was adjusted.
-<img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-7-1.png" width="691.2" />
-The traceplot below shows how the standard deviations of the proposals were adapted during the first <span class="math inline">\(5000\)</span> iterations. Despite a very bad initial guess for the <span class="math inline">\(\sigma_{proposal}\)</span> of <span class="math inline">\(Q\)</span>, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. The effective sample size after adaptation is <span class="math inline">\(3720\)</span>, which is <span class="math inline">\(52\%\)</span> higher than the effective sample size obtained with the same number of iterations in the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous version</a> of this model, where we tried to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>.
-<img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-8-1.png" width="537.6" />
+<img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-8-1.png" width="691.2" />
+The traceplot below shows how the standard deviations of the proposals were adapted during the first <span class="math inline">\(5000\)</span> iterations. Despite a very bad initial guess for the <span class="math inline">\(\sigma_{proposal}\)</span> of <span class="math inline">\(Q\)</span>, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. After the adaptation (at iteration <span class="math inline">\(5000\)</span>), the most recent proposal values are used for the remainder of the iterations. The effective sample size after adaptation is <span class="math inline">\(3720\)</span>, which is <span class="math inline">\(52\%\)</span> higher than the effective sample size obtained with the same number of iterations in the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous version</a> of this model, where we tried to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>.
+<img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-9-1.png" width="537.6" />
 Checking the acceptance rate shows that it is somewhat low even after the adaptation, at <strong>0.16</strong>. In multi-dimensional models, a good acceptance rate would be around <span class="math inline">\(0.25\)</span> <a href="https://projecteuclid.org/journals/annals-of-applied-probability/volume-7/issue-1/Weak-convergence-and-optimal-scaling-of-random-walk-Metropolis-algorithms/10.1214/aoap/1034625254.full">(Gelman et al. 1997)</a>. To further improve this algorithm and achieve more efficient sampling at a higher acceptance rate, we could use multivariate proposals that account for the correlation of parameters (see e.g. <a href="https://www.jstor.org/stable/3318737?seq=1#metadata_info_tab_contents">Haario et al. 2001</a>).</p>
 <p>You can find the full R code to reproduce all analyses and figures on <a href="https://github.com/KEichenseer/Methods/blob/main/Adaptive_Metropolis-Hastings.R">Github</a>.</p>
 

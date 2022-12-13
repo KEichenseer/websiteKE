@@ -153,10 +153,10 @@ pre {
 }
 &lt;/style&gt;
 &lt;p&gt;In the &lt;a href=&#34;/post/a-metropolis-algorithm-in-r-part-1-implementation&#34;&gt;previous post&lt;/a&gt;, we built a Metropolis algorithm to estimate latitudinal temperature gradients, approximated by a generalised logistic function. Recall that the Metropolis algorithm works by proposing new parameter values and evaluating the joint posterior probability of the model with these values, against the posterior with the current values.&lt;/p&gt;
-&lt;p&gt;How do we chose a new value for a parameter? A common approach is to sample a normal distribution, centred at the current value (i.e. the mean of the distribution is the current value). Choosing the standard deviation of the proposal distribution (&lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;) is more tricky. If &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; is too high, we end up proposing a lot of values at the far tail ends of the target posterior distribution, which will usually be rejected (see below, green proposals). This leads to inefficient sampling and patchy coverage of the posterior distribution. Conversely, a very small &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; leads to most new values being accepted, but the resulting Markov chain will move very slowly through the parameter space, leading to a low effective sample size (red proposals below). Instead, some intermediate &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; is desirable, at which the Markov chain moves quickly through the parameter space, without too many rejections (e.g., yellow proposals below).&lt;/p&gt;
+&lt;p&gt;How do we chose a new value for a parameter? A common approach is to sample from a normal distribution, centred at the current value (i.e. the mean of the distribution is the current value). Choosing the standard deviation of the proposal distribution (&lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;) is more tricky. If &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; is too high, we end up proposing a lot of values at the far tail ends of the target posterior distribution, which will usually be rejected (see below, yellow proposals). This leads to inefficient sampling and patchy coverage of the posterior distribution. Conversely, a very small &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; leads to most new values being accepted, but the resulting Markov chain will move very slowly through the parameter space, leading to a low effective sample size (red proposals). Instead, some intermediate &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; is desirable, at which the Markov chain moves quickly through the parameter space, without too many rejections (e.g., orange proposals).&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;It turns out that the Metropolis algorithm is usually most efficient when the acceptance rate of proposals is between $ 0.2$ and &lt;span class=&#34;math inline&#34;&gt;\(0.5\)&lt;/span&gt; (see &lt;a href=&#34;https://www.jstor.org/stable/pdf/3182776.pdf?casa_token=L8a1gJYi1SgAAAAA:ZVa-bCWzwBW3vAat13KRVDkDRu63BWmdxddvp2xLGAjV0bt1j72SP_tEXsxJrU1GqRDyu_23QMDMnCrMJM9Ydrc3bUAylT9eeJeqs5cmPrk9EFIiq9i-&#34;&gt;Roberts and Rosenthal 2001&lt;/a&gt;). In practice, this could be achieved e.g. by monitoring the acceptance rate or the standard deviation of the target distribution (&lt;span class=&#34;math inline&#34;&gt;\(\sigma_{target}\)&lt;/span&gt;), and adjusting &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; accordingly. Here, we will take the latter approach. For a four-dimensional Gaussian target distribution, the optimal &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; should be around &lt;span class=&#34;math inline&#34;&gt;\(~2.4/sqrt(4) \times \sigma_{target}\)&lt;/span&gt; (&lt;a href=&#34;http://people.ee.duke.edu/~lcarin/baystat5.pdf&#34;&gt;Gelman et al. 1996&lt;/a&gt;), so we will adapt &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; towards this target.&lt;/p&gt;
-&lt;p&gt;In order to allow for &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; to quickly converge on the optimum, the weighted variance of the samples from the Markov chains from previous iterations is used as the &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; for the next iteration. The weights decrease backwards in time, so that the recent values have more influence on the new value for &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;. The weighted variance is calculated with the following function, where &lt;code&gt;x&lt;/code&gt; denotes a vector of samples from the Markov chain, weights a vector of &lt;code&gt;weights&lt;/code&gt; (see below), and &lt;code&gt;sum_weights&lt;/code&gt; records the sum of the weights vector:&lt;/p&gt;
+&lt;p&gt;In order to allow for &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; to quickly converge on the optimum, the square root of the weighted variance of the samples from the Markov chains from previous iterations is used as the &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; for the next iteration. The weights decrease backwards in time, so that the recent values have more influence on the new value for &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;. The weighted variance is calculated with the following function, where &lt;code&gt;x&lt;/code&gt; denotes a vector of samples from the Markov chain, weights a vector of &lt;code&gt;weights&lt;/code&gt; (see below), and &lt;code&gt;sum_weights&lt;/code&gt; records the sum of the weights vector:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;weighted_var &amp;lt;- function(x, weights, sum_weights) {
   sum(weights*((x-sum(weights*x)/sum_weights)^2))/(sum_weights)
 }&lt;/code&gt;&lt;/pre&gt;
@@ -217,13 +217,14 @@ run_MCMC &amp;lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init
           function(f) weighted_var(
           f, weights = weights, sum_weights = sum_weights))
 
-    for(v in 1:4) {if(weighted_var_coeff[v]==0)   { # 
+    for(v in 1:4) {if(weighted_var_coeff[v]==0)   { # if variance is zero, reduce sd
               proposal_sd[i+1,v] &amp;lt;- sqrt(proposal_sd[i,v]^2/5)
-      } else  proposal_sd[i+1,v] &amp;lt;- 2.4/sqrt(4) * sqrt(weighted_var_coeff[v]) + 0.0001
+      } else  proposal_sd[i+1,v] &amp;lt;- 2.4/sqrt(4) * sqrt(weighted_var_coeff[v]) + 0.0001 
+      # note that a small value is added to prevent that the adaptation gets stuck.
     }                   
                            
     }
-    sd_it &amp;lt;- i+1
+    sd_it &amp;lt;- i+1 # index to access proposal_sd in the next iteration
     }
   } # end of the MCMC loop
 
@@ -235,28 +236,23 @@ run_MCMC &amp;lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init
                            sdy = sdy),
                 proposal_sd = data.frame(proposal_sd),
                 accept = accept)
-  return(output)
+  # return output
+    output
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We set the initial standard deviation of the proposals to &lt;span class=&#34;math inline&#34;&gt;\(5\)&lt;/span&gt;.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;### Taking samples
-set.seed(10)
-sample_lat &amp;lt;- runif(10,0,90)
-sample_data &amp;lt;- data.frame(
-  x = sample_lat, 
-  y = gradient(x = sample_lat, coeff = c(-2.0, 28, 41, 0.1), sd = 2))
-
-### Analysis
+&lt;p&gt;We re-use the data from the &lt;a href=&#34;/post/a-metropolis-algorithm-in-r-part-1-implementation&#34;&gt;previous post&lt;/a&gt;, and set the initial standard deviation of the proposals to &lt;span class=&#34;math inline&#34;&gt;\(5\)&lt;/span&gt;. This is probably too high, but we want to test whether the adaptation finds good values. We set the total number of iterations to &lt;span class=&#34;math inline&#34;&gt;\(100~000\)&lt;/span&gt;, and use the first &lt;span class=&#34;math inline&#34;&gt;\(5000\)&lt;/span&gt; iterations as the adapation phase:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;### Analysis
+proposal_sd_initial &amp;lt;- 5
 nIter &amp;lt;- 100000
-print(system.time({m &amp;lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
+adaptation_phase &amp;lt;- 5000
+m &amp;lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
-                                 nIter = nIter, nAdapt = 5000, adaptation_decay =500,
-                                 proposal_sd_init = c(5,5,5,5))}))&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;##    user  system elapsed 
-##    4.63    0.51    5.14&lt;/code&gt;&lt;/pre&gt;
+                                 nIter = nIter, nAdapt = adaptation_phase, 
+                                 adaptation_decay = adaptation_phase/10,
+                                 proposal_sd_init = proposal_sd_initial)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Looking at the traceplots, the MCMC runs well after an initial burn-in period, in which &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; was adjusted.
-&lt;img src=&#34;/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;691.2&#34; /&gt;
-The traceplot below shows how the standard deviations of the proposals were adapted during the first &lt;span class=&#34;math inline&#34;&gt;\(5000\)&lt;/span&gt; iterations. Despite a very bad initial guess for the &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; of &lt;span class=&#34;math inline&#34;&gt;\(Q\)&lt;/span&gt;, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. The effective sample size after adaptation is &lt;span class=&#34;math inline&#34;&gt;\(3720\)&lt;/span&gt;, which is &lt;span class=&#34;math inline&#34;&gt;\(52\%\)&lt;/span&gt; higher than the effective sample size obtained with the same number of iterations in the &lt;a href=&#34;/post/a-metropolis-algorithm-in-r-part-1-implementation&#34;&gt;previous version&lt;/a&gt; of this model, where we tried to guess good values for &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;.
-&lt;img src=&#34;/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;537.6&#34; /&gt;
+&lt;img src=&#34;/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;691.2&#34; /&gt;
+The traceplot below shows how the standard deviations of the proposals were adapted during the first &lt;span class=&#34;math inline&#34;&gt;\(5000\)&lt;/span&gt; iterations. Despite a very bad initial guess for the &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt; of &lt;span class=&#34;math inline&#34;&gt;\(Q\)&lt;/span&gt;, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. After the adaptation (at iteration &lt;span class=&#34;math inline&#34;&gt;\(5000\)&lt;/span&gt;), the most recent proposal values are used for the remainder of the iterations. The effective sample size after adaptation is &lt;span class=&#34;math inline&#34;&gt;\(3720\)&lt;/span&gt;, which is &lt;span class=&#34;math inline&#34;&gt;\(52\%\)&lt;/span&gt; higher than the effective sample size obtained with the same number of iterations in the &lt;a href=&#34;/post/a-metropolis-algorithm-in-r-part-1-implementation&#34;&gt;previous version&lt;/a&gt; of this model, where we tried to guess good values for &lt;span class=&#34;math inline&#34;&gt;\(\sigma_{proposal}\)&lt;/span&gt;.
+&lt;img src=&#34;/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;537.6&#34; /&gt;
 Checking the acceptance rate shows that it is somewhat low even after the adaptation, at &lt;strong&gt;0.16&lt;/strong&gt;. In multi-dimensional models, a good acceptance rate would be around &lt;span class=&#34;math inline&#34;&gt;\(0.25\)&lt;/span&gt; &lt;a href=&#34;https://projecteuclid.org/journals/annals-of-applied-probability/volume-7/issue-1/Weak-convergence-and-optimal-scaling-of-random-walk-Metropolis-algorithms/10.1214/aoap/1034625254.full&#34;&gt;(Gelman et al. 1997)&lt;/a&gt;. To further improve this algorithm and achieve more efficient sampling at a higher acceptance rate, we could use multivariate proposals that account for the correlation of parameters (see e.g. &lt;a href=&#34;https://www.jstor.org/stable/3318737?seq=1#metadata_info_tab_contents&#34;&gt;Haario et al. 2001&lt;/a&gt;).&lt;/p&gt;
 &lt;p&gt;You can find the full R code to reproduce all analyses and figures on &lt;a href=&#34;https://github.com/KEichenseer/Methods/blob/main/Adaptive_Metropolis-Hastings.R&#34;&gt;Github&lt;/a&gt;.&lt;/p&gt;
 </description>
@@ -423,7 +419,7 @@ In conclusion, the model seems to be doing a good job in estimating a sensible t
       <pubDate>Wed, 28 Jul 2021 00:00:00 +0000</pubDate>
       <guid>/post/change-point-regression/</guid>
       <description>
-&lt;script src=&#34;/post/change-point-regression/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+
 
 
 &lt;style&gt;
@@ -502,7 +498,7 @@ of &lt;span class=&#34;math inline&#34;&gt;\(\sigma^2\)&lt;/span&gt;.     &lt;
 and &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt; otherwise, resulting in&lt;br /&gt;
 &lt;span class=&#34;math inline&#34;&gt;\(\mu_i = \alpha_1~+~\beta_1~x_i\)&lt;/span&gt;     before &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt; and&lt;br /&gt;
 &lt;span class=&#34;math inline&#34;&gt;\(\mu_i = \alpha_1~+~\alpha_2~+~(\beta_1~+~\beta_2)~x_i\)&lt;/span&gt;&lt;br /&gt;
-from &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;   onwards.&lt;/p&gt;
+from &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt; onwards.&lt;/p&gt;
 &lt;p&gt;back-transform &lt;span class=&#34;math inline&#34;&gt;\(\log(\tau)\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;again, the &lt;em&gt;step&lt;/em&gt; function is used to define &lt;span class=&#34;math inline&#34;&gt;\(\log(\tau)\)&lt;/span&gt; before and after &lt;span class=&#34;math inline&#34;&gt;\(n_{change}\)&lt;/span&gt;. Log-transformation is used to ensure that the &lt;span class=&#34;math inline&#34;&gt;\(\tau\)&lt;/span&gt; resulting from &lt;span class=&#34;math inline&#34;&gt;\(\tau_1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\tau_2\)&lt;/span&gt; is positive.&lt;/p&gt;
 &lt;p&gt;We have to define priors for all parameters that are not specified by data.&lt;/p&gt;

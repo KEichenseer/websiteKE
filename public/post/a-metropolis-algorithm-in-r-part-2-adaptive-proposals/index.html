@@ -867,14 +867,14 @@ run_MCMC &lt;- function(x, y, coeff_inits, sdy_init, nIter, proposal_sd_init = r
 }</code></pre>
 <p>We re-use the data from the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous post</a>, and set the initial standard deviation of the proposals to <span class="math inline">\(5\)</span>. This is probably too high, but we want to test whether the adaptation finds good values. We set the total number of iterations to <span class="math inline">\(100~000\)</span>, and use the first <span class="math inline">\(5000\)</span> iterations as the adapation phase:</p>
 <pre class="r"><code>### Analysis
-proposal_sd_initial &lt;- 5
+proposal_sd_init &lt;- 5
 nIter &lt;- 100000
-adaptation_phase &lt;- 5000
+nAdapt &lt;- 5000
 m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
-                                 nIter = nIter, nAdapt = adaptation_phase, 
-                                 adaptation_decay = adaptation_phase/10,
-                                 proposal_sd_init = proposal_sd_initial)</code></pre>
+                                 nIter = nIter, nAdapt = nAdapt, 
+                                 adaptation_decay = nAdapt/10,
+                                 proposal_sd_init = proposal_sd_init)</code></pre>
 <p>Looking at the traceplots, the MCMC runs well after an initial burn-in period, in which <span class="math inline">\(\sigma_{proposal}\)</span> was adjusted.
 <img src="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals/index.en_files/figure-html/unnamed-chunk-8-1.png" width="691.2" />
 The traceplot below shows how the standard deviations of the proposals were adapted during the first <span class="math inline">\(5000\)</span> iterations. Despite a very bad initial guess for the <span class="math inline">\(\sigma_{proposal}\)</span> of <span class="math inline">\(Q\)</span>, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. After the adaptation (at iteration <span class="math inline">\(5000\)</span>), the most recent proposal values are used for the remainder of the iterations. The effective sample size after adaptation is <span class="math inline">\(3720\)</span>, which is <span class="math inline">\(52\%\)</span> higher than the effective sample size obtained with the same number of iterations in the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous version</a> of this model, where we tried to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>.

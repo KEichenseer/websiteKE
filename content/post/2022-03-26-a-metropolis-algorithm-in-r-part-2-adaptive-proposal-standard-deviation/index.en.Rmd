@@ -252,14 +252,14 @@ sample_data <- data.frame(
 ```{r, warning = FALSE, echo = TRUE}
 
 ### Analysis
-proposal_sd_initial <- 5
+proposal_sd_init <- 5
 nIter <- 100000
-adaptation_phase <- 5000
+nAdapt <- 5000
 m <- run_MCMC(x = sample_data$x, y = sample_data$y,
                                  coeff_inits = c(0,30,45,0.2), sdy_init = 4, 
-                                 nIter = nIter, nAdapt = adaptation_phase, 
-                                 adaptation_decay = adaptation_phase/10,
-                                 proposal_sd_init = proposal_sd_initial)
+                                 nIter = nIter, nAdapt = nAdapt, 
+                                 adaptation_decay = nAdapt/10,
+                                 proposal_sd_init = proposal_sd_init)
 
 ```
 Looking at the traceplots, the MCMC runs well after an initial burn-in period, in which $\sigma_{proposal}$ was adjusted.

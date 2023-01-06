@@ -14,10 +14,10 @@ education:
 email: "kilian.eichenseer@durham.ac.uk"
 highlight_name: false
 interests:
+- Bayesian statistics
+- R programming
 - Palaeobiology and palaeoclimate
 - Ecology and evolution
-- Marine invertebrates and reefs
-- Data analysis and statistics
 
 organizations:
 - name: Durham University

@@ -1,13 +1,12 @@
 ---
 title: "A Metropolis algorithm in R - Part 2: Adaptive proposals"
 author: ''
-date: "2022-03-26"
+date: "2022-12-10"
 output: pdf_document
-categories: []
+categories: [R, Bayesian]
 tags: []
 subtitle: ''
 authors: []
-lastmod: "2022-03-26T20:13:04Z"
 #featured: false
 image:
   caption: ''
@@ -140,4 +139,4 @@ m &lt;- run_MCMC(x = sample_data$x, y = sample_data$y,
 The traceplot below shows how the standard deviations of the proposals were adapted during the first <span class="math inline">\(5000\)</span> iterations. Despite a very bad initial guess for the <span class="math inline">\(\sigma_{proposal}\)</span> of <span class="math inline">\(Q\)</span>, the adaptive algorithm managed to quickly find smaller, better values, resulting in reasonably good behaviour of the Markov chains of the parameters shown above. After the adaptation (at iteration <span class="math inline">\(5000\)</span>), the most recent proposal values are used for the remainder of the iterations. The effective sample size after adaptation is <span class="math inline">\(3720\)</span>, which is <span class="math inline">\(52\%\)</span> higher than the effective sample size obtained with the same number of iterations in the <a href="/post/a-metropolis-algorithm-in-r-part-1-implementation">previous version</a> of this model, where we tried to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>.
 <img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-9-1.png" width="537.6" />
 Checking the acceptance rate shows that it is somewhat low even after the adaptation, at <strong>0.16</strong>. In multi-dimensional models, a good acceptance rate would be around <span class="math inline">\(0.25\)</span> <a href="https://projecteuclid.org/journals/annals-of-applied-probability/volume-7/issue-1/Weak-convergence-and-optimal-scaling-of-random-walk-Metropolis-algorithms/10.1214/aoap/1034625254.full">(Gelman et al. 1997)</a>. To further improve this algorithm and achieve more efficient sampling at a higher acceptance rate, we could use multivariate proposals that account for the correlation of parameters (see e.g. <a href="https://www.jstor.org/stable/3318737?seq=1#metadata_info_tab_contents">Haario et al. 2001</a>).</p>
-<p>You can find the full R code to reproduce all analyses and figures on <a href="https://github.com/KEichenseer/Methods/blob/main/Adaptive_Metropolis-Hastings.R">Github</a>.</p>
+<p>You can find the full R code to reproduce all analyses and figures on <a href="https://github.com/KEichenseer/Bayesian-Models/blob/main/03-Adaptive_Metropolis_algorithm_in_R">Github</a>.</p>

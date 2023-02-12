@@ -1,13 +1,12 @@
 ---
 title: "A Metropolis algorithm in R - Part 1: Implementation"
 author: "Kilian Eichenseer"
-date: '2022-02-12'
+date: '2022-02-17'
 slug: a-metropolis-algorithm-in-R-part-1-implementation
-categories: []
+categories: [R, Bayesian]
 tags: []
 subtitle: ''
 authors: []
-lastmod: '2022-02-12T21:20:10Z'
 #featured: false
 image:
   caption: ''
@@ -163,4 +162,4 @@ The parameters have converged reasonably well.</p>
 <p>Below, we discard the first <span class="math inline">\(10,000\)</span> iterations as burn-in and plot <span class="math inline">\(8\)</span> gradients, using different samples from the posterior (blue lines, lefthand plot). As expected, they fit nicely to the <span class="math inline">\(10\)</span> sampled data points (grey dots). They are also quite similar to the original gradient (black, dashed line). To the right, the estimated temperature gradient using the median of the parameters from the posterior (blue line), and <span class="math inline">\(95\%\)</span> credible intervals (blue shading), are shown. Between <span class="math inline">\(10^\circ\)</span> and <span class="math inline">\(50^\circ\)</span>, where we have sufficient samples, the estimated gradient very closely resembles the original gradient. The constraints imposed by the priors ensure that the estimated sea surface temperature gradients stays in a realistic range (<span class="math inline">\(&gt;-4^\circ C\)</span>), even at latitudes <span class="math inline">\(&gt; 63^\circ\)</span> where we have no data.</p>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-11-1.png" width="864" />
 In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. In the <a href="/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals">second part</a> of this series, we will implement adaption of <span class="math inline">\(\sigma_{proposal}\)</span>, which means we won’t have to guess good values for <span class="math inline">\(\sigma_{proposal}\)</span>. This should speed up convergence, meaning we will need less iterations of the MCMC algorithm to obtain reliable posterior estimates.</p>
-<p>You can find the full R code to reproduce all analyses and figures on <a href="https://github.com/KEichenseer/Methods/blob/main/A_Metropolis_algorithm_in_R_generalised_logistic_function.R">Github</a>.</p>
+<p>You can find the full R code to reproduce all analyses and figures on <a href="https://github.com/KEichenseer/Bayesian-Models/blob/main/02-Metropolis_algorithm_in_R">Github</a>.</p>

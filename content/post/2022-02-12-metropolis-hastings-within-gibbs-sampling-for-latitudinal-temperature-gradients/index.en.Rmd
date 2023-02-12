@@ -1,13 +1,12 @@
 ---
 title: "A Metropolis algorithm in R - Part 1: Implementation"
 author: "Kilian Eichenseer"
-date: '2022-02-12'
+date: '2022-02-17'
 slug: a-metropolis-algorithm-in-R-part-1-implementation
-categories: []
+categories: [R, Bayesian]
 tags: []
 subtitle: ''
 authors: []
-lastmod: '2022-02-12T21:20:10Z'
 #featured: false
 image:
   caption: ''
@@ -298,4 +297,4 @@ axis(2,seq(-5,30,5),c(NA,0,NA,10,NA,20,NA,30))
 ```
 In conclusion, the model seems to be doing a good job in estimating a sensible temperature gradient from sparse samples. In the [second part](/post/a-metropolis-algorithm-in-r-part-2-adaptive-proposals) of this series, we will implement adaption of $\sigma_{proposal}$, which means we won't have to guess good values for $\sigma_{proposal}$. This should speed up convergence, meaning we will need less iterations of the MCMC algorithm to obtain reliable posterior estimates.  
 
-You can find the full R code to reproduce all analyses and figures on [Github](https://github.com/KEichenseer/Methods/blob/main/A_Metropolis_algorithm_in_R_generalised_logistic_function.R).
+You can find the full R code to reproduce all analyses and figures on [Github](https://github.com/KEichenseer/Bayesian-Models/blob/main/02-Metropolis_algorithm_in_R).

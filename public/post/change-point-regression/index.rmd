@@ -1,13 +1,12 @@
 ---
 title: "Change Point Regression"
 author: ''
-date: '2021-07-28'
+date: '2021-08-02'
 slug: change-point-regression
-categories: []
+categories: [R, Bayesian, JAGS]
 tags: []
 subtitle: ''
 authors: []
-lastmod: '2021-07-28T10:58:49+02:00'
 #featured: false
 image:
   caption: ''
@@ -360,6 +359,6 @@ legend("topleft", legend = c(expression("before "*italic(n["change"])), expressi
 ```
 The shaded areas denote $95$ % credible intervals around the regression lines.
 
-You can find the full R code for this analysis at https://github.com/KEichenseer/Methods/blob/main/Change_point_regression.R
+You can find the full R code for this analysis at https://github.com/KEichenseer/Bayesian-Models/blob/main/01-Change_point_regression_with_JAGS.R
 
 Get in touch if you have any comments or questions!

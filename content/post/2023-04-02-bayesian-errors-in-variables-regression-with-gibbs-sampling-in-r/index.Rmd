@@ -1,0 +1,135 @@
+---
+title: Bayesian errors-in-variables regression with Gibbs sampling in R
+author: ''
+date: '2023-04-02'
+slug: bayesian-errors-in-variables-regression-with-gibbs-sampling-in-r
+categories: [R, Bayesian, JAGS, Gibbs sampling]
+tags: []
+subtitle: ''
+authors: []
+#featured: false
+draft: true
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: true
+projects: []
+header-includes: \usepackage{graphics}
+summary: Errors-in-variables regression is preferable to simple linear regression 
+when the observations come with uncertainty. Here, I first show how errors-in-variables 
+regression can be done in R, using JAGS. I then construct a Gibbs sampler that runs 
+purely in R, without any external software like JAGS or Stan. 
+
+---
+<style>
+.math {
+  font-size: small;
+}
+</style>
+
+<style>
+.column-left{
+  float: left;
+  width: 52%;
+  text-align: left;
+
+}
+
+<style>
+.column-center{
+  float: center;
+  width: 100%;
+  text-align: left;
+
+}
+
+.column-right{
+  float: right;
+  width: 48%;
+  text-align: left;
+  margin-top: 6px;
+  line-height: 1.83;
+  font-size: 12px;
+
+}
+</style>
+
+<style type="text/css">
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 12px;
+}
+pre {
+  font-size: 13.2px
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Assume we want to conduct a linear regression of $y$ against $x$. Both $x$ and $y$ come with normally distributed uncertainties or measurement errors, which we need to take into consideration, or we risk obtaining biased regression coefficients. Let's generate $x$ and $y$, with uncertainties denoted as standard deviations $sigma_x$ and $sigma_y$. Each point may have a different uncertainty. Below, we generate some sample data.
+
+```{r, warning = FALSE, echo = TRUE}
+set.seed(3) # change the seed for a different sequence of random numbers
+n <- 30 # number of total data points
+x <- runif(n,-2,2) # generate the true x
+y <- 2 + 0.75 * x # generate the true y
+# define the standard deviations of the normal uncertainties with which x and y where observed
+x_sd <- 0.2*(x+2)+runif(n,0.1,0.3)
+y_sd <- runif(n,0.2,0.75)
+# generate observations from x and y, given these uncertainties
+x_obs <- rnorm(n,x,x_sd)
+y_obs <- rnorm(n,y,y_sd)
+
+```
+
+Now, we show the observations of $x$ and $y$, along with the true underlying relationship. We also add a simple linear regression, using the R functions `lm()` and `predict.lm(), to compare it to the true relationship:
+
+```{r, fig.width = 4, fig.height = 4, warning = FALSE, echo = FALSE}
+# function to show uncertainty shadings
+ciPoly <- function(x,en,ep,color=rgb(0,0,0,0.2)) {
+  polygon( c(x[1], x, x[length(x)], x[length(x)], rev(x), x[1]),
+           c((ep)[1],ep, (ep)[length(ep)], (en)[length(en)], rev(en), (en)[1]),
+           border = NA, col = color)}
+
+par(mar = c(4,4,1,1), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
+
+plot(x_obs,y_obs,pch=21,col=NA,bg=rgb(0,0,0,0.5),
+     xlab = "x", ylab = "y")
+points(range(x),range(y),type="l",lwd=2)
+
+lm1 <- lm(y_obs~x_obs)
+x_seq <- seq(min(x),max(x),length.out = 100)
+x_pred <- predict.lm(lm1,newdata = data.frame(x_obs=x_seq), interval = "confidence")
+ciPoly(x_seq,x_pred[,2],x_pred[,3])
+points(x_seq,x_pred[,1],lwd=2,lty=2,type = "l")
+legend("topleft", legend = c("observations","true relationship", "linear regression"), pt.bg  = c(rgb(0,0,0,0.5), NA, NA), pch = c(21,NA, NA), lwd = c(NA,2,2),  pt.cex = c(1,NA,NA), bty = "n", pt.lwd = c(0,NA,NA), col = c(NA,"black","black"), lty = c(NA,1,2), cex = .75)
+
+```
+
+Next, we build a Bayesian, linear regression model using JAGS, that accounts for 
+the uncertainties around our observations of $x$ and $y$. As we can almost directly 
+pass the model formulas to JAGS using the `R2jags` package, this is quite straightforward. 
+Here is the JAGS model:
+
+```{r, warning = FALSE, echo = TRUE}
+errors_in_variables_regression_jags <- function() {
+
+  ## Likelihood
+  for (i in 1:N){ # 
+    x_est[i] ~ dnorm(x_obs[i], 1/(x_sd[i]*x_sd[i])) # precision = 1/sigma^2
+    y_obs[i] ~ dnorm(y_est[i], 1/(y_sd[i]*y_sd[i])) # precision = 1/sigma^2
+    y_est[i] ~ dnorm(mu[i], tau) # JAGS uses precision `tau` instead of sigma
+    mu[i] <- alpha + beta * x_est[i]
+  }
+
+  ## Priors
+  tau ~ dgamma(1, 1)  # gamma prior for precision
+  sigma <- 1/sqrt(tau) # calculate standard deviation
+  alpha ~ dnorm(0, 1/(100*100))
+  beta ~ dnorm(0, 1/(100*100))
+
+}

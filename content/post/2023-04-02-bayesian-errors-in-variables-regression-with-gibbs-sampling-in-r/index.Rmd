@@ -15,10 +15,7 @@ image:
   preview_only: true
 projects: []
 header-includes: \usepackage{graphics}
-summary: Errors-in-variables regression is preferable to simple linear regression 
-when the observations come with uncertainty. Here, I first show how errors-in-variables 
-regression can be done in R, using JAGS. I then construct a Gibbs sampler that runs 
-purely in R, without any external software like JAGS or Stan. 
+summary: Errors-in-variables regression is preferable to simple linear regression when the observations come with uncertainty. Here, I first show how errors-in-variables regression can be done in R, using JAGS. I then construct a Gibbs sampler that runs purely in R, without any external software like JAGS or Stan. 
 
 ---
 <style>
@@ -73,13 +70,13 @@ knitr::opts_chunk$set(echo = TRUE)
 Assume we want to conduct a linear regression of $y$ against $x$. Both $x$ and $y$ come with normally distributed uncertainties or measurement errors, which we need to take into consideration, or we risk obtaining biased regression coefficients. Let's generate $x$ and $y$, with uncertainties denoted as standard deviations $sigma_x$ and $sigma_y$. Each point may have a different uncertainty. Below, we generate some sample data.
 
 ```{r, warning = FALSE, echo = TRUE}
-set.seed(3) # change the seed for a different sequence of random numbers
+set.seed(1) # change the seed for a different sequence of random numbers
 n <- 30 # number of total data points
 x <- runif(n,-2,2) # generate the true x
 y <- 2 + 0.75 * x # generate the true y
 # define the standard deviations of the normal uncertainties with which x and y where observed
-x_sd <- 0.2*(x+2)+runif(n,0.1,0.3)
-y_sd <- runif(n,0.2,0.75)
+x_sd <- runif(n,0,0.25)
+y_sd <- runif(n,0.1,1)
 # generate observations from x and y, given these uncertainties
 x_obs <- rnorm(n,x,x_sd)
 y_obs <- rnorm(n,y,y_sd)
@@ -99,14 +96,16 @@ par(mar = c(4,4,1,1), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
 
 plot(x_obs,y_obs,pch=21,col=NA,bg=rgb(0,0,0,0.5),
      xlab = "x", ylab = "y")
-points(range(x),range(y),type="l",lwd=2)
+
+lm_true <- lm(y~x)
+points(range(x_obs),lm_true$coefficients[1]+lm_true$coefficients[2]*range(x_obs),type="l",lwd=2,col = rgb(0.5,0.5,0.5,1))
 
 lm1 <- lm(y_obs~x_obs)
-x_seq <- seq(min(x),max(x),length.out = 100)
+x_seq <- seq(min(x_obs),max(x_obs),length.out = 100)
 x_pred <- predict.lm(lm1,newdata = data.frame(x_obs=x_seq), interval = "confidence")
 ciPoly(x_seq,x_pred[,2],x_pred[,3])
-points(x_seq,x_pred[,1],lwd=2,lty=2,type = "l")
-legend("topleft", legend = c("observations","true relationship", "linear regression"), pt.bg  = c(rgb(0,0,0,0.5), NA, NA), pch = c(21,NA, NA), lwd = c(NA,2,2),  pt.cex = c(1,NA,NA), bty = "n", pt.lwd = c(0,NA,NA), col = c(NA,"black","black"), lty = c(NA,1,2), cex = .75)
+points(x_seq,x_pred[,1],lwd=2,lty=2,type = "l", col = rgb(0,0,0,1))
+legend("topleft", legend = c("observations","true relationship", "linear regression"), pt.bg  = c(rgb(0,0,0,0.5), NA, NA), pch = c(21,NA, NA), lwd = c(NA,2,2),  pt.cex = c(1,NA,NA), bty = "n", pt.lwd = c(0,NA,NA), col = c(NA,rgb(.5,.5,.5,1),rgb(0,0,0,1)), lty = c(NA,1,2), cex = .65)
 
 ```
 
@@ -117,19 +116,71 @@ Here is the JAGS model:
 
 ```{r, warning = FALSE, echo = TRUE}
 errors_in_variables_regression_jags <- function() {
-
   ## Likelihood
-  for (i in 1:N){ # 
+  for (i in 1:n){ # 
     x_est[i] ~ dnorm(x_obs[i], 1/(x_sd[i]*x_sd[i])) # precision = 1/sigma^2
     y_obs[i] ~ dnorm(y_est[i], 1/(y_sd[i]*y_sd[i])) # precision = 1/sigma^2
     y_est[i] ~ dnorm(mu[i], tau) # JAGS uses precision `tau` instead of sigma
     mu[i] <- alpha + beta * x_est[i]
   }
-
   ## Priors
   tau ~ dgamma(1, 1)  # gamma prior for precision
   sigma <- 1/sqrt(tau) # calculate standard deviation
   alpha ~ dnorm(0, 1/(100*100))
   beta ~ dnorm(0, 1/(100*100))
-
 }
+```
+
+We load the `R2jags` package, specify the data used in the model, and send everything to JAGS:
+
+```{r, warning = FALSE, echo = TRUE,message = FALSE, results = FALSE}
+library(R2jags)
+
+regression_data <- list("x_obs", "y_obs", "x_sd", "y_sd","n")
+
+lm_jags  <- jags(data = regression_data,
+                parameters.to.save = c("alpha",
+                                       "beta",
+                                       "sigma",
+                                       "y_est",
+                                       "x_est"
+                ),
+                n.iter = 3000,
+                n.thin = 1,
+                n.chains =  3, # Other values set at default (for simplicity)
+                model.file = errors_in_variables_regression_jags)
+
+```
+
+Let's visualise this regression and compare it to the simple linear regression from above:
+
+```{r, fig.width = 4, fig.height = 4, warning = FALSE, echo = FALSE}
+par(mar = c(4,4,1,1), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
+
+plot(x_obs,y_obs,pch=21,col=NA,bg=rgb(0,0,0,0.5),
+     xlab = "x", ylab = "y")
+lm_true <- lm(y~x)
+points(range(x_obs),lm_true$coefficients[1]+lm_true$coefficients[2]*range(x_obs),type="l",lwd=2,col = rgb(0.5,0.5,0.5,1))
+
+lm1 <- lm(y_obs~x_obs)
+x_seq <- seq(min(x_obs),max(x_obs),length.out = 100)
+x_pred <- predict.lm(lm1,newdata = data.frame(x_obs=x_seq), interval = "confidence")
+ciPoly(x_seq,x_pred[,2],x_pred[,3])
+points(x_seq,x_pred[,1],lwd=2,lty=2,type = "l")
+legend("topleft", legend = c("observations","true relationship", "lm() regression",
+                             "JAGS regression"), pt.bg  = c(rgb(0,0,0,0.5), NA, NA, NA), pch = c(21,NA, NA, NA), lwd = c(NA,2,2,2),  pt.cex = c(1,NA,NA,NA), bty = "n", pt.lwd = c(0,NA,NA,NA), col = c(NA,rgb(0.5,0.5,0.5,1),"black", rgb(0.9,0.33,0,1)), lty = c(NA,1,2,2), cex = .65)
+
+x_seq <- seq(min(x_obs),max(x_obs),length.out = 100)
+regmat <- matrix(NA,nrow = 1500, ncol = length(x_seq))
+
+for(i in 1:1500) {
+  regmat[i,] <- lm_jags$BUGSoutput$sims.list$alpha[i] + lm_jags$BUGSoutput$sims.list$beta[i]*x_seq
+}
+
+reg_025 <- apply(regmat, 2, function(x) quantile(x, probs = 0.025))
+reg_975 <- apply(regmat, 2, function(x) quantile(x, probs = 0.975))
+
+ciPoly(x_seq, reg_975,reg_025, col = rgb(0.9,.33,0,0.25))
+points(range(x_obs), lm_jags$BUGSoutput$mean$alpha + range(x_obs)*lm_jags$BUGSoutput$mean$beta, type = "l", col = rgb(0.9,.33,0,1),lwd=2)
+
+```

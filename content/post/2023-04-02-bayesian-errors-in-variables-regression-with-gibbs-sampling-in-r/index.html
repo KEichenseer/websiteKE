@@ -68,8 +68,8 @@ n &lt;- 30 # number of total data points
 x &lt;- runif(n,-2,2) # generate the true x
 y &lt;- 2 + 0.75 * x # generate the true y
 # define the standard deviations of the normal uncertainties with which x and y where observed
-x_sd &lt;- runif(n,0,0.25)
-y_sd &lt;- runif(n,0.1,1)
+x_sd &lt;- runif(n,0.2,0.5)
+y_sd &lt;- runif(n,0.2,1)
 # generate observations from x and y, given these uncertainties
 x_obs &lt;- rnorm(n,x,x_sd)
 y_obs &lt;- rnorm(n,y,y_sd)</code></pre>
@@ -111,3 +111,93 @@ lm_jags  &lt;- jags(data = regression_data,
                 model.file = errors_in_variables_regression_jags)</code></pre>
 <p>Let’s visualise this regression and compare it to the simple linear regression from above:</p>
 <p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="384" /></p>
+<pre><code>## [[1]]
+## NULL
+## 
+## [[2]]
+## NULL
+## 
+## [[3]]
+## NULL
+## 
+## [[4]]
+## NULL
+## 
+## [[5]]
+## NULL
+## 
+## [[6]]
+## NULL
+## 
+## [[7]]
+## NULL
+## 
+## [[8]]
+## NULL
+## 
+## [[9]]
+## NULL
+## 
+## [[10]]
+## NULL
+## 
+## [[11]]
+## NULL
+## 
+## [[12]]
+## NULL
+## 
+## [[13]]
+## NULL
+## 
+## [[14]]
+## NULL
+## 
+## [[15]]
+## NULL
+## 
+## [[16]]
+## NULL
+## 
+## [[17]]
+## NULL
+## 
+## [[18]]
+## NULL
+## 
+## [[19]]
+## NULL
+## 
+## [[20]]
+## NULL
+## 
+## [[21]]
+## NULL
+## 
+## [[22]]
+## NULL
+## 
+## [[23]]
+## NULL
+## 
+## [[24]]
+## NULL
+## 
+## [[25]]
+## NULL
+## 
+## [[26]]
+## NULL
+## 
+## [[27]]
+## NULL
+## 
+## [[28]]
+## NULL
+## 
+## [[29]]
+## NULL
+## 
+## [[30]]
+## NULL</code></pre>
+<p>The mean regression line is very similar to the simple linear regression, but the uncertainty is now larger. Also, notice how the estimates of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models.</p>

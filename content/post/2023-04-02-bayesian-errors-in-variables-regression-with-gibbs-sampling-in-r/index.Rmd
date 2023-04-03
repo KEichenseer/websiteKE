@@ -75,8 +75,8 @@ n <- 30 # number of total data points
 x <- runif(n,-2,2) # generate the true x
 y <- 2 + 0.75 * x # generate the true y
 # define the standard deviations of the normal uncertainties with which x and y where observed
-x_sd <- runif(n,0,0.25)
-y_sd <- runif(n,0.1,1)
+x_sd <- runif(n,0.2,0.5)
+y_sd <- runif(n,0.2,1)
 # generate observations from x and y, given these uncertainties
 x_obs <- rnorm(n,x,x_sd)
 y_obs <- rnorm(n,y,y_sd)
@@ -166,9 +166,11 @@ lm1 <- lm(y_obs~x_obs)
 x_seq <- seq(min(x_obs),max(x_obs),length.out = 100)
 x_pred <- predict.lm(lm1,newdata = data.frame(x_obs=x_seq), interval = "confidence")
 ciPoly(x_seq,x_pred[,2],x_pred[,3])
-points(x_seq,x_pred[,1],lwd=2,lty=2,type = "l")
-legend("topleft", legend = c("observations","true relationship", "lm() regression",
-                             "JAGS regression"), pt.bg  = c(rgb(0,0,0,0.5), NA, NA, NA), pch = c(21,NA, NA, NA), lwd = c(NA,2,2,2),  pt.cex = c(1,NA,NA,NA), bty = "n", pt.lwd = c(0,NA,NA,NA), col = c(NA,rgb(0.5,0.5,0.5,1),"black", rgb(0.9,0.33,0,1)), lty = c(NA,1,2,2), cex = .65)
+legend("topleft", legend = c("observations","true relationship", "lm() regression"
+                             ), pt.bg  = c(rgb(0,0,0,0.5), NA, NA), pch = c(21,NA, NA), lwd = c(NA,2,2),  pt.cex = c(1,NA,NA), pt.lwd = c(0,NA,NA), col = c(NA,rgb(0.5,0.5,0.5,1),"black"), lty = c(NA,1,2,2), cex = .65)
+
+legend("bottomright", legend = c("JAGS estimates",
+                             "JAGS regression"), pt.bg  = c(rgb(0.9,0.33,0,0.5), NA), pch = c(24,NA), lwd = c(NA,2),  pt.cex = c(1,NA,NA,NA), pt.lwd = c(0,NA), col = c(NA,rgb(0.9,0.33,0,1)), lty = c(NA,2), cex = .65)
 
 x_seq <- seq(min(x_obs),max(x_obs),length.out = 100)
 regmat <- matrix(NA,nrow = 1500, ncol = length(x_seq))
@@ -181,6 +183,13 @@ reg_025 <- apply(regmat, 2, function(x) quantile(x, probs = 0.025))
 reg_975 <- apply(regmat, 2, function(x) quantile(x, probs = 0.975))
 
 ciPoly(x_seq, reg_975,reg_025, col = rgb(0.9,.33,0,0.25))
-points(range(x_obs), lm_jags$BUGSoutput$mean$alpha + range(x_obs)*lm_jags$BUGSoutput$mean$beta, type = "l", col = rgb(0.9,.33,0,1),lwd=2)
+points(range(x_obs), lm_jags$BUGSoutput$mean$alpha + range(x_obs)*lm_jags$BUGSoutput$mean$beta, type = "l", col = rgb(0.9,.33,0,1),lwd=2, lty=2)
+
+points(x_seq,x_pred[,1],lwd=2,lty=2,type = "l")
+points(lm_jags$BUGSoutput$mean$x_est,lm_jags$BUGSoutput$mean$y_est,pch=24, col = NA, bg = rgb(0.9,0.33,0,0.5))
+sapply(1:n,function(a) points(points(c(lm_jags$BUGSoutput$mean$x_est[a],x_obs[a]),c(lm_jags$BUGSoutput$mean$y_est[a],y_obs[a]), type = "l", lty = 3, col = rgb(0.9,0.33,0,0.5))
+))
 
 ```
+
+The mean regression line is very similar to the simple linear regression, but the uncertainty is now larger. Also, notice how the estimates of $x$ and $y$ (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models.

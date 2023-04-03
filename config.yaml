@@ -30,6 +30,9 @@ module:
 ## ADVANCED
 ############################
 
+date: date
+      
+
 enableGitInfo: false
 summaryLength: 30
 paginate: 10

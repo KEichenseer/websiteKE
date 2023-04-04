@@ -75,15 +75,15 @@ n <- 30 # number of total data points
 x <- runif(n,-2,2) # generate the true x
 y <- 2 + 0.75 * x # generate the true y
 # define the standard deviations of the normal uncertainties with which x and y where observed
-x_sd <- runif(n,0.2,0.5)
-y_sd <- runif(n,0.2,1)
+sigma_x <- runif(n,0.2,0.5)
+sigma_y <- runif(n,0.2,0.8)
 # generate observations from x and y, given these uncertainties
-x_obs <- rnorm(n,x,x_sd)
-y_obs <- rnorm(n,y,y_sd)
+x_obs <- rnorm(n,x,sigma_x)
+y_obs <- rnorm(n,y,sigma_y)
 
 ```
 
-Now, we show the observations of $x$ and $y$, along with the true underlying relationship. We also add a simple linear regression, using the R functions `lm()` and `predict.lm(), to compare it to the true relationship:
+Now, we show the observations of $x$ and $y$, along with the true underlying relationship. We also add a simple linear regression, using the R functions `lm()` and `predict.lm(), to compare it to the true relationship. The shaded area denotes the 95% confidence interval of the regression:
 
 ```{r, fig.width = 4, fig.height = 4, warning = FALSE, echo = FALSE}
 # function to show uncertainty shadings
@@ -109,25 +109,32 @@ legend("topleft", legend = c("observations","true relationship", "linear regress
 
 ```
 
-Next, we build a Bayesian, linear regression model using JAGS, that accounts for 
-the uncertainties around our observations of $x$ and $y$. As we can almost directly 
-pass the model formulas to JAGS using the `R2jags` package, this is quite straightforward. 
-Here is the JAGS model:
+Next, we build a Bayesian, hierarchical model that accounts for the uncertainties around our observations of $x$ and $y$. It starts like a simple linear regression model, with intercept $\alpha$, slope $\beta$, and residual standard deviation $\sigma$:
+
+$$y_{est} \sim N(\mu, \sigma)$$
+$$\mu = \alpha + \beta x_{est}$$
+However, instead of using $x_{obs}$ and $y_{obs}$ directly, we let the model estimate the true values of $x$ and $y$, i.e. $x_{est}$ and $y_{est}$:
+
+$$x_{obs} \sim N(x_{est}, \sigma_x)$$
+$$y_{obs} \sim N(y_{est}, \sigma_y)$$
+
+To get the posterior of this model, we use Markov Chain Monte Carlo methods, implemented in the JAGS software. We can almost directly pass the model formulas to JAGS using the `R2jags` package, so this is quite straightforward. 
+Here is the JAGS model, with vague priors on $\alpha$, $\beta$, and $\sigma$:
 
 ```{r, warning = FALSE, echo = TRUE}
 errors_in_variables_regression_jags <- function() {
   ## Likelihood
-  for (i in 1:n){ # 
-    x_est[i] ~ dnorm(x_obs[i], 1/(x_sd[i]*x_sd[i])) # precision = 1/sigma^2
-    y_obs[i] ~ dnorm(y_est[i], 1/(y_sd[i]*y_sd[i])) # precision = 1/sigma^2
+  for (i in 1:n){  
     y_est[i] ~ dnorm(mu[i], tau) # JAGS uses precision `tau` instead of sigma
     mu[i] <- alpha + beta * x_est[i]
+    x_est[i] ~ dnorm(x_obs[i], 1/(sigma_x[i]*sigma_x[i])) # precision = 1/sigma^2
+    y_obs[i] ~ dnorm(y_est[i], 1/(sigma_y[i]*sigma_y[i])) # precision = 1/sigma^2
   }
   ## Priors
   tau ~ dgamma(1, 1)  # gamma prior for precision
-  sigma <- 1/sqrt(tau) # calculate standard deviation
-  alpha ~ dnorm(0, 1/(100*100))
-  beta ~ dnorm(0, 1/(100*100))
+  sigma <- 1/sqrt(tau) # calculate residual standard deviation
+  alpha ~ dnorm(0, 1/(10^2)) # normal prior with standard deviation = 10
+  beta ~ dnorm(0, 1/(10^2)) # normal prior with standard deviation = 10
 }
 ```
 
@@ -136,7 +143,7 @@ We load the `R2jags` package, specify the data used in the model, and send every
 ```{r, warning = FALSE, echo = TRUE,message = FALSE, results = FALSE}
 library(R2jags)
 
-regression_data <- list("x_obs", "y_obs", "x_sd", "y_sd","n")
+regression_data <- list("x_obs", "y_obs", "sigma_x", "sigma_y","n")
 
 lm_jags  <- jags(data = regression_data,
                 parameters.to.save = c("alpha",
@@ -192,4 +199,10 @@ sapply(1:n,function(a) points(points(c(lm_jags$BUGSoutput$mean$x_est[a],x_obs[a]
 
 ```
 
-The mean regression line is very similar to the simple linear regression, but the uncertainty is now larger. Also, notice how the estimates of $x$ and $y$ (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models.
+The mean regression line is very similar to the simple linear regression, but the 95 % credible interval of the hierarchical model (orange) is wider. This is because it correctly reflects the uncertainty associated with the observations, which the simple linear model ignored. Also, notice how the estimates of $x$ and $y$ (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models. The estimates $x_{est}$ and $y_{est}$ are essentially a compromise between the inferred linear relationship, and the observed values $x_{est}$ and $y_{est}$.
+
+So far, so good. Now, we will build a Gibbs sampler that can give us draws from the posterior of this model without relying on JAGS to do the sampling for us. Gibbs Sampling takes advantage of the fact that whilst it may be difficult to sample from the full posterior directly, we can iteratively sample from the conditional posterior of individual parameters given the current values of all other parameters. Deriving the conditional posteriors is easiest when the prior and likelihood functions are conjugate, that is when they belong to the same family of probability distributions.
+
+The posterior of our model looks like this:
+
+$$P(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto $$

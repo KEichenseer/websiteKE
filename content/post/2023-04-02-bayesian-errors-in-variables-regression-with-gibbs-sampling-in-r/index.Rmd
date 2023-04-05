@@ -161,7 +161,7 @@ lm_jags  <- jags(data = regression_data,
 
 Let's visualise this regression and compare it to the simple linear regression from above:
 
-```{r, fig.width = 4, fig.height = 4, warning = FALSE, echo = FALSE}
+```{r, fig.width = 4, fig.height = 4, warning = FALSE, echo = FALSE, results=FALSE}
 par(mar = c(4,4,1,1), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
 
 plot(x_obs,y_obs,pch=21,col=NA,bg=rgb(0,0,0,0.5),
@@ -199,17 +199,29 @@ sapply(1:n,function(a) points(points(c(lm_jags$BUGSoutput$mean$x_est[a],x_obs[a]
 
 ```
 
-The mean regression line is very similar to the simple linear regression, but the 95 % credible interval of the hierarchical model (orange) is wider. This is because it correctly reflects the uncertainty associated with the observations, which the simple linear model ignored. Also, notice how the estimates of $x$ and $y$ (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models. The estimates $x_{est}$ and $y_{est}$ are essentially a compromise between the inferred linear relationship, and the observed values $x_{est}$ and $y_{est}$.
+The mean regression line is very similar to previous regression, but the 95 % credible interval of the hierarchical model (orange) is wider. This is because it correctly reflects the uncertainty associated with the observations, which the simple linear model ignored. Also, notice how the estimates of $x$ and $y$ (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models. The estimates $x_{est}$ and $y_{est}$ are essentially a compromise between the inferred linear relationship, and the observed values $x_{obs}$ and $y_{obs}$.
 
-So far, so good. Now, we will build a Gibbs sampler that can give us draws from the posterior of this model without relying on JAGS to do the sampling for us. Gibbs Sampling takes advantage of the fact that whilst it may be difficult to sample from the full posterior directly, we can iteratively sample from the conditional posterior of individual parameters given the current values of all other parameters. Deriving the conditional posteriors is easiest when the prior and likelihood functions are conjugate, that is when they belong to the same family of probability distributions.
+Now, we will build a Gibbs sampler that can give us draws from the posterior of this model without relying on JAGS to do the sampling for us. Gibbs Sampling takes advantage of the fact that whilst it may be difficult to sample from the full posterior directly, we can iteratively sample from the conditional posterior of individual parameters given the current values of all other parameters. Deriving the conditional posteriors is easiest when the prior and likelihood functions are conjugate, that is when they belong to the same family of probability distributions.
 
-The posterior of our model looks like this:
+The unnormalised posterior of our model looks like this:
 
 $$p(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto 
-p(y_{est} | \alpha, \beta, y_{obs}, \sigma_y) p(x_{est} | $$
+p(y_{est} | \alpha, \beta, x_{est}, \sigma_y) 
+p(x_{obs} | y_{est},\sigma_{x})  
+p(y_{obs} | y_{est},\sigma_{y})
+p(\alpha)
+p(\beta)
+p(\sigma)
+$$
 
 
+$$y_{est} \sim N( \alpha + \beta x_{est}, \sigma)$$
+However, instead of using $x_{obs}$ and $y_{obs}$ directly, we let the model estimate the true values of $x$ and $y$, i.e. $x_{est}$ and $y_{est}$:
+
+$$x_{obs} \sim N(x_{est}, \sigma_x)$$
+$$y_{obs} \sim N(y_{est}, \sigma_y)$$
+
+note that sigma_x and sigma_y are known, whereas x_est and y_est are unknown
 
 
-
-
+ complete: $$p(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto 

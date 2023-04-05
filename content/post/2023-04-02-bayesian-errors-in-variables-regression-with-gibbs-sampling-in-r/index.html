@@ -115,97 +115,20 @@ lm_jags  &lt;- jags(data = regression_data,
                 model.file = errors_in_variables_regression_jags)</code></pre>
 <p>Let’s visualise this regression and compare it to the simple linear regression from above:</p>
 <p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="384" /></p>
-<pre><code>## [[1]]
-## NULL
-## 
-## [[2]]
-## NULL
-## 
-## [[3]]
-## NULL
-## 
-## [[4]]
-## NULL
-## 
-## [[5]]
-## NULL
-## 
-## [[6]]
-## NULL
-## 
-## [[7]]
-## NULL
-## 
-## [[8]]
-## NULL
-## 
-## [[9]]
-## NULL
-## 
-## [[10]]
-## NULL
-## 
-## [[11]]
-## NULL
-## 
-## [[12]]
-## NULL
-## 
-## [[13]]
-## NULL
-## 
-## [[14]]
-## NULL
-## 
-## [[15]]
-## NULL
-## 
-## [[16]]
-## NULL
-## 
-## [[17]]
-## NULL
-## 
-## [[18]]
-## NULL
-## 
-## [[19]]
-## NULL
-## 
-## [[20]]
-## NULL
-## 
-## [[21]]
-## NULL
-## 
-## [[22]]
-## NULL
-## 
-## [[23]]
-## NULL
-## 
-## [[24]]
-## NULL
-## 
-## [[25]]
-## NULL
-## 
-## [[26]]
-## NULL
-## 
-## [[27]]
-## NULL
-## 
-## [[28]]
-## NULL
-## 
-## [[29]]
-## NULL
-## 
-## [[30]]
-## NULL</code></pre>
-<p>The mean regression line is very similar to the simple linear regression, but the 95 % credible interval of the hierarchical model (orange) is wider. This is because it correctly reflects the uncertainty associated with the observations, which the simple linear model ignored. Also, notice how the estimates of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models. The estimates <span class="math inline">\(x_{est}\)</span> and <span class="math inline">\(y_{est}\)</span> are essentially a compromise between the inferred linear relationship, and the observed values <span class="math inline">\(x_{est}\)</span> and <span class="math inline">\(y_{est}\)</span>.</p>
-<p>So far, so good. Now, we will build a Gibbs sampler that can give us draws from the posterior of this model without relying on JAGS to do the sampling for us. Gibbs Sampling takes advantage of the fact that whilst it may be difficult to sample from the full posterior directly, we can iteratively sample from the conditional posterior of individual parameters given the current values of all other parameters. Deriving the conditional posteriors is easiest when the prior and likelihood functions are conjugate, that is when they belong to the same family of probability distributions.</p>
-<p>The posterior of our model looks like this:</p>
+<p>The mean regression line is very similar to previous regression, but the 95 % credible interval of the hierarchical model (orange) is wider. This is because it correctly reflects the uncertainty associated with the observations, which the simple linear model ignored. Also, notice how the estimates of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models. The estimates <span class="math inline">\(x_{est}\)</span> and <span class="math inline">\(y_{est}\)</span> are essentially a compromise between the inferred linear relationship, and the observed values <span class="math inline">\(x_{obs}\)</span> and <span class="math inline">\(y_{obs}\)</span>.</p>
+<p>Now, we will build a Gibbs sampler that can give us draws from the posterior of this model without relying on JAGS to do the sampling for us. Gibbs Sampling takes advantage of the fact that whilst it may be difficult to sample from the full posterior directly, we can iteratively sample from the conditional posterior of individual parameters given the current values of all other parameters. Deriving the conditional posteriors is easiest when the prior and likelihood functions are conjugate, that is when they belong to the same family of probability distributions.</p>
+<p>The unnormalised posterior of our model looks like this:</p>
 <p><span class="math display">\[p(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto
-p(y_{est} | \alpha, \beta, y_{obs}, \sigma_y) p(x_{est} | \]</span></p>
+p(y_{est} | \alpha, \beta, x_{est}, \sigma_y)
+p(x_{obs} | y_{est},\sigma_{x})  
+p(y_{obs} | y_{est},\sigma_{y})
+p(\alpha)
+p(\beta)
+p(\sigma)
+\]</span></p>
+<p><span class="math display">\[y_{est} \sim N( \alpha + \beta x_{est}, \sigma)\]</span>
+However, instead of using <span class="math inline">\(x_{obs}\)</span> and <span class="math inline">\(y_{obs}\)</span> directly, we let the model estimate the true values of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, i.e. <span class="math inline">\(x_{est}\)</span> and <span class="math inline">\(y_{est}\)</span>:</p>
+<p><span class="math display">\[x_{obs} \sim N(x_{est}, \sigma_x)\]</span>
+<span class="math display">\[y_{obs} \sim N(y_{est}, \sigma_y)\]</span></p>
+<p>note that sigma_x and sigma_y are known, whereas x_est and y_est are unknown</p>
+<p>complete: $$p(, , , x_{est}, y_{est} | x_{obs}, <em>x, y</em>{obs}, _y) </p>

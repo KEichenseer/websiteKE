@@ -68,35 +68,39 @@ n &lt;- 30 # number of total data points
 x &lt;- runif(n,-2,2) # generate the true x
 y &lt;- 2 + 0.75 * x # generate the true y
 # define the standard deviations of the normal uncertainties with which x and y where observed
-x_sd &lt;- runif(n,0.2,0.5)
-y_sd &lt;- runif(n,0.2,1)
+sigma_x &lt;- runif(n,0.2,0.5)
+sigma_y &lt;- runif(n,0.2,0.8)
 # generate observations from x and y, given these uncertainties
-x_obs &lt;- rnorm(n,x,x_sd)
-y_obs &lt;- rnorm(n,y,y_sd)</code></pre>
-<p>Now, we show the observations of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, along with the true underlying relationship. We also add a simple linear regression, using the R functions <code>lm()</code> and `predict.lm(), to compare it to the true relationship:</p>
+x_obs &lt;- rnorm(n,x,sigma_x)
+y_obs &lt;- rnorm(n,y,sigma_y)</code></pre>
+<p>Now, we show the observations of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, along with the true underlying relationship. We also add a simple linear regression, using the R functions <code>lm()</code> and `predict.lm(), to compare it to the true relationship. The shaded area denotes the 95% confidence interval of the regression:</p>
 <p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="384" /></p>
-<p>Next, we build a Bayesian, linear regression model using JAGS, that accounts for
-the uncertainties around our observations of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>. As we can almost directly
-pass the model formulas to JAGS using the <code>R2jags</code> package, this is quite straightforward.
-Here is the JAGS model:</p>
+<p>Next, we build a Bayesian, hierarchical model that accounts for the uncertainties around our observations of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>. It starts like a simple linear regression model, with intercept <span class="math inline">\(\alpha\)</span>, slope <span class="math inline">\(\beta\)</span>, and residual standard deviation <span class="math inline">\(\sigma\)</span>:</p>
+<p><span class="math display">\[y_{est} \sim N(\mu, \sigma)\]</span>
+<span class="math display">\[\mu = \alpha + \beta x_{est}\]</span>
+However, instead of using <span class="math inline">\(x_{obs}\)</span> and <span class="math inline">\(y_{obs}\)</span> directly, we let the model estimate the true values of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, i.e. <span class="math inline">\(x_{est}\)</span> and <span class="math inline">\(y_{est}\)</span>:</p>
+<p><span class="math display">\[x_{obs} \sim N(x_{est}, \sigma_x)\]</span>
+<span class="math display">\[y_{obs} \sim N(y_{est}, \sigma_y)\]</span></p>
+<p>To get the posterior of this model, we use Markov Chain Monte Carlo methods, implemented in the JAGS software. We can almost directly pass the model formulas to JAGS using the <code>R2jags</code> package, so this is quite straightforward.
+Here is the JAGS model, with vague priors on <span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span>, and <span class="math inline">\(\sigma\)</span>:</p>
 <pre class="r"><code>errors_in_variables_regression_jags &lt;- function() {
   ## Likelihood
-  for (i in 1:n){ # 
-    x_est[i] ~ dnorm(x_obs[i], 1/(x_sd[i]*x_sd[i])) # precision = 1/sigma^2
-    y_obs[i] ~ dnorm(y_est[i], 1/(y_sd[i]*y_sd[i])) # precision = 1/sigma^2
+  for (i in 1:n){  
     y_est[i] ~ dnorm(mu[i], tau) # JAGS uses precision `tau` instead of sigma
     mu[i] &lt;- alpha + beta * x_est[i]
+    x_est[i] ~ dnorm(x_obs[i], 1/(sigma_x[i]*sigma_x[i])) # precision = 1/sigma^2
+    y_obs[i] ~ dnorm(y_est[i], 1/(sigma_y[i]*sigma_y[i])) # precision = 1/sigma^2
   }
   ## Priors
   tau ~ dgamma(1, 1)  # gamma prior for precision
-  sigma &lt;- 1/sqrt(tau) # calculate standard deviation
-  alpha ~ dnorm(0, 1/(100*100))
-  beta ~ dnorm(0, 1/(100*100))
+  sigma &lt;- 1/sqrt(tau) # calculate residual standard deviation
+  alpha ~ dnorm(0, 1/(10^2)) # normal prior with standard deviation = 10
+  beta ~ dnorm(0, 1/(10^2)) # normal prior with standard deviation = 10
 }</code></pre>
 <p>We load the <code>R2jags</code> package, specify the data used in the model, and send everything to JAGS:</p>
 <pre class="r"><code>library(R2jags)
 
-regression_data &lt;- list(&quot;x_obs&quot;, &quot;y_obs&quot;, &quot;x_sd&quot;, &quot;y_sd&quot;,&quot;n&quot;)
+regression_data &lt;- list(&quot;x_obs&quot;, &quot;y_obs&quot;, &quot;sigma_x&quot;, &quot;sigma_y&quot;,&quot;n&quot;)
 
 lm_jags  &lt;- jags(data = regression_data,
                 parameters.to.save = c(&quot;alpha&quot;,
@@ -200,4 +204,7 @@ lm_jags  &lt;- jags(data = regression_data,
 ## 
 ## [[30]]
 ## NULL</code></pre>
-<p>The mean regression line is very similar to the simple linear regression, but the uncertainty is now larger. Also, notice how the estimates of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models.</p>
+<p>The mean regression line is very similar to the simple linear regression, but the 95 % credible interval of the hierarchical model (orange) is wider. This is because it correctly reflects the uncertainty associated with the observations, which the simple linear model ignored. Also, notice how the estimates of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models. The estimates <span class="math inline">\(x_{est}\)</span> and <span class="math inline">\(y_{est}\)</span> are essentially a compromise between the inferred linear relationship, and the observed values <span class="math inline">\(x_{est}\)</span> and <span class="math inline">\(y_{est}\)</span>.</p>
+<p>So far, so good. Now, we will build a Gibbs sampler that can give us draws from the posterior of this model without relying on JAGS to do the sampling for us. Gibbs Sampling takes advantage of the fact that whilst it may be difficult to sample from the full posterior directly, we can iteratively sample from the conditional posterior of individual parameters given the current values of all other parameters. Deriving the conditional posteriors is easiest when the prior and likelihood functions are conjugate, that is when they belong to the same family of probability distributions.</p>
+<p>The posterior of our model looks like this:</p>
+<p><span class="math display">\[P(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto \]</span></p>

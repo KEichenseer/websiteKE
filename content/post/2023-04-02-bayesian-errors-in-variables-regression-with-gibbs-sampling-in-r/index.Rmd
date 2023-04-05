@@ -205,4 +205,11 @@ So far, so good. Now, we will build a Gibbs sampler that can give us draws from 
 
 The posterior of our model looks like this:
 
-$$P(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto $$
+$$p(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto 
+p(y_{est} | \alpha, \beta, y_{obs}, \sigma_y) p(x_{est} | $$
+
+
+
+
+
+

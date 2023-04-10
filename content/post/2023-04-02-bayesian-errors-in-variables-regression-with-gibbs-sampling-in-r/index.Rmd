@@ -207,12 +207,26 @@ The unnormalised posterior of our model looks like this:
 
 $$p(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto 
 p(y_{est} | \alpha, \beta, x_{est}, \sigma_y) 
-p(x_{obs} | y_{est},\sigma_{x})  
+p(x_{obs} | x_{est},\sigma_{x})  
 p(y_{obs} | y_{est},\sigma_{y})
 p(\alpha)
 p(\beta)
 p(\sigma)
 $$
+
+From this, we need to work out the conditional posteriors of individual parameters, to create a Gibbs sampling routine that estimates one parameter after the other. We start by inferring $y_est$. Looking at the posterior above, we note that $y_est$ only occurs in the first and the third term, i.e. in $p(y_{est} | \alpha, \beta, x_{est}, \sigma_y)$ and in $p(y_{obs} | y_{est},\sigma_{y})$. Beforehand, we defined those as $y_{obs} \sim N(y_{est}, \sigma_y)$ and 
+$y_{est} \sim N(\mu, \sigma)$, with $\mu = \alpha + \beta x_{est}$. These are two normal distributions, which means we can use the likelihood of a normal distribution with a normal prior to sample from a $y_{est}$ (see [Murphy 2007](https://www.cs.ubc.ca/~murphyk/Papers/bayesGauss.pdf) for details. Given values for $\mu$ and $\sigma$, we can sample 
+
+$$y_{est} \sim N(\sigma^2/(\sigma_y^2+\sigma^2)\times y_{obs} + \sigma_y^2/(\sigma_y^2+\sigma^2)\times \mu, \sqrt{1/(1/\sigma^2+1/\sigma_y^2)}) $$
+We sample from $x_{est}$ in a similar way, given values for $y_{est}$, $\sigma$, $\alpha$, and $\beta$:
+
+$$x_{est} \sim N((\beta (y_{est}-\alpha)/\sigma^2 + x_{obs}/\sigma_x^2)/ (1/\sigma^2 + \beta^2/\sigma^2)
+, \sqrt{1/(\beta^2/\sigma^2+1/\sigma_y^2)}) $$ 
+
+sigma2/(y_sd^2+sigma2)*y_obs + y_sd^2/(y_sd^2+sigma2)*y_pred,
+          sqrt(1/(1/sigma2 + 1/y_sd^2)))
+
+
 
 
 $$y_{est} \sim N( \alpha + \beta x_{est}, \sigma)$$

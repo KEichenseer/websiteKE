@@ -120,12 +120,20 @@ lm_jags  &lt;- jags(data = regression_data,
 <p>The unnormalised posterior of our model looks like this:</p>
 <p><span class="math display">\[p(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto
 p(y_{est} | \alpha, \beta, x_{est}, \sigma_y)
-p(x_{obs} | y_{est},\sigma_{x})  
+p(x_{obs} | x_{est},\sigma_{x})  
 p(y_{obs} | y_{est},\sigma_{y})
 p(\alpha)
 p(\beta)
 p(\sigma)
 \]</span></p>
+<p>From this, we need to work out the conditional posteriors of individual parameters, to create a Gibbs sampling routine that estimates one parameter after the other. We start by inferring <span class="math inline">\(y_est\)</span>. Looking at the posterior above, we note that <span class="math inline">\(y_est\)</span> only occurs in the first and the third term, i.e. in <span class="math inline">\(p(y_{est} | \alpha, \beta, x_{est}, \sigma_y)\)</span> and in <span class="math inline">\(p(y_{obs} | y_{est},\sigma_{y})\)</span>. Beforehand, we defined those as <span class="math inline">\(y_{obs} \sim N(y_{est}, \sigma_y)\)</span> and
+<span class="math inline">\(y_{est} \sim N(\mu, \sigma)\)</span>, with <span class="math inline">\(\mu = \alpha + \beta x_{est}\)</span>. These are two normal distributions, which means we can use the likelihood of a normal distribution with a normal prior to sample from a <span class="math inline">\(y_{est}\)</span> (see <a href="https://www.cs.ubc.ca/~murphyk/Papers/bayesGauss.pdf">Murphy 2007</a> for details. Given values for <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span>, we can sample</p>
+<p><span class="math display">\[y_{est} \sim N(\sigma^2/(\sigma_y^2+\sigma^2)\times y_{obs} + \sigma_y^2/(\sigma_y^2+\sigma^2)\times \mu, \sqrt{1/(1/\sigma^2+1/\sigma_y^2)}) \]</span>
+We sample from <span class="math inline">\(x_{est}\)</span> in a similar way, given values for <span class="math inline">\(y_{est}\)</span>, <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\alpha\)</span>, and <span class="math inline">\(\beta\)</span>:</p>
+<p><span class="math display">\[x_{est} \sim N((\beta (y_{est}-\alpha)/\sigma^2 + x_{obs}/\sigma_x^2)/ (1/\sigma^2 + \beta^2/\sigma^2)
+, \sqrt{1/(\beta^2/\sigma^2+1/\sigma_y^2)}) \]</span></p>
+<p>sigma2/(y_sd^2+sigma2)<em>y_obs + y_sd<sup>2/(y_sd</sup>2+sigma2)</em>y_pred,
+sqrt(1/(1/sigma2 + 1/y_sd^2)))</p>
 <p><span class="math display">\[y_{est} \sim N( \alpha + \beta x_{est}, \sigma)\]</span>
 However, instead of using <span class="math inline">\(x_{obs}\)</span> and <span class="math inline">\(y_{obs}\)</span> directly, we let the model estimate the true values of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, i.e. <span class="math inline">\(x_{est}\)</span> and <span class="math inline">\(y_{est}\)</span>:</p>
 <p><span class="math display">\[x_{obs} \sim N(x_{est}, \sigma_x)\]</span>

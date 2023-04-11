@@ -132,6 +132,9 @@ p(\sigma)
 We sample from <span class="math inline">\(x_{est}\)</span> in a similar way, given values for <span class="math inline">\(y_{est}\)</span>, <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\alpha\)</span>, and <span class="math inline">\(\beta\)</span>:</p>
 <p><span class="math display">\[x_{est} \sim N((\beta (y_{est}-\alpha)/\sigma^2 + x_{obs}/\sigma_x^2)/ (1/\sigma^2 + \beta^2/\sigma^2)
 , \sqrt{1/(\beta^2/\sigma^2+1/\sigma_y^2)}) \]</span></p>
+<div id="oh-booy.-maybe-just-use-mh-for-getting-x_est.-not-sure-how-to-get-the-conditional-posterior-for-this-in-a-nice-form." class="section level3">
+<h3>OH booy. Maybe just use MH for getting x_est. Not sure how to get the conditional posterior for this in a nice form.</h3>
+<p>Test the machinery:</p>
 <p>sigma2/(y_sd^2+sigma2)<em>y_obs + y_sd<sup>2/(y_sd</sup>2+sigma2)</em>y_pred,
 sqrt(1/(1/sigma2 + 1/y_sd^2)))</p>
 <p><span class="math display">\[y_{est} \sim N( \alpha + \beta x_{est}, \sigma)\]</span>
@@ -140,3 +143,4 @@ However, instead of using <span class="math inline">\(x_{obs}\)</span> and <span
 <span class="math display">\[y_{obs} \sim N(y_{est}, \sigma_y)\]</span></p>
 <p>note that sigma_x and sigma_y are known, whereas x_est and y_est are unknown</p>
 <p>complete: $$p(, , , x_{est}, y_{est} | x_{obs}, <em>x, y</em>{obs}, _y) </p>
+</div>

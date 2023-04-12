@@ -126,31 +126,31 @@ for (i in 1:n_iterations){
   
   y_est =
     rnorm(n_obs,
-          sigma2/(y_sd^2+sigma2)*y_obs + y_sd^2/(y_sd^2+sigma2)*y_pred,
-          sqrt(1/(1/sigma2 + 1/y_sd^2))) # I think that one at least should be correct now... If x_sd is
+          sigma2/(sigma_y^2+sigma2)*y_obs + sigma_y^2/(sigma_y^2+sigma2)*y_pred,
+          sqrt(1/(1/sigma2 + 1/sigma_y^2))) # I think that one at least should be correct now... If sigma_x is
   #  set to very small values, then the results mostly agree with those of the jags implementation
   
   
   if(beta[2] == 0) x_pred = rep(beta[1],length(x_obs)) else x_pred = (y_pred-beta[1])/beta[2]
   
   
-  X_est[,2] =
     #   rnorm(n_obs,
-    #                   ((beta[2] * x_obs / x_sd^2) + ((y_est - beta[1] - y_pred) * beta[2]/ sigma2)) / ((beta[2]^2 / x_sd^2) + (1 / sigma2)),
-    #                   1 / ((beta[1]^2 / x_sd^2) + (1 / sigma2))
+    #                   ((beta[2] * x_obs / sigma_x^2) + ((y_est - beta[1] - y_pred) * beta[2]/ sigma2)) / ((beta[2]^2 / sigma_x^2) + (1 / sigma2)),
+    #                   1 / ((beta[1]^2 / sigma_x^2) + (1 / sigma2))
     # )
-    rnorm(n_obs, 
-          sigma2/(x_sd^2+sigma2)*x_obs + x_sd^2/(x_sd^2+sigma2)*x_pred,
-          sqrt(1/(1/sigma2 + 1/x_sd^2)))
+    # rnorm(n_obs, 
+    #       sigma2/(sigma_x^2+sigma2)*x_obs + sigma_x^2/(sigma_x^2+sigma2)*x_pred,
+    #       sqrt(1/(1/sigma2 + 1/sigma_x^2)))
   
-  rnorm(n_obs,
-        (beta[2]*(y_est - beta[1]) / sigma2 + x_obs / x_sd^2) / (1 / x_sd^2 + beta[2]^2 / sigma2), #(x_obs / x_sd^2 + beta[2]*y_est / sigma2) / (1 / x_sd^2 + beta[2]^2 / sigma2),
-        sqrt(1 / (1 / x_sd^2 + beta[2]^2 / sigma2))
-  )
+    # this was close but not quite...
+  # X_est[,2] = rnorm(n_obs,
+  #       (beta[2]*(y_est - beta[1]) / sigma2 + x_obs / sigma_x^2) / (1 / sigma_x^2 + beta[2]^2 / sigma2), #(x_obs / sigma_x^2 + beta[2]*y_est / sigma2) / (1 / sigma_x^2 + beta[2]^2 / sigma2),
+  #       sqrt(1 / (1 / sigma_x^2 + beta[2]^2 / sigma2))
+  # )
   
   # rnorm(n_obs,
-  #       (beta[2]*y_est + beta[1]*x_sd^2/x_obs) / (beta[2]^2*x_sd^2/x_obs + 1),
-  #       (sigma2*x_sd^2) / (beta[2]^2*x_sd^2/x_obs + 1)
+  #       (beta[2]*y_est + beta[1]*sigma_x^2/x_obs) / (beta[2]^2*sigma_x^2/x_obs + 1),
+  #       (sigma2*sigma_x^2) / (beta[2]^2*sigma_x^2/x_obs + 1)
   # )
   #
   #
@@ -165,6 +165,13 @@ for (i in 1:n_iterations){
   resid = (y_pred-y_est)
   
   sigma2 = 1/rgamma(1, 1+n_obs/2, 1+sum(resid^2) * .5 ) # sigma^2 is IG(n/2, ....)
+  
+  
+  logLikOld <- sum(dnorm(X_est[,2], x_obs, sigma_x, log=T))+sum(dnorm(y_pred,y_obs,sigma_y,log=T))
+  X_est_new <- X_est[,2]  + rnorm(n_obs,0,0.1)
+  logLikNew <- sum(dnorm(X_est_new, x_obs, sigma_x, log=T))+sum(dnorm(y_pred,y_obs,sigma_y,log=T))
+  
+  if(runif(1) < exp(logLikNew-logLikOld)) X_est[,2] <- X_est_new
   
   # save the results.
   beta_out[i,] = beta
@@ -192,3 +199,4 @@ points(apply(x_est_out,2,mean),apply(y_est_out,2,mean),pch = 21, col = NA, bg = 
 
 
 ### OH booy. Maybe just use MH for getting x_est. Not sure how to get the conditional posterior for this in a nice form.
+

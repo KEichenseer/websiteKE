@@ -14,9 +14,11 @@ education:
 email: "kilian.eichenseer@durham.ac.uk"
 highlight_name: false
 interests:
+- Developing computational methods
 - Bayesian statistics
 - R programming
 - Palaeobiology and palaeoclimate
+- Stratigraphy and sedimentology
 - Ecology and evolution
 
 organizations:
@@ -42,7 +44,6 @@ superuser: true
 title: Kilian Eichenseer PhD
 ---
 
-Centuries of palaeontological and geological research have produced vast quantities of information on past organisms and environments. Using statistical tools, I am probing these data riches to reconstruct novel aspects of the history of Life. Focal points of my research have been coral reefs, palaeoclimate and the skeletal mineralogy of marine invertebrates. I am currently building a Bayesian stratigraphic model to correlate Cambrian sections using $\delta$<sup>13</sup>C records. (https://smithlabdurham.github.io/#!team).
-
+I am developing novel statistical and computational methods for the Earth Sciences. My academic background lies in Geology and Palaeontology, focussing on marine life and sediments. I became increasingly interested in data science and R programming during my master's and PhD. In my [current PostDoc at Durham University](https://smithlabdurham.github.io/#!research), I build a Bayesian stratigraphic model that can correlate and date geological sections using geochemical signatures. Other projects include [modelling the latitudinal temperature gradient from sparsely sampled climate data](https://github.com/KEichenseer/PalaeoClimateGradient), and an [R package](https://cran.r-project.org/web/packages/palaeoverse/index.html) enabling [reproducible, efficient workflows for palaeobiological research](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.14099).
 
 {{< icon name="download" pack="fas" >}} Download my {{< staticref "media/Kilian-Eichenseer-CV.pdf" "newtab" >}}CV{{< /staticref >}}.

@@ -39,9 +39,13 @@ content:
 
 ## **Peer-reviewed publications**
 
+#### 2023
+
+Lewis A.Jones, William Gearty, Bethany J. Allen, **Kilian Eichenseer**, Miranta Kouvari, Pedro L. Godoy, Cecili S. C. Nicholl, Lucas Buffan, Erin M. Dillon, Joseph T. Flannery-Sutherland, Alfio Alessandro Chiarenza (2023). "palaeoverse: A community-driven R package to support palaeobiological analysis." **Methods in Ecology and Evolution**. [View here.](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.14099)
+
 #### 2022
 
-Jones, Lewis A., & **Kilian Eichenseer** (2022). "Uneven spatial sampling distorts reconstructions of Phanerozoic seawater temperature." **Geology** 50 (2), 238-242. [View here.](https://pubs.geoscienceworld.org/gsa/geology/article/50/2/238/609542/Uneven-spatial-sampling-distorts-reconstructions)
+Lewis A. Jones, & **Kilian Eichenseer** (2022). Uneven spatial sampling distorts reconstructions of Phanerozoic seawater temperature. **Geology** 50 (2), 238-242. [View here.](https://pubs.geoscienceworld.org/gsa/geology/article/50/2/238/609542/Uneven-spatial-sampling-distorts-reconstructions)
 
 #### 2021
 

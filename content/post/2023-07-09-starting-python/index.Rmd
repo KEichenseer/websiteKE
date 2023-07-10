@@ -1,0 +1,249 @@
+---
+title: Trying out some Python, coming from R
+author: ''
+date: '2023-07-09'
+slug: bayesian-errors-in-variables-regression-with-gibbs-sampling-in-r
+categories: [R, Bayesian, JAGS, Gibbs sampling]
+tags: []
+subtitle: ''
+authors: []
+#featured: false
+draft: true
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: true
+projects: []
+header-includes: \usepackage{graphics}
+summary: Errors-in-variables regression is preferable to simple linear regression when the observations come with uncertainty. Here, I first show how errors-in-variables regression can be done in R, using JAGS. I then construct a Gibbs sampler that runs purely in R, without any external software like JAGS or Stan. 
+
+---
+<style>
+.math {
+  font-size: small;
+}
+</style>
+
+<style>
+.column-left{
+  float: left;
+  width: 52%;
+  text-align: left;
+
+}
+
+<style>
+.column-center{
+  float: center;
+  width: 100%;
+  text-align: left;
+
+}
+
+.column-right{
+  float: right;
+  width: 48%;
+  text-align: left;
+  margin-top: 6px;
+  line-height: 1.83;
+  font-size: 12px;
+
+}
+</style>
+
+<style type="text/css">
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 12px;
+}
+pre {
+  font-size: 13.2px
+}
+</style>
+
+```{r setup, include=FALSE}
+library(reticulate)
+use_python("C:\\ProgramData\\Anaconda3\\python.exe", required = TRUE)
+```
+
+Assume we want to conduct a linear regression of $y$ against $x$. Both $x$ and $y$ come with normally distributed uncertainties or measurement errors, which we need to take into consideration, or we risk obtaining biased regression coefficients. Let's generate $x$ and $y$, with uncertainties denoted as standard deviations $sigma_x$ and $sigma_y$. Each point may have a different uncertainty. Below, we generate some sample data.
+
+```{r, warning = FALSE, echo = TRUE}
+set.seed(1) # change the seed for a different sequence of random numbers
+n <- 30 # number of total data points
+x <- runif(n,-2,2) # generate the true x
+y <- 2 + 0.75 * x # generate the true y
+# define the standard deviations of the normal uncertainties with which x and y where observed
+sigma_x <- runif(n,0.2,0.5)
+sigma_y <- runif(n,0.2,0.8)
+# generate observations from x and y, given these uncertainties
+x_obs <- rnorm(n,x,sigma_x)
+y_obs <- rnorm(n,y,sigma_y)
+
+```
+
+Now, we show the observations of $x$ and $y$, along with the true underlying relationship. We also add a simple linear regression, using the R functions `lm()` and `predict.lm(), to compare it to the true relationship. The shaded area denotes the 95% confidence interval of the regression:
+
+```{r, fig.width = 4, fig.height = 4, warning = FALSE, echo = FALSE}
+# function to show uncertainty shadings
+ciPoly <- function(x,en,ep,color=rgb(0,0,0,0.2)) {
+  polygon( c(x[1], x, x[length(x)], x[length(x)], rev(x), x[1]),
+           c((ep)[1],ep, (ep)[length(ep)], (en)[length(en)], rev(en), (en)[1]),
+           border = NA, col = color)}
+
+par(mar = c(4,4,1,1), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
+
+plot(x_obs,y_obs,pch=21,col=NA,bg=rgb(0,0,0,0.5),
+     xlab = "x", ylab = "y")
+
+lm_true <- lm(y~x)
+points(range(x_obs),lm_true$coefficients[1]+lm_true$coefficients[2]*range(x_obs),type="l",lwd=2,col = rgb(0.5,0.5,0.5,1))
+
+lm1 <- lm(y_obs~x_obs)
+x_seq <- seq(min(x_obs),max(x_obs),length.out = 100)
+x_pred <- predict.lm(lm1,newdata = data.frame(x_obs=x_seq), interval = "confidence")
+ciPoly(x_seq,x_pred[,2],x_pred[,3])
+points(x_seq,x_pred[,1],lwd=2,lty=2,type = "l", col = rgb(0,0,0,1))
+legend("topleft", legend = c("observations","true relationship", "linear regression"), pt.bg  = c(rgb(0,0,0,0.5), NA, NA), pch = c(21,NA, NA), lwd = c(NA,2,2),  pt.cex = c(1,NA,NA), bty = "n", pt.lwd = c(0,NA,NA), col = c(NA,rgb(.5,.5,.5,1),rgb(0,0,0,1)), lty = c(NA,1,2), cex = .65)
+
+```
+
+Next, we build a Bayesian, hierarchical model that accounts for the uncertainties around our observations of $x$ and $y$. It starts like a simple linear regression model, with intercept $\alpha$, slope $\beta$, and residual standard deviation $\sigma$:
+
+$$y_{est} \sim N(\mu, \sigma)$$
+$$\mu = \alpha + \beta x_{est}$$
+However, instead of using $x_{obs}$ and $y_{obs}$ directly, we let the model estimate the true values of $x$ and $y$, i.e. $x_{est}$ and $y_{est}$:
+
+$$x_{obs} \sim N(x_{est}, \sigma_x)$$
+$$y_{obs} \sim N(y_{est}, \sigma_y)$$
+
+To get the posterior of this model, we use Markov Chain Monte Carlo methods, implemented in the JAGS software. We can almost directly pass the model formulas to JAGS using the `R2jags` package, so this is quite straightforward. 
+Here is the JAGS model, with vague priors on $\alpha$, $\beta$, and $\sigma$:
+
+```{r, warning = FALSE, echo = TRUE}
+errors_in_variables_regression_jags <- function() {
+  ## Likelihood
+  for (i in 1:n){  
+    y_est[i] ~ dnorm(mu[i], tau) # JAGS uses precision `tau` instead of sigma
+    mu[i] <- alpha + beta * x_est[i]
+    x_est[i] ~ dnorm(x_obs[i], 1/(sigma_x[i]*sigma_x[i])) # precision = 1/sigma^2
+    y_obs[i] ~ dnorm(y_est[i], 1/(sigma_y[i]*sigma_y[i])) # precision = 1/sigma^2
+  }
+  ## Priors
+  tau ~ dgamma(1, 1)  # gamma prior for precision
+  sigma <- 1/sqrt(tau) # calculate residual standard deviation
+  alpha ~ dnorm(0, 1/(10^2)) # normal prior with standard deviation = 10
+  beta ~ dnorm(0, 1/(10^2)) # normal prior with standard deviation = 10
+}
+```
+
+We load the `R2jags` package, specify the data used in the model, and send everything to JAGS:
+
+```{r, warning = FALSE, echo = TRUE,message = FALSE, results = FALSE}
+library(R2jags)
+
+regression_data <- list("x_obs", "y_obs", "sigma_x", "sigma_y","n")
+
+lm_jags  <- jags(data = regression_data,
+                parameters.to.save = c("alpha",
+                                       "beta",
+                                       "sigma",
+                                       "y_est",
+                                       "x_est"
+                ),
+                n.iter = 3000,
+                n.thin = 1,
+                n.chains =  3, # Other values set at default (for simplicity)
+                model.file = errors_in_variables_regression_jags)
+
+```
+
+Let's visualise this regression and compare it to the simple linear regression from above:
+
+```{r, fig.width = 4, fig.height = 4, warning = FALSE, echo = FALSE, results=FALSE}
+par(mar = c(4,4,1,1), las = 1, mgp = c(2.25,0.75,0), cex = 1.35)
+
+plot(x_obs,y_obs,pch=21,col=NA,bg=rgb(0,0,0,0.5),
+     xlab = "x", ylab = "y")
+lm_true <- lm(y~x)
+points(range(x_obs),lm_true$coefficients[1]+lm_true$coefficients[2]*range(x_obs),type="l",lwd=2,col = rgb(0.5,0.5,0.5,1))
+
+lm1 <- lm(y_obs~x_obs)
+x_seq <- seq(min(x_obs),max(x_obs),length.out = 100)
+x_pred <- predict.lm(lm1,newdata = data.frame(x_obs=x_seq), interval = "confidence")
+ciPoly(x_seq,x_pred[,2],x_pred[,3])
+legend("topleft", legend = c("observations","true relationship", "lm() regression"
+                             ), pt.bg  = c(rgb(0,0,0,0.5), NA, NA), pch = c(21,NA, NA), lwd = c(NA,2,2),  pt.cex = c(1,NA,NA), pt.lwd = c(0,NA,NA), col = c(NA,rgb(0.5,0.5,0.5,1),"black"), lty = c(NA,1,2,2), cex = .65)
+
+legend("bottomright", legend = c("JAGS estimates",
+                             "JAGS regression"), pt.bg  = c(rgb(0.9,0.33,0,0.5), NA), pch = c(24,NA), lwd = c(NA,2),  pt.cex = c(1,NA,NA,NA), pt.lwd = c(0,NA), col = c(NA,rgb(0.9,0.33,0,1)), lty = c(NA,2), cex = .65)
+
+x_seq <- seq(min(x_obs),max(x_obs),length.out = 100)
+regmat <- matrix(NA,nrow = 1500, ncol = length(x_seq))
+
+for(i in 1:1500) {
+  regmat[i,] <- lm_jags$BUGSoutput$sims.list$alpha[i] + lm_jags$BUGSoutput$sims.list$beta[i]*x_seq
+}
+
+reg_025 <- apply(regmat, 2, function(x) quantile(x, probs = 0.025))
+reg_975 <- apply(regmat, 2, function(x) quantile(x, probs = 0.975))
+
+ciPoly(x_seq, reg_975,reg_025, col = rgb(0.9,.33,0,0.25))
+points(range(x_obs), lm_jags$BUGSoutput$mean$alpha + range(x_obs)*lm_jags$BUGSoutput$mean$beta, type = "l", col = rgb(0.9,.33,0,1),lwd=2, lty=2)
+
+points(x_seq,x_pred[,1],lwd=2,lty=2,type = "l")
+points(lm_jags$BUGSoutput$mean$x_est,lm_jags$BUGSoutput$mean$y_est,pch=24, col = NA, bg = rgb(0.9,0.33,0,0.5))
+sapply(1:n,function(a) points(points(c(lm_jags$BUGSoutput$mean$x_est[a],x_obs[a]),c(lm_jags$BUGSoutput$mean$y_est[a],y_obs[a]), type = "l", lty = 3, col = rgb(0.9,0.33,0,0.5))
+))
+
+```
+
+The mean regression line is very similar to previous regression, but the 95 % credible interval of the hierarchical model (orange) is wider. This is because it correctly reflects the uncertainty associated with the observations, which the simple linear model ignored. Also, notice how the estimates of $x$ and $y$ (orange triangles) have been shifted towards the mean regression line - this effect is called shrinkage, and is characteristic of hierarchical models. The estimates $x_{est}$ and $y_{est}$ are essentially a compromise between the inferred linear relationship, and the observed values $x_{obs}$ and $y_{obs}$.
+
+Now, we will build a Gibbs sampler that can give us draws from the posterior of this model without relying on JAGS to do the sampling for us. Gibbs Sampling takes advantage of the fact that whilst it may be difficult to sample from the full posterior directly, we can iteratively sample from the conditional posterior of individual parameters given the current values of all other parameters. Deriving the conditional posteriors is easiest when the prior and likelihood functions are conjugate, that is when they belong to the same family of probability distributions.
+
+The unnormalised posterior of our model looks like this:
+
+$$p(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto 
+p(y_{est} | \alpha, \beta, x_{est}, \sigma_y) 
+p(x_{obs} | x_{est},\sigma_{x})  
+p(y_{obs} | y_{est},\sigma_{y})
+p(\alpha)
+p(\beta)
+p(\sigma)
+$$
+
+From this, we need to work out the conditional posteriors of individual parameters, to create a Gibbs sampling routine that estimates one parameter after the other. We start by inferring $y_est$. Looking at the posterior above, we note that $y_est$ only occurs in the first and the third term, i.e. in $p(y_{est} | \alpha, \beta, x_{est}, \sigma_y)$ and in $p(y_{obs} | y_{est},\sigma_{y})$. Beforehand, we defined those as $y_{obs} \sim N(y_{est}, \sigma_y)$ and 
+$y_{est} \sim N(\mu, \sigma)$, with $\mu = \alpha + \beta x_{est}$. These are two normal distributions, which means we can use the likelihood of a normal distribution with a normal prior to sample from a $y_{est}$ (see [Murphy 2007](https://www.cs.ubc.ca/~murphyk/Papers/bayesGauss.pdf) for details. Given values for $\mu$ and $\sigma$, we can sample 
+
+$$y_{est} \sim N(\sigma^2/(\sigma_y^2+\sigma^2)\times y_{obs} + \sigma_y^2/(\sigma_y^2+\sigma^2)\times \mu, \sqrt{1/(1/\sigma^2+1/\sigma_y^2)}) $$
+We sample from $x_{est}$ in a similar way, given values for $y_{est}$, $\sigma$, $\alpha$, and $\beta$:
+
+$$x_{est} \sim N((\beta (y_{est}-\alpha)/\sigma^2 + x_{obs}/\sigma_x^2)/ (1/\sigma^2 + \beta^2/\sigma^2)
+, \sqrt{1/(\beta^2/\sigma^2+1/\sigma_y^2)}) $$ 
+
+### OH booy. Maybe just use MH for getting x_est. Not sure how to get the conditional posterior for this in a nice form.
+
+Test the machinery:
+
+
+
+
+sigma2/(y_sd^2+sigma2)*y_obs + y_sd^2/(y_sd^2+sigma2)*y_pred,
+          sqrt(1/(1/sigma2 + 1/y_sd^2)))
+
+
+
+
+$$y_{est} \sim N( \alpha + \beta x_{est}, \sigma)$$
+However, instead of using $x_{obs}$ and $y_{obs}$ directly, we let the model estimate the true values of $x$ and $y$, i.e. $x_{est}$ and $y_{est}$:
+
+$$x_{obs} \sim N(x_{est}, \sigma_x)$$
+$$y_{obs} \sim N(y_{est}, \sigma_y)$$
+
+note that sigma_x and sigma_y are known, whereas x_est and y_est are unknown
+
+
+ complete: $$p(\alpha, \beta, \sigma, x_{est}, y_{est} | x_{obs}, \sigma_x, y_{obs}, \sigma_y) \propto 

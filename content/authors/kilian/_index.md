@@ -1,6 +1,10 @@
 ---
 bio: 
 education:
+  employment:
+  - title: Research associate
+    institution: ZZZ
+    year: 2022
   courses:
   - course: PhD in Earth Sciences
     institution: University of Plymouth
@@ -14,12 +18,11 @@ education:
 email: "kilian.eichenseer@durham.ac.uk"
 highlight_name: false
 interests:
-- Developing computational methods
+- Machine learning
 - Bayesian statistics
-- R programming
-- Palaeobiology and palaeoclimate
+- Programming with R
 - Stratigraphy and sedimentology
-- Ecology and evolution
+- Palaeoclimate and palaeobiology
 
 organizations:
 - name: Durham University
@@ -44,6 +47,6 @@ superuser: true
 title: Kilian Eichenseer PhD
 ---
 
-I am developing novel statistical and computational methods for the Earth Sciences. My academic background lies in Geology and Palaeontology, focussing on marine life and sediments. I became increasingly interested in data science and R programming during my master's and PhD. In my [current PostDoc at Durham University](https://smithlabdurham.github.io/#!research), I build a Bayesian stratigraphic model that can correlate and date geological sections using geochemical signatures. Other projects include [modelling the latitudinal temperature gradient from sparsely sampled climate data](https://egusphere.copernicus.org/preprints/2023/egusphere-2023-1188/), and an [R package](https://cran.r-project.org/web/packages/palaeoverse/index.html) enabling [reproducible, efficient workflows for palaeobiological research](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.14099).
+I am developing novel statistical and computational methods for the Earth Sciences. In my [current PostDoc at Durham University](https://smithlabdurham.github.io/#!research), I build a Bayesian stratigraphic model that can correlate and date geological sections using geochemical signatures. Other projects include [modelling the latitudinal temperature gradient from sparsely sampled climate data](https://egusphere.copernicus.org/preprints/2023/egusphere-2023-1188/), and an [R package](https://cran.r-project.org/web/packages/palaeoverse/index.html) enabling [reproducible, efficient workflows for palaeobiological research](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.14099).
 
 {{< icon name="download" pack="fas" >}} Download my {{< staticref "media/Kilian-Eichenseer-CV.pdf" "newtab" >}}CV{{< /staticref >}}.

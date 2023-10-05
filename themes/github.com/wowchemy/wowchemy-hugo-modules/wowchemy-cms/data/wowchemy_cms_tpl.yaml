@@ -131,11 +131,19 @@ collections:
         fields:
           - {label: Organization, name: name, widget: string, required: true}
           - {label: Link, name: url, widget: string, required: false}
-      - label: "Education"
+      - label: "Employment & Education"
         name: "education"
         required: false
         widget: object
         fields:
+          - label: "Employment"      
+            name: "employment"
+            required: false
+            widget: list
+            fields:
+              - {label: Job Title, name: title, widget: string, required: true}
+              - {label: Institution/Company, name: institution, widget: string, required: true}
+              - {label: Year, name: year, widget: number, value_type: int, required: false}
           - label: "Courses"
             name: "courses"
             required: false

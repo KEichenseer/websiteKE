@@ -189,6 +189,24 @@ collections:
     widget: list
   - fields:
     - fields:
+      - label: Job Title
+        name: title
+        required: true
+        widget: string
+      - label: Institution/Company
+        name: institution
+        required: true
+        widget: string
+      - label: Year
+        name: year
+        required: false
+        value_type: int
+        widget: number
+      label: Employment
+      name: employment
+      required: false
+      widget: list
+    - fields:
       - label: Course
         name: course
         required: true
@@ -206,7 +224,7 @@ collections:
       name: courses
       required: false
       widget: list
-    label: Education
+    label: Employment & Education
     name: education
     required: false
     widget: object
